@@ -1,2 +1,0 @@
-[2020-10-23 14:17:03] - [ERROR] - [slimCMS]
-500 Internal Server Error Type: Slim\Exception\HttpInternalServerErrorException Code: 500 Message: ERROR: Undefined variable: a on line 100 in file E:\cs090\slimCMS\vendor\slim\psr7\src\Factory\ServerRequestFactory.php. File: E:\cs090\slimCMS\src\Handlers\ShutdownHandler.php Line: 75 Trace: #0 [internal function]: SlimCMS\Handlers\ShutdownHandler->__invoke() #1 {main} [] {"uid":"ca96042"}

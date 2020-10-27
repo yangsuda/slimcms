@@ -19,6 +19,7 @@ use SlimCMS\Error\JsonError;
 use SlimCMS\Error\PlainTextError;
 use SlimCMS\Error\HtmlError;
 use SlimCMS\Error\XmlError;
+use SlimCMS\Error\TextException;
 use Throwable;
 
 class HttpErrorHandler extends ErrorHandler
@@ -41,51 +42,20 @@ class HttpErrorHandler extends ErrorHandler
     {
 
         $exception = $this->exception;
-        $statusCode = 500;
-        $error = new Error(
-            Error::SERVER_ERROR,
-            'An internal error has occurred while processing your request.'
-        );
-        //return parent::respond();
-        if ($exception instanceof HttpException) {
-            $statusCode = $exception->getCode();
-            $error->setDescription($exception->getMessage());
 
-            if ($exception instanceof HttpNotFoundException) {
-                $error->setType(Error::RESOURCE_NOT_FOUND);
-            } elseif ($exception instanceof HttpMethodNotAllowedException) {
-                $error->setType(Error::NOT_ALLOWED);
-            } elseif ($exception instanceof HttpUnauthorizedException) {
-                $error->setType(Error::UNAUTHENTICATED);
-            } elseif ($exception instanceof HttpForbiddenException) {
-                $error->setType(Error::INSUFFICIENT_PRIVILEGES);
-            } elseif ($exception instanceof HttpBadRequestException) {
-                $error->setType(Error::BAD_REQUEST);
-            } elseif ($exception instanceof HttpNotImplementedException) {
-                $error->setType(Error::NOT_IMPLEMENTED);
+        if ($exception instanceof TextException) {
+            $result = ['code' => $exception->getCode(), 'msg' => $exception->getMessage()];
+            $encodedOutput = json_encode($result, JSON_PRETTY_PRINT);
+            $response = $this->responseFactory->createResponse();
+            if ($this->contentType !== null && array_key_exists($this->contentType, $this->errorRenderers)) {
+                $response = $response->withHeader('Content-type', $this->contentType);
+            } else {
+                $response = $response->withHeader('Content-type', $this->defaultErrorRendererContentType);
             }
+            $response->getBody()->write($encodedOutput);
+            return $response;
+        }else{
+            return parent::respond();
         }
-
-        if (
-            !($exception instanceof HttpException)
-            && ($exception instanceof Exception || $exception instanceof Throwable)
-            && $this->displayErrorDetails
-        ) {
-            $error->setDescription($exception->getMessage());
-        }
-
-        $output = new Output($statusCode, null, $error);
-        $encodedOutput = json_encode($output, JSON_PRETTY_PRINT);
-
-        $response = $this->responseFactory->createResponse($statusCode);
-
-        if ($this->contentType !== null && array_key_exists($this->contentType, $this->errorRenderers)) {
-            $response = $response->withHeader('Content-type', $this->contentType);
-        } else {
-            $response = $response->withHeader('Content-type', $this->defaultErrorRendererContentType);
-        }
-        $response->getBody()->write($encodedOutput);
-
-        return $response;
     }
 }
