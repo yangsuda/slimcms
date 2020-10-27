@@ -1,6 +1,6 @@
 <?php
 /**
- * 异常处理类
+ * 异常处理类 
  * @author zhucy
  */
 declare(strict_types=1);
