@@ -1,6 +1,6 @@
 <?php
 /**
- * 输出类
+ * 输出类 
  * @author zhucy
  */
 declare(strict_types=1);
