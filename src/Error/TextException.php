@@ -8,7 +8,6 @@ use Exception;
 
 class TextException extends Exception
 {
-
     public function __construct($result)
     {
         if (is_numeric($result)) {
