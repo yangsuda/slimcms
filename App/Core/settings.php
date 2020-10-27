@@ -11,8 +11,10 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use SlimCMS\Interfaces\RouteInterface;
 use SlimCMS\Interfaces\CookieInterface;
+use SlimCMS\Interfaces\OutputInterface;
 use App\Core\Routes;
 use SlimCMS\Core\Cookie;
+use SlimCMS\Core\Output;
 
 
 return function (ContainerBuilder $containerBuilder) {
@@ -80,5 +82,6 @@ return function (ContainerBuilder $containerBuilder) {
         CookieInterface::class => function (ContainerInterface $c) {
             return new Cookie($c);
         },
+        OutputInterface::class => autowire(Output::class),
     ]);
 };

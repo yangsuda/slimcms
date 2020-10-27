@@ -1,68 +1,97 @@
 <?php
 /**
- * 输出类 
+ * 输出类
  * @author zhucy
  */
 declare(strict_types=1);
 
 namespace SlimCMS\Core;
 
-use JsonSerializable;
+use SlimCMS\Interfaces\OutputInterface;
 
-class Output implements JsonSerializable
+class Output implements OutputInterface
 {
     /**
      * @var int
      */
-    private $code;
+    static private $code;
 
     /**
      * @var array|object|null
      */
-    private $data;
+    static private $data;
 
     /**
-     * @var Error|null
+     * @var array|object|null
      */
-    private $error;
+    static private $msg = '';
+
+    static private $referer;
+
+    static private $showType = 3;
 
     /**
-     * @param int                   $code
-     * @param array|object|null     $data
-     * @param Error|null      $error
+     * {@inheritDoc}
      */
-    public function __construct(
-        int $code = 200,
-        $data = null,
-        ?Error $error = null
-    ) {
-        $this->code = $code;
-        $this->data = $data;
-        $this->error = $error;
+    static public function result($code, $data = [], $para = [], $referer = '')
+    {
+        if (is_array($code)) {
+            self::$code = aval($code, 'code');
+            self::$msg = !empty($code['param']) ? self::promptMsg($code['code'], $code['param']) : aval($code, 'msg');
+            self::$data = aval($code, 'data', []);
+            self::$referer = aval($code, 'referer');
+            self::$showType = aval($code, 'showType', 3);
+        } else {
+            self::$code = $code;
+            self::$msg = self::promptMsg($code, $para);
+            self::$data = $data;
+            self::$referer = $referer;
+        }
+        return new self;
     }
 
     /**
-     * @return int
+     * 返回提示代码对应信息
+     * @param $code
+     * @param array $para
+     * @return mixed|string
      */
-    public function getcode(): int
+    static private function promptMsg($code, $para = []): string
     {
-        return $this->code;
+        $prompt = require CSROOT . 'config/prompt.php';
+        $prompt += require dirname(dirname(__FILE__)) . '/Config/prompt.php';
+        $str = $prompt[$code];
+        if ($para) {
+            if (is_array($para)) {
+                extract($para);
+                eval("\$str = \"$str\";");
+            } elseif (is_string($para)) {
+                $str = $para;
+            } elseif (is_numeric($para)) {
+                $str = self::promptMsg($para);
+            }
+        }
+        return $str;
     }
 
-    /**
-     * @return array|null|object
-     */
-    public function getData()
+    static public function getShowType(): int
     {
-        return $this->data;
+        return (int)self::$showType;
     }
 
-    /**
-     * @return Error|null
-     */
-    public function getError(): ?Error
+    static public function getMsg(): string
     {
-        return $this->error;
+        return (string)self::$msg;
+    }
+
+    static public function getCode(): int
+    {
+        return (int)self::$code;
+    }
+
+    static public function getReferer(): string
+    {
+        return (string)self::$referer;
     }
 
     /**
@@ -70,16 +99,11 @@ class Output implements JsonSerializable
      */
     public function jsonSerialize()
     {
-        $error = [
-            'code' => $this->code,
+        return [
+            'code' => self::$code,
+            'msg' => self::$msg,
+            'data' => self::$data,
+            'referer' => self::$referer,
         ];
-
-        if ($this->data !== null) {
-            $error['data'] = $this->data;
-        } elseif ($this->error !== null) {
-            $error['error'] = $this->error;
-        }
-
-        return $error;
     }
 }

@@ -27,6 +27,27 @@ abstract class Control
         $this->response = $response;
     }
 
+    /**
+     * 获取外部传入数据
+     * @param $name
+     * @param string $type
+     * @return array|mixed|\都不存在时的默认值|null
+     */
+    public function input($name, $type = 'string')
+    {
+        return $this->request->input($name, $type);
+    }
+
+    /**
+     *
+     * @param $result
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    public function output($result)
+    {
+        return $this->response->output($result);
+    }
+
     public function __destruct()
     {
         $this->request->getCookie()->set('errorCode');

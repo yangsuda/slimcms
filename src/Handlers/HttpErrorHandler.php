@@ -44,8 +44,7 @@ class HttpErrorHandler extends ErrorHandler
         $exception = $this->exception;
 
         if ($exception instanceof TextException) {
-            $result = ['code' => $exception->getCode(), 'msg' => $exception->getMessage()];
-            $encodedOutput = json_encode($result, JSON_PRETTY_PRINT);
+            $encodedOutput = json_encode($exception->getResult(), JSON_PRETTY_PRINT);
             $response = $this->responseFactory->createResponse();
             if ($this->contentType !== null && array_key_exists($this->contentType, $this->errorRenderers)) {
                 $response = $response->withHeader('Content-type', $this->contentType);
@@ -54,8 +53,20 @@ class HttpErrorHandler extends ErrorHandler
             }
             $response->getBody()->write($encodedOutput);
             return $response;
-        }else{
-            return parent::respond();
         }
+        return parent::respond();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function logError(string $error): void
+    {
+        if ($this->exception instanceof TextException) {
+            $this->logger->alert($error);
+        }else{
+            $this->logger->error($error);
+        }
+
     }
 }

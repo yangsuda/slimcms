@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace SlimCMS\Core;
 
+use SlimCMS\Error\TextException;
+
 class Request extends Message
 {
     /**
@@ -60,7 +62,7 @@ class Request extends Message
                     continue;
                 }
                 if (preg_match("/$val/i", $word)) {
-                    return ['code' => 21051, 'para' => ['title' => $val]];
+                    throw new TextException(['code' => 21051, 'param' => ['title' => $val]]);
                 }
             }
             foreach (explode('|', $this->cfg['replacestr']) as $key => $val) {

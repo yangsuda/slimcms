@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace SlimCMS\Core;
 
 use Psr\Http\Message\ResponseInterface;
+use SlimCMS\Interfaces\OutputInterface;
 
 class Response extends Message
 {
@@ -21,9 +22,7 @@ class Response extends Message
      */
     public function output($result): ResponseInterface
     {
-        if (is_numeric($result)) {
-            $result = ['code' => $result, 'msg' => $this->promptMsg($result), 'data' => [], 'referer' => ''];
-        }
+        $result = $this->container->get(OutputInterface::class)::result($result);
         if ($this->jsonCallbackStr) {
             $encodedOutput = $this->jsonCallbackStr . '(' . json_encode($result) . ')';
         } else {
@@ -37,30 +36,6 @@ class Response extends Message
         }
         $this->response->getBody()->write($encodedOutput);
         return $this->response;
-    }
-
-    /**
-     * 返回提示代码对应信息
-     * @param $code
-     * @param array $para
-     * @return mixed|string
-     */
-    private function promptMsg($code, $para = array()): string
-    {
-        $prompt = require CSROOT . 'config/prompt.php';
-        $prompt += require dirname(dirname(__FILE__)) . '/Config/prompt.php';
-        $str = $prompt[$code];
-        if ($para) {
-            if (is_array($para)) {
-                extract($para);
-                eval("\$str = \"$str\";");
-            } elseif (is_string($para)) {
-                $str = $para;
-            } elseif (is_numeric($para)) {
-                $str = $this->promptMsg($para);
-            }
-        }
-        return $str;
     }
 
     /**
@@ -106,7 +81,7 @@ class Response extends Message
      * @param $jsonCallbackStr
      * @return $this
      */
-    public function jsonCallback($jsonCallbackStr)
+    public function jsonCallback(string $jsonCallbackStr)
     {
         $this->jsonCallbackStr = $jsonCallbackStr;
         return $this;
@@ -116,17 +91,18 @@ class Response extends Message
      * 返回提示消息
      * @param $msg
      */
-    protected function responseText(array $result): string
+    protected function responseText(Output $result): string
     {
-        $showType = aval($result, 'showType', 3);
-
+        $showType = $result::getShowType();
+        $msg = $result::getMsg();
+        $referer = $result::getReferer();
         if ($showType == 1) {
-            self::$cookie->set('errorCode', $result['code']);
-            self::$cookie->set('errorMsg', $result['msg']);
-            $this->response = $this->response->withHeader('location', $result['referer']);
+            self::$cookie->set('errorCode', $result::getCode());
+            self::$cookie->set('errorMsg', $msg);
+            $this->response = $this->response->withHeader('location', $referer);
             return '';
         } elseif ($showType == 2) {
-            return "<script>alert(\"" . $result['msg'] . "\");</script>";
+            return "<script>alert(\"" . $msg . "\");</script>";
         } else {
             $cfg = $this->cfg;
             return <<<EOT
@@ -146,11 +122,11 @@ class Response extends Message
         {$cfg['webname']}提示信息
     </div>
     <div class="card-body">
-        <p class="card-text text-dark">{$result['msg']}</p>
-        <a href="{$result['referer']}" class="text-info">如果你的浏览器没反应，请点击这里...</a>
+        <p class="card-text text-dark">{$msg}</p>
+        <a href="{$referer}" class="text-info">如果你的浏览器没反应，请点击这里...</a>
     </div>
 </div>
-<script>setTimeout("location='{$result['referer']}';",3000);</script>
+<script>setTimeout("location='{$referer}';",3000);</script>
 </body>
 </html>
 EOT;
