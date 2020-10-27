@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace SlimCMS\Core;
 
-
 use Slim\Factory\ServerRequestCreatorFactory;
 use Slim\ResponseEmitter;
 use SlimCMS\Handlers\HttpErrorHandler;
