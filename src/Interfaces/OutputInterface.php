@@ -11,16 +11,15 @@ interface OutputInterface extends JsonSerializable
     /**
      * 返回提示数据
      * @param $code
-     * @param array $data
-     * @param array $para
-     * @param string $referer
      * @return array
      */
-    static public function result($code, $data = [], $para = [], $referer = '');
+    public static function result($code): self;
 
-    static public function getMsg():string;
+    public static function getMsg(): string;
 
-    static public function getCode():int;
+    public static function getCode(): int;
 
-    static public function getReferer():string;
+    public static function getReferer(): string;
+
+    public static function analysisTemplate();
 }

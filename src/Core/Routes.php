@@ -68,9 +68,6 @@ class Routes implements RouteInterface
 
             return $obj->$method();
 
-            if ($rs['code'] != 200) {
-                return $rs;
-            }
             if (!empty($rs['data']) && is_array($rs['data'])) {
                 extract($rs['data'], EXTR_SKIP);
             }

@@ -12,7 +12,7 @@ use SlimCMS\Interfaces\RouteInterface;
 error_reporting(0);
 define('CSINC', str_replace("\\", '/', dirname(__FILE__)).'/');
 define('CSROOT', dirname(CSINC).'/');
-define('CSAPP', CSROOT . 'App/');
+define('CSAPP', CSROOT . 'app/');
 define('CSDATA', CSROOT . 'data/');
 define('CSPUBLIC', CSROOT . 'public/');
 define('CSTEMPLATE', CSROOT . 'template/');

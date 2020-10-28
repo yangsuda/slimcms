@@ -13,7 +13,7 @@ class MainControl extends Control
     public function test()
     {
         $this->input('p');
-        //return $this->output(21007);
+        return $this->output(['template'=>'test']);
         var_dump($this->input('p'));
         exit;
     }

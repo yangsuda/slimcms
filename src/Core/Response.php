@@ -25,16 +25,23 @@ class Response extends Message
         $result = $this->container->get(OutputInterface::class)::result($result);
         if ($this->jsonCallbackStr) {
             $encodedOutput = $this->jsonCallbackStr . '(' . json_encode($result) . ')';
+            $this->response->getBody()->write($encodedOutput);
         } else {
-            $contentType = $this->determineContentType();
-            $this->response = $this->response->withHeader('Content-type', $contentType);
-            if (strpos($contentType, 'json')) {
-                $encodedOutput = json_encode($result, JSON_PRETTY_PRINT);
+            $content = $result::analysisTemplate();
+            if ($content) {
+                $this->response = $this->response->withHeader('Content-type', 'text/html');
+                $this->response->getBody()->write($content);
             } else {
-                $encodedOutput = $this->responseText($result);
+                $contentType = $this->determineContentType();
+                $this->response = $this->response->withHeader('Content-type', $contentType);
+                if (strpos($contentType, 'json')) {
+                    $encodedOutput = json_encode($result, JSON_PRETTY_PRINT);
+                } else {
+                    $encodedOutput = $this->responseText($result);
+                }
+                $this->response->getBody()->write($encodedOutput);
             }
         }
-        $this->response->getBody()->write($encodedOutput);
         return $this->response;
     }
 

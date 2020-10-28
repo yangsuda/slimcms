@@ -14,40 +14,41 @@ class Output implements OutputInterface
     /**
      * @var int
      */
-    static private $code;
+    private static $code = 200;
 
     /**
      * @var array|object|null
      */
-    static private $data;
+    private static $data = [];
 
     /**
      * @var array|object|null
      */
-    static private $msg = '';
+    private static $msg = '';
 
-    static private $referer;
+    private static $referer = '';
 
-    static private $showType = 3;
+    private static $showType = 3;
+
+    private static $template = '';
 
     /**
      * {@inheritDoc}
      */
-    static public function result($code, $data = [], $para = [], $referer = '')
+    public static function result($code): OutputInterface
     {
-        if (is_array($code)) {
-            self::$code = aval($code, 'code');
-            self::$msg = !empty($code['param']) ? self::promptMsg($code['code'], $code['param']) : aval($code, 'msg');
-            self::$data = aval($code, 'data', []);
-            self::$referer = aval($code, 'referer');
-            self::$showType = aval($code, 'showType', 3);
-        } else {
+        if (is_numeric($code)) {
             self::$code = $code;
-            self::$msg = self::promptMsg($code, $para);
-            self::$data = $data;
-            self::$referer = $referer;
+            self::$msg = self::promptMsg($code);
+        } else {
+            !empty($code['code']) && self::$code = $code['code'];
+            self::$msg = self::promptMsg(self::$code, aval($code, 'param'));
+            !empty($code['data']) && self::$data = $code['data'];
+            !empty($code['referer']) && self::$referer = $code['referer'];
+            !empty($code['showType']) && self::$showType = $code['showType'];
+            !empty($code['template']) && self::$template = $code['template'];
         }
-        return new self;
+        return new self();
     }
 
     /**
@@ -56,7 +57,7 @@ class Output implements OutputInterface
      * @param array $para
      * @return mixed|string
      */
-    static private function promptMsg($code, $para = []): string
+    private static function promptMsg($code, $para = []): string
     {
         $prompt = require CSROOT . 'config/prompt.php';
         $prompt += require dirname(dirname(__FILE__)) . '/Config/prompt.php';
@@ -74,24 +75,42 @@ class Output implements OutputInterface
         return $str;
     }
 
-    static public function getShowType(): int
+    public static function getShowType(): int
     {
         return (int)self::$showType;
     }
 
-    static public function getMsg(): string
+    public static function getMsg(): string
     {
         return (string)self::$msg;
     }
 
-    static public function getCode(): int
+    public static function getCode(): int
     {
         return (int)self::$code;
     }
 
-    static public function getReferer(): string
+    public static function getReferer(): string
     {
         return (string)self::$referer;
+    }
+
+    /**
+     * 解析模板
+     * @return false|string
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function analysisTemplate()
+    {
+        if (self::$template) {
+            $callback = function_exists('ob_gzhandler') ? 'ob_gzhandler' : '';
+            ob_start($callback);
+            include_once(Template::loadTemplate(self::$template));
+            $content = ob_get_contents();
+            ob_end_clean();
+            return $content;
+        }
+        return '';
     }
 
     /**
