@@ -65,26 +65,7 @@ class Routes implements RouteInterface
             if (!is_callable(array($obj, $method))) {
                 return $response->output(21009);
             }
-
             return $obj->$method();
-
-            if (!empty($rs['data']) && is_array($rs['data'])) {
-                extract($rs['data'], EXTR_SKIP);
-            }
-            if (!empty($template)) {
-                //显示进行某个操作后的提示信息
-                $errorCode = Request::getCookie('errorCode');
-                $errorMsg = Request::getCookie('errorMsg');
-                Request::setCookie('errorMsg');
-                Request::setCookie('errorCode');
-
-                $_G = Config::$config;
-                $_G['currenturl'] = !empty($_G['currenturl']) ? $_G['currenturl'] : Http::currentUrl();
-                include_once(Template::loadTemplate($template));
-                exit;
-            }
-            $res->getBody()->write("Hello,");
-            return $res;
         };
         $app->get('/[{params:.*}]', $route);
         $app->post('/[{params:.*}]', $route);

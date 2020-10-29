@@ -13,7 +13,6 @@ use SlimCMS\Interfaces\OutputInterface;
 
 class Response extends Message
 {
-    private $jsonCallbackStr = '';
 
     /**
      * 返回提示数据
@@ -22,26 +21,25 @@ class Response extends Message
      */
     public function output($result): ResponseInterface
     {
-        $result = $this->container->get(OutputInterface::class)::result($result);
-        if ($this->jsonCallbackStr) {
-            $encodedOutput = $this->jsonCallbackStr . '(' . json_encode($result) . ')';
-            $this->response->getBody()->write($encodedOutput);
-        } else {
-            $content = $result::analysisTemplate();
-            if ($content) {
-                $this->response = $this->response->withHeader('Content-type', 'text/html');
-                $this->response->getBody()->write($content);
-            } else {
-                $contentType = $this->determineContentType();
-                $this->response = $this->response->withHeader('Content-type', $contentType);
-                if (strpos($contentType, 'json')) {
-                    $encodedOutput = json_encode($result, JSON_PRETTY_PRINT);
-                } else {
-                    $encodedOutput = $this->responseText($result);
-                }
-                $this->response->getBody()->write($encodedOutput);
-            }
+        $output = $this->container->get(OutputInterface::class);
+        $output($this->app);
+        $output = $output->result($result);
+        if (!empty($result['directTo'])) {
+            return $this->directTo($output);
         }
+        if (!empty($result['jsonCallback'])) {
+            return $this->jsonCallback($output);
+        }
+        $contentType = $this->determineContentType();
+        if (strpos($contentType, 'json')) {
+            $this->response = $this->response->withHeader('Content-type', $contentType);
+            $encodedOutput = json_encode($output, JSON_PRETTY_PRINT);
+            $this->response->getBody()->write($encodedOutput);
+            return $this->response;
+        }
+        $content = $output->analysisTemplate();
+        $this->response = $this->response->withHeader('Content-type', 'text/html');
+        $this->response->getBody()->write($content);
         return $this->response;
     }
 
@@ -62,14 +60,10 @@ class Response extends Message
         if ($count) {
             $current = current($selectedContentTypes);
 
-            /**
-             * Ensure other supported content types take precedence over text/plain
-             * when multiple content types are provided via Accept header.
-             */
+            //当通过Accept头提供多个内容类型时,确保其他受支持的内容类型优先于text/plain
             if ($current === 'text/plain' && $count > 1) {
                 return next($selectedContentTypes);
             }
-
             return $current;
         }
 
@@ -79,64 +73,31 @@ class Response extends Message
                 return $mediaType;
             }
         }
-
         return null;
     }
 
     /**
      * JSONP数据返回
-     * @param $jsonCallbackStr
-     * @return $this
+     * @param Output $result
+     * @return ResponseInterface
      */
-    public function jsonCallback(string $jsonCallbackStr)
+    protected function jsonCallback(Output $output)
     {
-        $this->jsonCallbackStr = $jsonCallbackStr;
-        return $this;
+        $encodedOutput = $output->getJsonCallback() . '(' . json_encode($output) . ')';
+        $this->response->getBody()->write($encodedOutput);
+        return $this->response;
     }
 
     /**
-     * 返回提示消息
-     * @param $msg
+     * 直接跳转
+     * @param Output $result
+     * @return ResponseInterface
      */
-    protected function responseText(Output $result): string
+    protected function directTo(Output $output)
     {
-        $showType = $result::getShowType();
-        $msg = $result::getMsg();
-        $referer = $result::getReferer();
-        if ($showType == 1) {
-            self::$cookie->set('errorCode', $result::getCode());
-            self::$cookie->set('errorMsg', $msg);
-            $this->response = $this->response->withHeader('location', $referer);
-            return '';
-        } elseif ($showType == 2) {
-            return "<script>alert(\"" . $msg . "\");</script>";
-        } else {
-            $cfg = $this->cfg;
-            return <<<EOT
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{$cfg['webname']}后台管理系统</title>
-    <link href="{$cfg['basehost']}favicon.ico" type="image/x-icon" rel="shortcut icon">
-    <link href="{$cfg['resourceUrl']}assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <link href="{$cfg['resourceUrl']}assets/css/style.css" rel="stylesheet" type="text/css" />
-</head>
-<body>
-<div class="card text-center" style="width: 22rem;margin: 10rem auto">
-    <div class="card-header">
-        {$cfg['webname']}提示信息
-    </div>
-    <div class="card-body">
-        <p class="card-text text-dark">{$msg}</p>
-        <a href="{$referer}" class="text-info">如果你的浏览器没反应，请点击这里...</a>
-    </div>
-</div>
-<script>setTimeout("location='{$referer}';",3000);</script>
-</body>
-</html>
-EOT;
-        }
+        self::$cookie->set('errorCode', $output->getCode());
+        self::$cookie->set('errorMsg', $output->getMsg());
+        $this->response->withHeader('location', $output->getReferer());
+        return $this->response;
     }
 }

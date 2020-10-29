@@ -7,48 +7,67 @@ declare(strict_types=1);
 
 namespace SlimCMS\Core;
 
+use Slim\App;
 use SlimCMS\Interfaces\OutputInterface;
+use SlimCMS\Interfaces\TemplateInterface;
 
 class Output implements OutputInterface
 {
+    private $app;
     /**
      * @var int
      */
-    private static $code = 200;
+    private $code = 200;
 
     /**
      * @var array|object|null
      */
-    private static $data = [];
+    private $data = [];
 
     /**
      * @var array|object|null
      */
-    private static $msg = '';
+    private $msg = '';
 
-    private static $referer = '';
+    private $referer;
 
-    private static $showType = 3;
+    private $jsonCallback;
 
-    private static $template = '';
+    private $template = 'prompt';
+
+    /**
+     * 容器
+     * @var \DI\Container|mixed
+     */
+    protected $container;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __invoke(App $app)
+    {
+        $this->app = $app;
+        $this->container = $app->getContainer()->get('DI\Container');
+        return $this;
+    }
 
     /**
      * {@inheritDoc}
      */
-    public static function result($code): OutputInterface
+    public function result($res = []): OutputInterface
     {
-        if (is_numeric($code)) {
-            self::$code = $code;
-            self::$msg = self::promptMsg($code);
+        if (is_numeric($res)) {
+            $this->code = $res;
+            $this->msg = $this->promptMsg($res);
         } else {
-            !empty($code['code']) && self::$code = $code['code'];
-            self::$msg = self::promptMsg(self::$code, aval($code, 'param'));
-            !empty($code['data']) && self::$data = $code['data'];
-            !empty($code['referer']) && self::$referer = $code['referer'];
-            !empty($code['showType']) && self::$showType = $code['showType'];
-            !empty($code['template']) && self::$template = $code['template'];
+            !empty($res['code']) && $this->code = $res['code'];
+            $this->msg = $this->promptMsg($this->code, aval($res, 'param'));
+            !empty($res['data']) && $this->data = $res['data'];
+            !empty($res['referer']) && $this->referer = $res['referer'];
+            !empty($res['jsonCallback']) && $this->jsonCallback = $res['jsonCallback'];
+            !empty($res['template']) && $this->template = $res['template'];
         }
-        return new self();
+        return $this;
     }
 
     /**
@@ -57,7 +76,7 @@ class Output implements OutputInterface
      * @param array $para
      * @return mixed|string
      */
-    private static function promptMsg($code, $para = []): string
+    private function promptMsg($code, $para = []): string
     {
         $prompt = require CSROOT . 'config/prompt.php';
         $prompt += require dirname(dirname(__FILE__)) . '/Config/prompt.php';
@@ -69,30 +88,30 @@ class Output implements OutputInterface
             } elseif (is_string($para)) {
                 $str = $para;
             } elseif (is_numeric($para)) {
-                $str = self::promptMsg($para);
+                $str = $this->promptMsg($para);
             }
         }
         return $str;
     }
 
-    public static function getShowType(): int
+    public function getJsonCallback(): string
     {
-        return (int)self::$showType;
+        return (string)$this->jsonCallback;
     }
 
-    public static function getMsg(): string
+    public function getMsg(): string
     {
-        return (string)self::$msg;
+        return (string)$this->msg;
     }
 
-    public static function getCode(): int
+    public function getCode(): int
     {
-        return (int)self::$code;
+        return (int)$this->code;
     }
 
-    public static function getReferer(): string
+    public function getReferer(): string
     {
-        return (string)self::$referer;
+        return (string)$this->referer;
     }
 
     /**
@@ -100,12 +119,17 @@ class Output implements OutputInterface
      * @return false|string
      * @throws \SlimCMS\Error\TextException
      */
-    public static function analysisTemplate()
+    public function analysisTemplate()
     {
-        if (self::$template) {
+        if ($this->template) {
             $callback = function_exists('ob_gzhandler') ? 'ob_gzhandler' : '';
             ob_start($callback);
-            include_once(Template::loadTemplate(self::$template));
+            $code = $this->code;
+            $msg = $this->msg;
+            $referer = $this->referer;
+            $data = $this->data;
+            $cfg = $this->container->get('cfg');
+            include_once($this->container->get(TemplateInterface::class)::loadTemplate($this->template));
             $content = ob_get_contents();
             ob_end_clean();
             return $content;
@@ -118,11 +142,12 @@ class Output implements OutputInterface
      */
     public function jsonSerialize()
     {
-        return [
-            'code' => self::$code,
-            'msg' => self::$msg,
-            'data' => self::$data,
-            'referer' => self::$referer,
+        $data = [
+            'code' => $this->code,
+            'msg' => $this->msg,
+            'data' => $this->data,
         ];
+        !empty($this->referer) && $data['referer'] = $this->referer;
+        return $data;
     }
 }

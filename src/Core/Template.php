@@ -48,7 +48,6 @@ class Template implements TemplateInterface
         $template = preg_replace_callback("/[\n\r\t]*\{list\s+(.+?)\s*\}[\n\r\t]*/is", [__CLASS__, 'listTag'], $template);
         $template = preg_replace("/\{\/list\}/i", "<?php }} ?>", $template);
         $template = preg_replace_callback("/[\n\r\t]*\{data\s+(.+?)\s*\}[\n\r\t]*/is", [__CLASS__, 'dataTag'], $template);
-        $template = str_replace("{LF}", "<?=\"\\n\"?>", $template);
         $template = preg_replace("/\{(\\\$[a-zA-Z0-9_\-\>\[\]\'\"\$\.\x7f-\xff]+)\}/s", "<?=\\1?>", $template);
         $template = preg_replace_callback("/$var_regexp/s", [__CLASS__, 'addquote'], $template);
         $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", [__CLASS__, 'addquote'], $template);
@@ -264,7 +263,7 @@ class Template implements TemplateInterface
                 }
             }
             if (!is_file(CSROOT . $tplfile)) {
-                $tplfile = '/template/default/' . $file . '.htm';
+                $tplfile = '/template/default/' . basename($file) . '.htm';
             }
             self::$cacheFile = 'template/' . CURSCRIPT . '_' . str_replace('/', '_', $file) . '.tpl.php';
         } else {

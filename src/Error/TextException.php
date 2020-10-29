@@ -12,7 +12,8 @@ class TextException extends Exception
     private $result;
     public function __construct($result)
     {
-        $this->result = Output::result($result);
+        $output = new Output();
+        $this->result = $output->result($result);
     }
 
     public function getResult()

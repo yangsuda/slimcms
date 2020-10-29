@@ -5,21 +5,29 @@ namespace SlimCMS\Interfaces;
 
 
 use JsonSerializable;
+use Slim\App;
 
 interface OutputInterface extends JsonSerializable
 {
     /**
+     * 当尝试以调用函数的方式调用一个对象时，此方法会被自动调用
+     * @param App $app
+     * @return mixed
+     */
+    public function __invoke(App $app);
+
+    /**
      * 返回提示数据
-     * @param $code
+     * @param $res
      * @return array
      */
-    public static function result($code): self;
+    public function result($res = []): self;
 
-    public static function getMsg(): string;
+    public function getMsg(): string;
 
-    public static function getCode(): int;
+    public function getCode(): int;
 
-    public static function getReferer(): string;
+    public function getReferer(): string;
 
-    public static function analysisTemplate();
+    public function analysisTemplate();
 }

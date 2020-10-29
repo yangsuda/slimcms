@@ -43,7 +43,7 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 //中间件设置
-$app->add(\SlimCMS\Core\MiddleWare::class);
+$app->add(\App\MiddleWare\MiddleWare::class);
 
 //注册路由
 $routes = $container->get(RouteInterface::class);
