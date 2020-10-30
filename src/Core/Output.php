@@ -1,6 +1,6 @@
 <?php
 /**
- * 输出类
+ * 输出数据整理类
  * @author zhucy
  */
 declare(strict_types=1);
@@ -99,27 +99,62 @@ class Output implements OutputInterface
         return (string)$this->jsonCallback;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getMsg(): string
     {
         return (string)$this->msg;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getCode(): int
     {
         return (int)$this->code;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function withCode(int $code): OutputInterface
+    {
+        $clone = clone $this;
+        $this->code = $code;
+        return $clone;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getData(): array
+    {
+        return (array)$this->data;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withData(array $data): OutputInterface
+    {
+        $clone = clone $this;
+        $this->data = array_merge($this->data, $data);
+        return $clone;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getReferer(): string
     {
         return (string)$this->referer;
     }
 
     /**
-     * 解析模板
-     * @return false|string
-     * @throws \SlimCMS\Error\TextException
+     * {@inheritDoc}
      */
-    public function analysisTemplate()
+    public function analysisTemplate(): string
     {
         if ($this->template) {
             $callback = function_exists('ob_gzhandler') ? 'ob_gzhandler' : '';
@@ -138,9 +173,9 @@ class Output implements OutputInterface
     }
 
     /**
-     * @return array
+     * {@inheritDoc}
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $data = [
             'code' => $this->code,

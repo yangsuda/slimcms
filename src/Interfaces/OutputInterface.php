@@ -23,11 +23,53 @@ interface OutputInterface extends JsonSerializable
      */
     public function result($res = []): self;
 
+    /**
+     * 返回提示文字
+     * @return string
+     */
     public function getMsg(): string;
 
+    /**
+     * 返回提示代码
+     * @return int
+     */
     public function getCode(): int;
 
+    /**
+     * 设置返回提示代码
+     * @param int $code
+     * @return OutputInterface
+     */
+    public function withCode(int $code): self;
+
+    /**
+     * 返回输出数据
+     * @return int
+     */
+    public function getData(): array;
+
+    /**
+     * 设置返回输出数据
+     * @param int $data
+     * @return OutputInterface
+     */
+    public function withData(array $data): self;
+
+    /**
+     * 返回跳转URL
+     * @return string
+     */
     public function getReferer(): string;
 
-    public function analysisTemplate();
+    /**
+     * 解析模板
+     * @return mixed
+     */
+    public function analysisTemplate(): string;
+
+    /**
+     * 对象转成json时处理方法
+     * @return array
+     */
+    public function jsonSerialize(): array;
 }

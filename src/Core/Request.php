@@ -8,8 +8,9 @@ declare(strict_types=1);
 namespace SlimCMS\Core;
 
 use SlimCMS\Error\TextException;
+use SlimCMS\Abstracts\MessageAbstract;
 
-class Request extends Message
+class Request extends MessageAbstract
 {
     /**
      * 获取外部传参

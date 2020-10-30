@@ -5,9 +5,9 @@
 
 namespace App\Control;
 
-use SlimCMS\Core\Control;
+use SlimCMS\Abstracts\ControlAbstract;
 
-class DefaultControl extends Control
+class DefaultControl extends ControlAbstract
 {
 
 }

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace SlimCMS\Core;
+namespace SlimCMS\Abstracts;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,7 +14,7 @@ use Slim\App;
 use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\CookieInterface;
 
-abstract class Message
+abstract class MessageAbstract
 {
 
     /**

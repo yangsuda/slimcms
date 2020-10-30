@@ -10,8 +10,9 @@ namespace SlimCMS\Core;
 
 use Psr\Http\Message\ResponseInterface;
 use SlimCMS\Interfaces\OutputInterface;
+use SlimCMS\Abstracts\MessageAbstract;
 
-class Response extends Message
+class Response extends MessageAbstract
 {
 
     /**

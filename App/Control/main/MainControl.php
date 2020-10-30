@@ -6,9 +6,9 @@
 
 namespace App\Control\main;
 
-use SlimCMS\Core\Control;
+use SlimCMS\Abstracts\ControlAbstract;
 
-class MainControl extends Control
+class MainControl extends ControlAbstract
 {
     public function test()
     {
