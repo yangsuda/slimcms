@@ -9,11 +9,11 @@ interface CookieInterface
      * 设置Cookie
      * @return mixed
      */
-    public function set($key, $value = '', $life = 0);
+    public function set(string $key, $value = '', int $life = 0);
 
     /**
      * 获取Cookie
      * @return mixed
      */
-    public function get($key);
+    public function get(string $key);
 }

@@ -7,6 +7,7 @@ namespace SlimCMS\Abstracts;
 
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
+use SlimCMS\Interfaces\OutputInterface;
 
 abstract class BaseAbstract
 {
@@ -22,10 +23,15 @@ abstract class BaseAbstract
      */
     protected $response;
 
+    protected $output;
+
     public function __construct(Request $request, Response $response)
     {
         $this->request = $request;
         $this->response = $response;
+        $output = $response->getContainer()->get(OutputInterface::class);
+        $output($this->response->getApp());
+        $this->output = $output;
     }
 
     /**
@@ -34,7 +40,7 @@ abstract class BaseAbstract
      * @param string $type
      * @return array|mixed|\都不存在时的默认值|null
      */
-    public function input($name, $type = 'string')
+    public function input(string $name, string $type = 'string')
     {
         return $this->request->input($name, $type);
     }
@@ -44,8 +50,9 @@ abstract class BaseAbstract
      * @param $result
      * @return array|\Psr\Http\Message\ResponseInterface
      */
-    public function output($result = [])
+    public function response(OutputInterface $output = null)
     {
-        return $this->response->output($result);
+        $output = $output??$this->output;
+        return $this->response->output($output);
     }
 }

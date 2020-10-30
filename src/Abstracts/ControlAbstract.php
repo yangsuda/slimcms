@@ -5,6 +5,8 @@
 
 namespace SlimCMS\Abstracts;
 
+use SlimCMS\Interfaces\OutputInterface;
+
 abstract class ControlAbstract extends BaseAbstract
 {
     /**
@@ -12,11 +14,12 @@ abstract class ControlAbstract extends BaseAbstract
      * @param array $result
      * @return array|\Psr\Http\Message\ResponseInterface
      */
-    public function view($result = [])
+    public function view(OutputInterface $output = null, string $template = null)
     {
         $p = $this->input('p');
-        $result['template'] = $result['template'] ?? $p;
-        return $this->output($result);
+        $output = $output??$this->output;
+        $output = $output->withTemplate($template ?? $p);
+        return $this->response($output);
     }
 
     /**
@@ -24,10 +27,11 @@ abstract class ControlAbstract extends BaseAbstract
      * @param array $result
      * @return array|\Psr\Http\Message\ResponseInterface
      */
-    public function directTo($result = [])
+    public function directTo(OutputInterface $output = null)
     {
-        $result['directTo'] = 1;
-        return $this->output($result);
+        $output = $output??$this->output;
+        $output->directTo = 1;
+        return $this->response($output);
     }
 
     /**
@@ -36,10 +40,11 @@ abstract class ControlAbstract extends BaseAbstract
      * @return array|\Psr\Http\Message\ResponseInterface
      *
      */
-    public function jsonCallback($result = [])
+    public function jsonCallback(OutputInterface $output = null, string $jsonCallback)
     {
-        $result['jsonCallback'] = 1;
-        return $this->output($result);
+        $output = $output??$this->output;
+        $output->jsonCallback = $jsonCallback;
+        return $this->response($output);
     }
 
     public function __destruct()

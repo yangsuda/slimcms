@@ -10,10 +10,11 @@ use SlimCMS\Core\Output;
 class TextException extends Exception
 {
     private $result;
-    public function __construct($result)
+
+    public function __construct($code, $param = [])
     {
         $output = new Output();
-        $this->result = $output->result($result);
+        $this->result = $output->withCode($code,$param);
     }
 
     public function getResult()

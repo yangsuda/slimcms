@@ -31,15 +31,15 @@ class Output implements OutputInterface
 
     private $referer;
 
-    private $jsonCallback;
-
     private $template = 'prompt';
 
     /**
      * 容器
      * @var \DI\Container|mixed
      */
-    protected $container;
+    private $container;
+
+    private $attribute = [];
 
     /**
      * {@inheritdoc}
@@ -51,23 +51,14 @@ class Output implements OutputInterface
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function result($res = []): OutputInterface
+    public function __set($name, $value)
     {
-        if (is_numeric($res)) {
-            $this->code = $res;
-            $this->msg = $this->promptMsg($res);
-        } else {
-            !empty($res['code']) && $this->code = $res['code'];
-            $this->msg = $this->promptMsg($this->code, aval($res, 'param'));
-            !empty($res['data']) && $this->data = $res['data'];
-            !empty($res['referer']) && $this->referer = $res['referer'];
-            !empty($res['jsonCallback']) && $this->jsonCallback = $res['jsonCallback'];
-            !empty($res['template']) && $this->template = $res['template'];
-        }
-        return $this;
+        $this->attribute[$name] = $value;
+    }
+
+    public function __get($name)
+    {
+        return aval($this->attribute, $name);
     }
 
     /**
@@ -94,11 +85,6 @@ class Output implements OutputInterface
         return $str;
     }
 
-    public function getJsonCallback(): string
-    {
-        return (string)$this->jsonCallback;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -118,10 +104,11 @@ class Output implements OutputInterface
     /**
      * {@inheritDoc}
      */
-    public function withCode(int $code): OutputInterface
+    public function withCode(int $code, $param = []): OutputInterface
     {
         $clone = clone $this;
-        $this->code = $code;
+        $clone->code = $code;
+        $clone->msg = $clone->promptMsg($code, $param);
         return $clone;
     }
 
@@ -139,7 +126,17 @@ class Output implements OutputInterface
     public function withData(array $data): OutputInterface
     {
         $clone = clone $this;
-        $this->data = array_merge($this->data, $data);
+        $clone->data = array_merge($clone->data, $data);
+        return $clone;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withTemplate(string $template): OutputInterface
+    {
+        $clone = clone $this;
+        $clone->template = $template;
         return $clone;
     }
 
@@ -149,6 +146,16 @@ class Output implements OutputInterface
     public function getReferer(): string
     {
         return (string)$this->referer;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withReferer(string $url): OutputInterface
+    {
+        $clone = clone $this;
+        $clone->referer = $url;
+        return $clone;
     }
 
     /**

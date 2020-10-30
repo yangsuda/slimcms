@@ -17,13 +17,6 @@ interface OutputInterface extends JsonSerializable
     public function __invoke(App $app);
 
     /**
-     * 返回提示数据
-     * @param $res
-     * @return array
-     */
-    public function result($res = []): self;
-
-    /**
      * 返回提示文字
      * @return string
      */
@@ -56,10 +49,24 @@ interface OutputInterface extends JsonSerializable
     public function withData(array $data): self;
 
     /**
+     * 设置解析的模板
+     * @param string $template
+     * @return OutputInterface
+     */
+    public function withTemplate(string $template): self;
+
+    /**
      * 返回跳转URL
      * @return string
      */
     public function getReferer(): string;
+
+    /**
+     * 设置跳转URL
+     * @param string $url
+     * @return OutputInterface
+     */
+    public function withReferer(string $url): self;
 
     /**
      * 解析模板

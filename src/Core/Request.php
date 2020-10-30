@@ -63,7 +63,7 @@ class Request extends MessageAbstract
                     continue;
                 }
                 if (preg_match("/$val/i", $word)) {
-                    throw new TextException(['code' => 21051, 'param' => ['title' => $val]]);
+                    throw new TextException(21051, ['title' => $val]);
                 }
             }
             foreach (explode('|', $this->cfg['replacestr']) as $key => $val) {

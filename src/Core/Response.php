@@ -20,15 +20,12 @@ class Response extends MessageAbstract
      * @param $code
      * @return array
      */
-    public function output($result): ResponseInterface
+    public function output(OutputInterface $output): ResponseInterface
     {
-        $output = $this->container->get(OutputInterface::class);
-        $output($this->app);
-        $output = $output->result($result);
-        if (!empty($result['directTo'])) {
+        if ($output->directTo) {
             return $this->directTo($output);
         }
-        if (!empty($result['jsonCallback'])) {
+        if ($output->jsonCallback) {
             return $this->jsonCallback($output);
         }
         $contentType = $this->determineContentType();
@@ -85,7 +82,7 @@ class Response extends MessageAbstract
     protected function jsonCallback(Output $output)
     {
         $encodedOutput = $output->getJsonCallback() . '(' . json_encode($output) . ')';
-        $this->response->getBody()->write($encodedOutput);
+        $this->response = $this->response->getBody()->write($encodedOutput);
         return $this->response;
     }
 
@@ -98,7 +95,7 @@ class Response extends MessageAbstract
     {
         self::$cookie->set('errorCode', $output->getCode());
         self::$cookie->set('errorMsg', $output->getMsg());
-        $this->response->withHeader('location', $output->getReferer());
+        $this->response = $this->response->withHeader('location', $output->getReferer());
         return $this->response;
     }
 }

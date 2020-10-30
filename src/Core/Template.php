@@ -25,10 +25,10 @@ class Template implements TemplateInterface
             $template = self::getPHPTemplate(@fread($fp, filesize($filename)));
             fclose($fp);
         } else {
-            throw new TextException(['code' => 21052, 'param' => ['title' => $tplfile]]);
+            throw new TextException(21052, ['title' => $tplfile]);
         }
         if (!@$fp = fopen(CSDATA . $cachefile, 'w')) {
-            throw new TextException(['code' => 21053, 'param' => ['title' => $cachefile]]);
+            throw new TextException(21053, ['title' => $cachefile]);
         }
         $template = self::formatTemplate($template);
 
@@ -275,7 +275,7 @@ class Template implements TemplateInterface
         }
 
         if (!is_file(CSROOT . $tplfile)) {
-            throw new TextException(['code' => 21052, 'param' => ['title' => $tplfile]]);
+            throw new TextException(21052, ['title' => $tplfile]);
         }
         if (self::$cacheFile) {
             self::checktplrefresh($tplfile, self::$cacheFile);

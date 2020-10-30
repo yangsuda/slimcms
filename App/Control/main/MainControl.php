@@ -13,8 +13,8 @@ class MainControl extends ControlAbstract
     public function test()
     {
         $this->input('p');
-        return $this->view();
-        var_dump($this->input('p'));
-        exit;
+        $output = $this->output->withCode(21012)->withReferer('http://www.cs090.com');
+        //return $this->response($output);
+        return $this->view($output);
     }
 }

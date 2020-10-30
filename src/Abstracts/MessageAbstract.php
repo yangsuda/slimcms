@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace SlimCMS\Abstracts;
 
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
@@ -80,6 +81,11 @@ abstract class MessageAbstract
     public function getApp(): App
     {
         return $this->app;
+    }
+
+    public function getContainer(): ContainerInterface
+    {
+        return $this->container;
     }
 
     /**

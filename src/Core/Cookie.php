@@ -19,8 +19,9 @@ class Cookie implements CookieInterface
         $this->setting = $app->get('settings');
     }
 
-    public function set($key, $value = '', $life = 0)
+    public function set(string $key, $value = '', int $life = 0)
     {
+        $value = (string)$value;
         $cookie = &$this->setting['cookie'];
         $var = $cookie['cookiepre'] . $key;
         $_COOKIE[$var] = $value;
@@ -35,7 +36,7 @@ class Cookie implements CookieInterface
         return setcookie($var, $value, $life, $cookie['cookiepath'], $cookie['cookiedomain'], $secure, true);
     }
 
-    public function get($key)
+    public function get(string $key)
     {
         $key = $this->setting['cookie']['cookiepre'] . $key;
         return aval($_COOKIE, $key);
