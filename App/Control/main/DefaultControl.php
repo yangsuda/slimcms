@@ -9,5 +9,12 @@ use SlimCMS\Abstracts\ControlAbstract;
 
 class DefaultControl extends ControlAbstract
 {
-
+    /**
+     * 默认首页
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    public function index()
+    {
+        return $this->view($this->output,'index');
+    }
 }

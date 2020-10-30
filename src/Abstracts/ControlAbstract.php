@@ -5,6 +5,7 @@
 
 namespace SlimCMS\Abstracts;
 
+use SlimCMS\Error\TextException;
 use SlimCMS\Interfaces\OutputInterface;
 
 abstract class ControlAbstract extends BaseAbstract
@@ -17,8 +18,12 @@ abstract class ControlAbstract extends BaseAbstract
     public function view(OutputInterface $output = null, string $template = null)
     {
         $p = $this->input('p');
-        $output = $output??$this->output;
-        $output = $output->withTemplate($template ?? $p);
+        $output = $output ?? $this->output;
+        $template = $template ?? $p;
+        if (empty($template)) {
+            return $this->response($output->withCode(21017));
+        }
+        $output = $output->withTemplate($template);
         return $this->response($output);
     }
 
@@ -29,7 +34,7 @@ abstract class ControlAbstract extends BaseAbstract
      */
     public function directTo(OutputInterface $output = null)
     {
-        $output = $output??$this->output;
+        $output = $output ?? $this->output;
         $output->directTo = 1;
         return $this->response($output);
     }
@@ -42,7 +47,7 @@ abstract class ControlAbstract extends BaseAbstract
      */
     public function jsonCallback(OutputInterface $output = null, string $jsonCallback)
     {
-        $output = $output??$this->output;
+        $output = $output ?? $this->output;
         $output->jsonCallback = $jsonCallback;
         return $this->response($output);
     }

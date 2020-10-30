@@ -29,9 +29,7 @@ abstract class BaseAbstract
     {
         $this->request = $request;
         $this->response = $response;
-        $output = $response->getContainer()->get(OutputInterface::class);
-        $output($this->response->getApp());
-        $this->output = $output;
+        $this->output = $this->request->getOutput();
     }
 
     /**

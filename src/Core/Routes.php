@@ -30,7 +30,7 @@ class Routes implements RouteInterface
             $response = new Response($req, $res, $app);
             $p = $request->input('p');
             if (empty($p)) {
-                return $response->output(21009);
+                $p = 'index';
             }
             $path = str_replace('/', '\\', dirname($p));
             $path = trim($path, '\.');
@@ -63,7 +63,7 @@ class Routes implements RouteInterface
                 $obj = $container->get($classname);
             }
             if (!is_callable(array($obj, $method))) {
-                return $response->output(21009);
+                return $response->output($request->getOutput());
             }
             return $obj->$method();
         };

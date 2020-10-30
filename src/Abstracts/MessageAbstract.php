@@ -14,6 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
 use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\CookieInterface;
+use SlimCMS\Interfaces\OutputInterface;
 
 abstract class MessageAbstract
 {
@@ -46,6 +47,8 @@ abstract class MessageAbstract
 
     static protected $cookie;
 
+    protected $output;
+
     /**
      * 容器
      * @var \DI\Container|mixed
@@ -63,6 +66,9 @@ abstract class MessageAbstract
         if (empty(self::$cookie)) {
             self::$cookie = $this->container->get(CookieInterface::class);
         }
+        $output = $this->container->get(OutputInterface::class);
+        $output($app);
+        $this->output = $output;
     }
 
     /**
@@ -74,6 +80,11 @@ abstract class MessageAbstract
         return $this->request;
     }
 
+    public function getOutput(): OutputInterface
+    {
+        return $this->output;
+    }
+
     /**
      * 返回全局实例对象
      * @return App
@@ -83,6 +94,10 @@ abstract class MessageAbstract
         return $this->app;
     }
 
+    /**
+     * 获取容器
+     * @return ContainerInterface
+     */
     public function getContainer(): ContainerInterface
     {
         return $this->container;

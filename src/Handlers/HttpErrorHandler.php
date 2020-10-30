@@ -3,24 +3,14 @@ declare(strict_types=1);
 
 namespace SlimCMS\Handlers;
 
-use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
-use Slim\Exception\HttpBadRequestException;
-use Slim\Exception\HttpException;
-use Slim\Exception\HttpForbiddenException;
-use Slim\Exception\HttpMethodNotAllowedException;
-use Slim\Exception\HttpNotFoundException;
-use Slim\Exception\HttpNotImplementedException;
-use Slim\Exception\HttpUnauthorizedException;
 use Slim\Handlers\ErrorHandler;
 use SlimCMS\Core\Error;
-use SlimCMS\Core\Output;
 use SlimCMS\Error\JsonError;
 use SlimCMS\Error\PlainTextError;
 use SlimCMS\Error\HtmlError;
 use SlimCMS\Error\XmlError;
 use SlimCMS\Error\TextException;
-use Throwable;
 
 class HttpErrorHandler extends ErrorHandler
 {
