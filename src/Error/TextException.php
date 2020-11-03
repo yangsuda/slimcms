@@ -11,15 +11,23 @@ class TextException extends Exception
 {
     private $result;
 
-    public function __construct($code, $param = [])
+    protected $loggerName;
+
+    public function __construct($code, $param = [], $loggerName = 'slimCMS')
     {
         //应用实例引入还要传多一个参数，此处暂时不走容器，直接new了
         $output = new Output();
-        $this->result = $output->withCode($code,$param);
+        $this->result = $output->withCode($code, $param);
+        $this->loggerName = $loggerName;
     }
 
     public function getResult()
     {
         return $this->result;
+    }
+
+    public function getLoggerName()
+    {
+        return $this->loggerName;
     }
 }

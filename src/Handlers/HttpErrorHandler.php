@@ -17,6 +17,16 @@ class HttpErrorHandler extends ErrorHandler
     /**
      * {@inheritdoc}
      */
+    protected $defaultErrorRenderer = HtmlError::class;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $logErrorRenderer = PlainTextError::class;
+
+    /**
+     * {@inheritdoc}
+     */
     protected $errorRenderers = [
         'application/json' => JsonError::class,
         'application/xml' => XmlError::class,
@@ -53,8 +63,9 @@ class HttpErrorHandler extends ErrorHandler
     protected function logError(string $error): void
     {
         if ($this->exception instanceof TextException) {
+            $this->logger = $this->logger->withName($this->exception->getLoggerName());
             $this->logger->alert($error);
-        }else{
+        } else {
             $this->logger->error($error);
         }
 
