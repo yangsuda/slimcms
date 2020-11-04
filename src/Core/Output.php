@@ -108,7 +108,7 @@ class Output implements OutputInterface
     {
         $clone = clone $this;
         $clone->code = $code;
-        $clone->msg = $clone->promptMsg($code, $param);
+        $clone->msg = is_array($param) ? $clone->promptMsg($code, $param) : $param;
         return $clone;
     }
 

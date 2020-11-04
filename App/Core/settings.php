@@ -13,6 +13,7 @@ use SlimCMS\Interfaces\RouteInterface;
 use SlimCMS\Interfaces\CookieInterface;
 use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Interfaces\TemplateInterface;
+use SlimCMS\Interfaces\DatabaseInterface;
 use App\Core\Routes;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Output;
@@ -86,5 +87,8 @@ return function (ContainerBuilder $containerBuilder) {
         },
         OutputInterface::class => autowire(Output::class),
         TemplateInterface::class => autowire(Template::class),
+        DatabaseInterface::class => function (ContainerInterface $c) {
+            return new Database($c);
+        },
     ]);
 };
