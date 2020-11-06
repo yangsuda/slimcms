@@ -9,6 +9,7 @@ use Monolog\Processor\UidProcessor;
 use Monolog\Formatter\LineFormatter;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use SlimCMS\Core\Redis;
 use SlimCMS\Interfaces\RouteInterface;
 use SlimCMS\Interfaces\CookieInterface;
 use SlimCMS\Interfaces\OutputInterface;
@@ -18,6 +19,7 @@ use App\Core\Routes;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Output;
 use SlimCMS\Core\Template;
+use SlimCMS\Core\Database;
 
 
 return function (ContainerBuilder $containerBuilder) {
@@ -89,6 +91,10 @@ return function (ContainerBuilder $containerBuilder) {
         TemplateInterface::class => autowire(Template::class),
         DatabaseInterface::class => function (ContainerInterface $c) {
             return new Database($c);
+        },
+        Redis::class => function (ContainerInterface $c) {
+            $redis = new Redis($c);
+            return $redis->selectDB();
         },
     ]);
 };

@@ -50,7 +50,6 @@ class Routes implements RouteInterface
             }
             $method = basename($p);
             $container = $app->getContainer()->get('DI\Container');
-
             $container->set($classname, function () use ($request, $response, $classname) {
                 return new $classname($request, $response);
             });

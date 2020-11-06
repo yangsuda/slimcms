@@ -15,10 +15,10 @@ class Redis
     public static $redis;
     private $setting;
 
-    public function __construct(ContainerInterface $app)
+    public function __construct(ContainerInterface $container)
     {
         if (empty(self::$redis)) {
-            $this->setting = $app->get('settings');
+            $this->setting = $container->get('settings');
             $config = &$this->setting['redis'];
             if (!empty($config['server'])) {
                 try {
@@ -42,13 +42,18 @@ class Redis
         }
     }
 
-    public function getRedis($dbindex = 1)
+    /**
+     * 设置存储库
+     * @param int $dbindex
+     * @return $this|null
+     */
+    public function selectDB(int $dbindex = 1)
     {
         if (empty(self::$redis)) {
             return null;
         }
         self::$redis->select($dbindex);
-        return self::$redis;
+        return $this;
     }
 
     private function cacheKey(&$key)
@@ -62,6 +67,19 @@ class Redis
             return null;
         }
         return self::$redis->info();
+    }
+
+    public function get($key)
+    {
+        $this->cacheKey($key);
+        if (empty(self::$redis)) {
+            return null;
+        }
+        $data = self::$redis->get($key);
+        if (is_numeric($data)) {
+            return $data;
+        }
+        return $data ? unserialize($data) : $data;
     }
 
     public function set($key, $data, $ttl = 12960000)
@@ -156,20 +174,6 @@ class Redis
         }
         return $res;
     }
-
-    public function get($key)
-    {
-        $this->cacheKey($key);
-        if (empty(self::$redis)) {
-            return null;
-        }
-        $data = self::$redis->get($key);
-        if (is_numeric($data)) {
-            return $data;
-        }
-        return unserialize($data);
-    }
-
 
     public function exists($key)
     {

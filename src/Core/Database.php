@@ -20,9 +20,9 @@ class Database implements DatabaseInterface
     private $setting;
     public static $link;
 
-    public function __construct(ContainerInterface $app)
+    public function __construct(ContainerInterface $container)
     {
-        $this->setting = $app->get('settings');
+        $this->setting = $container->get('settings');
         self::$link = $this->connect();
         $error = self::$link->errorInfo();
         if (in_array($error[1], [2006, 2013])) {
@@ -76,7 +76,7 @@ class Database implements DatabaseInterface
         $query = self::$link->query($sql);
         if (!$query) {
             $error = self::$link->errorInfo();
-            $msg = $error[0] . "\t" . $error[2] . "\t" . $error[1] . "\t" . $sql;
+            $msg = $error[0] . " " . $error[2] . " " . $error[1] . " " . $sql;
             throw new TextException(21055, $msg, 'pdo');
         }
         return $query;

@@ -64,6 +64,7 @@ class HttpErrorHandler extends ErrorHandler
     {
         if ($this->exception instanceof TextException) {
             $this->logger = $this->logger->withName($this->exception->getLoggerName());
+            $error = $this->exception->getResult()->getMsg().' '.$error;
             $this->logger->alert($error);
         } else {
             $this->logger->error($error);

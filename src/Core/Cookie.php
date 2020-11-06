@@ -14,9 +14,9 @@ class Cookie implements CookieInterface
 {
     private $setting;
 
-    public function __construct(ContainerInterface $app)
+    public function __construct(ContainerInterface $container)
     {
-        $this->setting = $app->get('settings');
+        $this->setting = $container->get('settings');
     }
 
     public function set(string $key, $value = '', int $life = 0)

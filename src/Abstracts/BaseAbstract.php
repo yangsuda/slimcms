@@ -5,8 +5,11 @@
 
 namespace SlimCMS\Abstracts;
 
+use SlimCMS\Core\Redis;
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
+use SlimCMS\Core\Table;
+use SlimCMS\Interfaces\DatabaseInterface;
 use SlimCMS\Interfaces\OutputInterface;
 
 abstract class BaseAbstract
@@ -25,11 +28,37 @@ abstract class BaseAbstract
 
     protected $output;
 
+    protected $container;
+
+    /**
+     * redis实例
+     * @var \Redis|null
+     *
+     */
+    protected $redis;
+
     public function __construct(Request $request, Response $response)
     {
         $this->request = $request;
         $this->response = $response;
         $this->output = $this->request->getOutput();
+        $this->container = $this->request->getContainer();
+        $this->redis = $this->container->get(Redis::class);
+    }
+
+    public function t($name): Table
+    {
+        $className = ucfirst($name);
+        $classname = '\App\Table\\' . $className . 'Table';
+        if (!class_exists($classname)) {
+            $classname = 'App\Core\Table';
+        }
+
+        $container = &$this->container;
+        $container->set($classname, function () use ($container, $classname, $name) {
+            return new $classname($container, $name);
+        });
+        return $container->get($classname);
     }
 
     /**
@@ -50,7 +79,7 @@ abstract class BaseAbstract
      */
     public function response(OutputInterface $output = null)
     {
-        $output = $output??$this->output;
+        $output = $output ?? $this->output;
         return $this->response->output($output);
     }
 }

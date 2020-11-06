@@ -22,9 +22,9 @@ return [
         'redis' =>
             [
                 'prefix' => 'y1cdF6_',
-                'server' => '',
+                'server' => '127.0.0.1',
                 'port' => 6379,
-                'password' => '',
+                'password' => 's5RY-D4aKuz',
                 'pconnect' => 0,
                 'timeout' => '0',
                 'serializer' => 1,
