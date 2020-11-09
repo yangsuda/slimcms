@@ -50,7 +50,7 @@ interface DatabaseInterface
      * 返回插入数据的自增ID
      * @return mixed
      */
-    public static function insertId();
+    public function insertId();
 
     /**
      * 返回受上一个 SQL 语句影响的行数

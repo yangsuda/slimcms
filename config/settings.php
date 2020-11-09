@@ -15,7 +15,7 @@ return [
                 'dbpw' => 'root',
                 'dbcharset' => 'utf8',
                 'pconnect' => '0',
-                'dbname' => 'yingpaisi',
+                'dbname' => 'zheshanghui',
                 'tablepre' => 'cs_',
                 'connecttype' => ':',
             ],

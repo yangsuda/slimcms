@@ -5,11 +5,10 @@
 
 namespace SlimCMS\Abstracts;
 
-use SlimCMS\Core\Redis;
+use App\Core\Redis;
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
 use SlimCMS\Core\Table;
-use SlimCMS\Interfaces\DatabaseInterface;
 use SlimCMS\Interfaces\OutputInterface;
 
 abstract class BaseAbstract
@@ -48,17 +47,16 @@ abstract class BaseAbstract
 
     public function t($name): Table
     {
+        static $objs = [];
         $className = ucfirst($name);
         $classname = '\App\Table\\' . $className . 'Table';
         if (!class_exists($classname)) {
             $classname = 'App\Core\Table';
         }
-
-        $container = &$this->container;
-        $container->set($classname, function () use ($container, $classname, $name) {
-            return new $classname($container, $name);
-        });
-        return $container->get($classname);
+        if (empty($objs[$name])) {
+            $objs[$name] = new $classname($this->container, $name);
+        }
+        return $objs[$name];
     }
 
     /**

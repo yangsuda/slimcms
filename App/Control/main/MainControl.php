@@ -12,7 +12,7 @@ class MainControl extends ControlAbstract
 {
     public function test()
     {
-        $row = $this->t('admin')->withWhere(1)->fetch();
+        $row = $this->t('admin')->withWhere(2)->fetch();
         var_dump($row);
         exit;
         $this->input('p');

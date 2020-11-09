@@ -62,7 +62,7 @@ class Database implements DatabaseInterface
     /**
      * {@inheritDoc}
      */
-    public static function insertId()
+    public function insertId()
     {
         return self::$link->lastInsertId();
     }

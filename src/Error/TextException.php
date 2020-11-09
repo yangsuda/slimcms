@@ -17,6 +17,7 @@ class TextException extends Exception
     {
         //应用实例引入还要传多一个参数，此处暂时不走容器，直接new了
         $output = new Output();
+        $param = CORE_DEBUG ? $param : [];
         $this->result = $output->withCode($code, $param);
         $this->loggerName = $loggerName;
     }

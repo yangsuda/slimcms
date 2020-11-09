@@ -42,7 +42,6 @@ class HttpErrorHandler extends ErrorHandler
     {
 
         $exception = $this->exception;
-
         if ($exception instanceof TextException) {
             $encodedOutput = json_encode($exception->getResult(), JSON_PRETTY_PRINT);
             $response = $this->responseFactory->createResponse();
@@ -69,6 +68,5 @@ class HttpErrorHandler extends ErrorHandler
         } else {
             $this->logger->error($error);
         }
-
     }
 }

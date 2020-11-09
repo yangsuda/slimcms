@@ -9,11 +9,10 @@ declare(strict_types=1);
 
 namespace SlimCMS\Core;
 
-use cs090\helper\Http;
-use cs090\helper\Page;
 use Psr\Container\ContainerInterface;
 use SlimCMS\Error\TextException;
 use SlimCMS\Interfaces\DatabaseInterface;
+use App\Core\Redis;
 
 class Table
 {
@@ -68,15 +67,23 @@ class Table
     protected $limit = '';
 
     /**
+     * 表名前缀
+     * @var string
+     */
+    private $tablepre = '';
+
+    /**
      * 排序
      * @var string
      */
-    protected $orderby = '';
+    protected $orderby = ' order by main.id desc ';
 
     public function __construct(ContainerInterface $container, string $tableName)
     {
+        $settings = $container->get('settings');
         $this->db = $container->get(DatabaseInterface::class);
-        $this->tableName = $tableName;
+        $this->tablepre = $settings['db']['tablepre'];
+        $this->tableName = $this->tablepre . $tableName;
         $this->redis = $container->get(Redis::class);
     }
 
@@ -87,8 +94,10 @@ class Table
      */
     private function selectSQL(string $fields): string
     {
-        return 'SELECT ' . $fields . ' FROM ' . $this->tableName . ' main ' .
+        $sql = 'SELECT ' . $fields . ' FROM ' . $this->tableName . ' main ' .
             $this->join . $this->where . $this->orderby . $this->limit;
+        echo $sql;
+        return $sql;
     }
 
     /**
@@ -136,7 +145,7 @@ class Table
      */
     public function fetch(string $fields = '*', int $cacheTime = 0)
     {
-        if ($this->redis) {
+        if ($this->redis && !$this->join) {
             if ($this->whereIsNumber) {
                 $indexid = $this->whereIsNumber;
             } else {
@@ -169,6 +178,7 @@ class Table
             $fields = explode(',', $fields);
             $row = [];
             foreach ($fields as $v) {
+                $v = str_replace('main.', '', $v);
                 if (preg_match('/ as /i', $v)) {
                     list($v, $v1) = explode(' as ', $v);
                     if (isset($data[$v])) {
@@ -197,7 +207,7 @@ class Table
     public function fetchList(string $fields = '*', string $indexField = '', int $cacheTime = 0): array
     {
         $func = function ($fields, $indexField, $cacheTime) {
-            if (preg_match('/distinct /i', $fields)) {
+            if (preg_match('/distinct /i', $fields) || $this->join) {
                 $sql = $this->selectSQL($fields);
                 $list = $this->db->fetchList($sql);
             } else {
@@ -270,7 +280,7 @@ class Table
     public function withJoin(array $join): Table
     {
         $clone = clone $this;
-        $clone->join = implode(' ', $join);
+        $clone->join = ' left join ' . $this->tablepre . implode(' left join ' . $this->tablepre, $join);
         return $clone;
     }
 
@@ -282,7 +292,7 @@ class Table
     public function withLimit($limit): Table
     {
         $clone = clone $this;
-        $clone->join = strpos($limit, 'limit') !== false ? ' ' . $limit : ' limit ' . $limit;
+        $clone->limit = strpos($limit, 'limit') !== false ? ' ' . $limit : ' limit ' . $limit;
         return $clone;
     }
 
@@ -317,7 +327,7 @@ class Table
             if ($cacheData) {
                 foreach ($data as $key => $value) {
                     $matches = [];
-                    preg_match('/^(#@#){1}[A-Za-z]{2,}([\w])*(\+|\-)([\d.]{1,20})$/i', $value, $matches);
+                    preg_match('/^(#@#){1}[A-Za-z]{2,}([\w])*(\+|\-)([\d.]{1,20})$/i', (string)$value, $matches);
                     if ($matches) {
                         if ($matches[3] == '+') {
                             $data[$key] = $cacheData[$key] + (int)$matches[4];
@@ -343,7 +353,7 @@ class Table
             if ($this->redis) {
                 $row = $this->fetchList('id');
                 foreach ($row as $v) {
-                    $this->updateFetchCache($v['id'], $data);
+                    $this->updateFetchCache((int)$v['id'], $data);
                 }
             }
             $sql = 'UPDATE ' . $this->tableName . ' SET ' . $this->implodeSave($data) . $this->where;
@@ -386,7 +396,7 @@ class Table
         $cmd = $replace ? 'REPLACE INTO ' : 'INSERT INTO ';
         $query = $this->db->query($cmd . $this->tableName . ' set ' . $sql);
         if ($returnID) {
-            return $this->db->lastInsertId();
+            return (int)$this->db->insertId();
         }
         return $this->db->affectedRows($query);
     }
@@ -567,7 +577,7 @@ class Table
      * 某表的表单结构
      * @return array
      */
-    private function fetchAllField(): array
+    public function fetchAllField(): array
     {
         return $this->db->fetchList('SHOW FIELDS FROM ' . $this->tableName, 'Field');
     }

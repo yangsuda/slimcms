@@ -49,17 +49,10 @@ class Routes implements RouteInterface
                 }
             }
             $method = basename($p);
-            $container = $app->getContainer()->get('DI\Container');
-            $container->set($classname, function () use ($request, $response, $classname) {
-                return new $classname($request, $response);
-            });
-            $obj = $container->get($classname);
+            $obj = new $classname($request, $response);
             if (!is_callable(array($obj, $method))) {
                 $classname = '\App\Control\\' . 'DefaultControl';
-                $container->set($classname, function () use ($request, $response, $classname) {
-                    return new $classname($request, $response);
-                });
-                $obj = $container->get($classname);
+                $obj = new $classname($request, $response);
             }
             if (!is_callable(array($obj, $method))) {
                 return $response->output($request->getOutput());
