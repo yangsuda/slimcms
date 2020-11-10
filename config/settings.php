@@ -93,8 +93,6 @@ return [
             [
                 'prikey' => 'HW8k1f8D',
                 'pubkey' => 'P0595R50',
-                'wsLogin' => 'A8k9X9rL8m',
-                'wsPwd' => 'V15r58zw61',
             ],
     ]
 ];

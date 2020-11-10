@@ -30,10 +30,11 @@ interface OutputInterface extends JsonSerializable
 
     /**
      * 设置返回提示代码
-     * @param int $code
+     * @param int $codee
+     * @param array $param
      * @return OutputInterface
      */
-    public function withCode(int $code): self;
+    public function withCode(int $codee, $param = []): self;
 
     /**
      * 返回输出数据

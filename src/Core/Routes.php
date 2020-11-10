@@ -50,11 +50,11 @@ class Routes implements RouteInterface
             }
             $method = basename($p);
             $obj = new $classname($request, $response);
-            if (!is_callable(array($obj, $method))) {
+            if (!is_callable([$obj, $method])) {
                 $classname = '\App\Control\\' . 'DefaultControl';
                 $obj = new $classname($request, $response);
             }
-            if (!is_callable(array($obj, $method))) {
+            if (!is_callable([$obj, $method])) {
                 return $response->output($request->getOutput());
             }
             return $obj->$method();

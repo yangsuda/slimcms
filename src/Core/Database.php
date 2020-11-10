@@ -85,7 +85,7 @@ class Database implements DatabaseInterface
     /**
      * {@inheritDoc}
      */
-    public function fetch(string $sql): array
+    public function fetch(string $sql)
     {
         $query = $this->query($sql);
         $data = $query->fetch(PDO::FETCH_ASSOC);

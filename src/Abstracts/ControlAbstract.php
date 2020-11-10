@@ -5,7 +5,6 @@
 
 namespace SlimCMS\Abstracts;
 
-use SlimCMS\Error\TextException;
 use SlimCMS\Interfaces\OutputInterface;
 
 abstract class ControlAbstract extends BaseAbstract
@@ -17,14 +16,14 @@ abstract class ControlAbstract extends BaseAbstract
      */
     public function view(OutputInterface $output = null, string $template = null)
     {
-        $p = $this->input('p');
-        $output = $output ?? $this->output;
+        $p = self::input('p');
+        $output = $output ?? self::$output;
         $template = $template ?? $p;
         if (empty($template)) {
-            return $this->response($output->withCode(21017));
+            return self::response($output->withCode(21017));
         }
         $output = $output->withTemplate($template);
-        return $this->response($output);
+        return self::response($output);
     }
 
     /**
@@ -34,9 +33,9 @@ abstract class ControlAbstract extends BaseAbstract
      */
     public function directTo(OutputInterface $output = null)
     {
-        $output = $output ?? $this->output;
+        $output = $output ?? self::$output;
         $output->directTo = 1;
-        return $this->response($output);
+        return self::response($output);
     }
 
     /**
@@ -47,16 +46,16 @@ abstract class ControlAbstract extends BaseAbstract
      */
     public function jsonCallback(OutputInterface $output = null, string $jsonCallback)
     {
-        $output = $output ?? $this->output;
+        $output = $output ?? self::$output;
         $output->jsonCallback = $jsonCallback;
-        return $this->response($output);
+        return self::response($output);
     }
 
     public function __destruct()
     {
         //删除操作时临时生成的cookie提示信息
-        $this->request->getCookie()->set('errorCode');
-        $this->request->getCookie()->set('errorMsg');
+        self::$request->getCookie()->set('errorCode');
+        self::$request->getCookie()->set('errorMsg');
     }
 
 }

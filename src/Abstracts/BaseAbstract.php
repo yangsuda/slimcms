@@ -3,6 +3,8 @@
  * 默认控制类
  */
 
+declare(strict_types=1);
+
 namespace SlimCMS\Abstracts;
 
 use App\Core\Redis;
@@ -17,35 +19,49 @@ abstract class BaseAbstract
      * 请求对象实例
      * @var Request
      */
-    protected $request;
+    protected static $request;
 
     /**
      * 响应对象实例
      * @var Response
      */
-    protected $response;
+    protected static $response;
 
-    protected $output;
+    protected static $output;
 
-    protected $container;
+    protected static $container;
 
     /**
      * redis实例
      * @var \Redis|null
      *
      */
-    protected $redis;
+    protected static $redis;
+
+    /**
+     * 后台配置参数
+     * @var
+     */
+    protected static $config;
+
+    /**
+     * 站点初始化参数
+     * @var
+     */
+    protected static $setting;
 
     public function __construct(Request $request, Response $response)
     {
-        $this->request = $request;
-        $this->response = $response;
-        $this->output = $this->request->getOutput();
-        $this->container = $this->request->getContainer();
-        $this->redis = $this->container->get(Redis::class);
+        self::$request = $request;
+        self::$response = $response;
+        self::$output = self::$request->getOutput();
+        self::$container = self::$request->getContainer();
+        self::$redis = self::$container->get(Redis::class);
+        self::$config = self::$container->get('cfg');
+        self::$setting = self::$container->get('settings');
     }
 
-    public function t($name): Table
+    public static function t($name): Table
     {
         static $objs = [];
         $className = ucfirst($name);
@@ -54,7 +70,7 @@ abstract class BaseAbstract
             $classname = 'App\Core\Table';
         }
         if (empty($objs[$name])) {
-            $objs[$name] = new $classname($this->container, $name);
+            $objs[$name] = new $classname(self::$container, $name);
         }
         return $objs[$name];
     }
@@ -65,9 +81,9 @@ abstract class BaseAbstract
      * @param string $type
      * @return array|mixed|\都不存在时的默认值|null
      */
-    public function input(string $name, string $type = 'string')
+    public static function input(string $name, string $type = 'string')
     {
-        return $this->request->input($name, $type);
+        return self::$request->input($name, $type);
     }
 
     /**
@@ -75,9 +91,9 @@ abstract class BaseAbstract
      * @param $result
      * @return array|\Psr\Http\Message\ResponseInterface
      */
-    public function response(OutputInterface $output = null)
+    public static function response(OutputInterface $output = null)
     {
-        $output = $output ?? $this->output;
-        return $this->response->output($output);
+        $output = $output ?? self::$output;
+        return self::$response->output($output);
     }
 }

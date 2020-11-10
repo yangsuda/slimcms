@@ -76,10 +76,10 @@ class Output implements OutputInterface
             if (is_array($para)) {
                 extract($para);
                 eval("\$str = \"$str\";");
-            } elseif (is_string($para)) {
-                $str = $para;
             } elseif (is_numeric($para)) {
                 $str = $this->promptMsg($para);
+            } elseif (is_string($para)) {
+                $str = $para;
             }
         }
         return $str;
@@ -108,7 +108,7 @@ class Output implements OutputInterface
     {
         $clone = clone $this;
         $clone->code = $code;
-        $clone->msg = is_array($param) ? $clone->promptMsg($code, $param) : $param;
+        $clone->msg = $clone->promptMsg($code, $param);
         return $clone;
     }
 

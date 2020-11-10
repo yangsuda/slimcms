@@ -28,7 +28,7 @@ interface DatabaseInterface
      * @param string $sql
      * @return array
      */
-    public function fetch(string $sql): array;
+    public function fetch(string $sql);
 
     /**
      * 查询列表数据

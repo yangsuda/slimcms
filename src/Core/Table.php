@@ -11,6 +11,7 @@ namespace SlimCMS\Core;
 
 use Psr\Container\ContainerInterface;
 use SlimCMS\Error\TextException;
+use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\DatabaseInterface;
 use App\Core\Redis;
 
@@ -85,6 +86,15 @@ class Table
         $this->tablepre = $settings['db']['tablepre'];
         $this->tableName = $this->tablepre . $tableName;
         $this->redis = $container->get(Redis::class);
+    }
+
+    /**
+     * 数据库操作实例
+     * @return mixed|DatabaseInterface
+     */
+    public function db()
+    {
+        return $this->db;
     }
 
     /**
@@ -708,20 +718,6 @@ class Table
     {
         $condition[] = $this->where;
         $condition[] = $this->join;
-        $key = str_replace("'", '', var_export($condition, true));
-        preg_match_all('/(1[0-9]{9})/', $key, $matches);
-        if (empty($matches[1][0])) {
-            return md5($key);
-        }
-        $arr = explode($matches[1][0], $key);
-        if (!empty($arr[1]) && is_numeric($arr[1][0])) {
-            return $key;
-        }
-        $search = $replace = array();
-        foreach ($matches[1] as $v) {
-            $search[] = $v;
-            $replace[] = substr($v, 0, -3) . '000';
-        }
-        return md5(str_replace($search, $replace, $key));
+        return Str::md5key($condition);
     }
 }

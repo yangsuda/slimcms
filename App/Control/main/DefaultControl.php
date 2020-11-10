@@ -15,6 +15,6 @@ class DefaultControl extends ControlAbstract
      */
     public function index()
     {
-        return $this->view($this->output,'index');
+        return $this->view(self::$output,'index');
     }
 }

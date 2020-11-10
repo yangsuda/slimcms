@@ -7,6 +7,27 @@ namespace SlimCMS\Helper;
 
 class Str
 {
+    /**
+     * 将缓存KEY中含有的时间戳后3位改成000，否则缓存会一直生成，失去缓存意义
+     */
+    public static function md5key(array $condition = []): string
+    {
+        $key = str_replace("'", '', var_export($condition, true));
+        preg_match_all('/(1[0-9]{9})/', $key, $matches);
+        if (empty($matches[1][0])) {
+            return md5($key);
+        }
+        $arr = explode($matches[1][0], $key);
+        if (!empty($arr[1]) && is_numeric($arr[1][0])) {
+            return $key;
+        }
+        $search = $replace = array();
+        foreach ($matches[1] as $v) {
+            $search[] = $v;
+            $replace[] = substr($v, 0, -3) . '000';
+        }
+        return md5(str_replace($search, $replace, $key));
+    }
 
     public static function random($length, $numeric = 0)
     {
