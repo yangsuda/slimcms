@@ -161,7 +161,7 @@ class Output implements OutputInterface
     /**
      * {@inheritDoc}
      */
-    public function analysisTemplate(): string
+    public function analysisTemplate(bool $force = false): string
     {
         if ($this->template) {
             $callback = function_exists('ob_gzhandler') ? 'ob_gzhandler' : '';
@@ -171,7 +171,7 @@ class Output implements OutputInterface
             $referer = $this->referer;
             $data = $this->data;
             $cfg = $this->container->get('cfg');
-            include_once($this->container->get(TemplateInterface::class)::loadTemplate($this->template));
+            include($this->container->get(TemplateInterface::class)::loadTemplate($this->template, $force));
             $content = ob_get_contents();
             ob_end_clean();
             return $content;

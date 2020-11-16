@@ -92,14 +92,16 @@ class Request extends MessageAbstract
             }
         } else {
             if (empty($flags)) {
-                $string = str_replace(['&', '"', '<', '>', '\'', '||', '*', '$', '(', ')'], ['&amp;', '&quot;', '&lt;', '&gt;', '&#039;', '&#124;&#124;', '&#042;', '&#036;', '&#040;', '&#041;'], $string);
+                $string = str_replace(
+                    ['&', '"', '<', '>', '\'', '||', '*', '$', '(', ')'],
+                    ['&amp;', '&quot;', '&lt;', '&gt;', '&#039;', '&#124;&#124;', '&#042;', '&#036;', '&#040;', '&#041;'], $string);
                 if (strpos($string, '&amp;#') !== false) {
                     $string = preg_replace('/&amp;((#(\d{3,5}|x[a-fA-F0-9]{4}));)/', '&\\1', $string);
                 }
-            } elseif ($flags == 'en') {
-                $string = str_replace(['&', '"', '<', '>', '\'', '||', '*', '$', '(', ')'], ['&amp;', '&quot;', '&lt;', '&gt;', '&#039;', '&#124;&#124;', '&#042;', '&#036;', '&#040;', '&#041;'], $string);
             } elseif ($flags == 'de') {
-                $string = str_replace(['&#039;', '&#034;', '&#042;', '&quot;', '&ldquo;', '&rdquo;', '&amp;', '&#040;', '&#041;'], ["'", '"', '*', '"', '“', '”', '&', '(', ')'], $string);
+                $string = str_replace(
+                    ['&#039;', '&#034;', '&#042;', '&quot;', '&ldquo;', '&rdquo;', '&amp;', '&#040;', '&#041;'],
+                    ["'", '"', '*', '"', '“', '”', '&', '(', ')'], $string);
             }
         }
         return $string;
@@ -157,9 +159,9 @@ class Request extends MessageAbstract
                 continue;
             }
             if ($v == 'htmltext') {
-                $data[$k] = $this->addslashes($val);
+                $data[$k] = (string)$this->addslashes($val);
             } elseif ($v == 'string') {
-                $data[$k] = $this->htmlspecialchars($val);
+                $data[$k] = (string)$this->htmlspecialchars($val);
             } elseif ($v == 'float') {
                 $data[$k] = (float)$val;
             } elseif ($v == 'price') {

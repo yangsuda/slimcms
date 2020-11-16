@@ -18,7 +18,7 @@ class Time
             $tformat = 'H:i';
             $dtformat = $dformat . ' ' . $tformat;
             $offset = 8;
-            $lang = array(
+            $lang = [
                 'before' => '前',
                 'day' => '天',
                 'yday' => '昨天',
@@ -28,7 +28,7 @@ class Time
                 'min' => '分钟',
                 'sec' => '秒',
                 'now' => '刚刚',
-            );
+            ];
         }
         $timeoffset = $timeoffset == 9999 ? $offset : $timeoffset;
         $timestamp += $timeoffset * 3600;

@@ -1,0 +1,6 @@
+<script id="$data[fieldname]" name="$data[fieldname]" type="text/plain">$data[content]</script>
+<!--{if !$data[has_load]}-->
+<script type="text/javascript" src="$cfg[basehost]ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="$cfg[basehost]ueditor/ueditor.all.min.js"></script>
+<!--{/if}-->
+<script type="text/javascript">var ue_$data[fieldname] = UE.getEditor("$data[fieldname]", {$data[ue]});</script>

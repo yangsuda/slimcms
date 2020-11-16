@@ -1,0 +1,16 @@
+<!--{if $cfg[clienttype] > 0 && count($data[rules] > 3}-->
+    <select multiple="multiple" class="form-control $data[css]" $data[validform] id="$data[identifier]" name="{$data[identifier]}[]">
+        <!--{loop $data[rules] $k $v}-->
+        <option value="$k" {echo in_array($k,explode(',',$data[default]))?'selected':''}>$v</option>
+        <!--{/loop}-->
+    </select>
+<!--{else}-->
+    {eval $i = 0;}
+    <!--{loop $data[rules] $k $v}-->
+    {eval $i++;}
+    <span class="custom-control custom-checkbox mr-2">
+        <input type="checkbox" {echo $i==1?$data[validform]:''} class="custom-control-input $data[css]" id="{$data[identifier]}$k" name="{$data[identifier]}[]" value="$k" {echo in_array($k, explode(',',$data[default]))?'checked':''}/>
+        <label for="{$data[identifier]}$k" class="custom-control-label">$v</label>
+    </span>
+    <!--{/loop}-->
+<!--{/if}-->

@@ -1,0 +1,13 @@
+<style type="text/css">
+    .am-form-file input[type="file"] {position: absolute;left: 0;z-index: 1;opacity: 0;cursor: pointer;}
+</style>
+<div class="am-form-file">
+    <button type="button" class="btn btn-secondary btn-sm"><i class="fa-1x fas fa-cloud-upload-alt"></i> 本地上传</button>
+    <input type="file" name="$data[identifier]" onChange="$('#{$data[identifier]}_html').html(this.value);$('#{$data[identifier]}_hidden').val(this.value);" />
+    <input type="hidden" id="{$data[identifier]}_hidden" name="{$data[identifier]}_hidden" value="$data[default]" $data[validform] />
+</div>
+<div class="m-1">
+    <!--{if $data[default]}-->
+    <a href="$data[default]">$data[default]</a>
+    <!--{/if}-->
+</div>

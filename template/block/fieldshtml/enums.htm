@@ -1,0 +1,15 @@
+<!--{if $data[loadonce]==1}-->
+<script type="text/javascript" src="$cfg[resourceUrl]global/lib/enums2.js"></script>
+<!--{/if}-->
+<script type="text/javascript">
+    $(document).ready(function(){
+        var enums = new Enums();
+        var validform = '$data[validform];';
+        var css = '$data[css]';
+        var evalue = "$data[default]";
+        var defaultName = "";
+        var option = {evalue:evalue,egroup:"$data[identifier]",drawID:"{$data[identifier]}_span",defaultName:defaultName,validform:validform,css:css};
+        enums.init(option);
+    });
+</script>
+<span class="form-inline" id="{$data[identifier]}_span"></span>

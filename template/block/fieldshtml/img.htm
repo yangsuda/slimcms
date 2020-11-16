@@ -1,0 +1,74 @@
+<!--{if $cfg[clienttype] > 0}-->
+<!--{if $data[isLoadh5upload]==1}-->
+<link rel="stylesheet" href="$cfg[resourceUrl]global_wap/css/upimgs.css" />
+<script src="$cfg[resourceUrl]global_wap/js/image_upload.js"></script>
+<!--{/if}-->
+
+<!--{if $data[default]}-->
+<div class="am-cf am-margin-vertical $data[css]"><a href="{echo copyImage($data[default])}" target="_blank">
+    <img src="{echo copyImage($data[default], 100, 100)}" style="height:80px;" class="am-img-thumbnail" /></a>
+    <div class="btn-delImg" style="position:absolute;top:2.3rem;left:0.2rem;" data-identifier="$data[identifier]" data-id="$data[row][id]" data-did="$data[formid]">
+        <span class="text-danger fa-2x ml-3 mt-6 fas fa-times"></span>
+    </div>
+</div>
+<!--{/if}-->
+<div class="block_upimgs">
+    <ul class="am-gallery" data-am-widget="gallery">
+        <li class="box_addimgs" id="li_btnupimg_$data[identifier]" {echo $data[default]?'style="display:none;"':''}>
+            <input id="file_$data[identifier]" type="file" {echo $data[default]?'':$data[validform]} class="form-control file_imgs $data[css]" accept="image/*"  onchange="handleFiles_{$data[identifier]}();" />
+            <button class="btn_imgs"><em></em><span><font style="font-size:12px">添加单张照片</font></span></button>
+        </li>
+        <li id="li_canvas_$data[identifier]" {echo !$data[default]?'style="display:none;"':''}>
+            <input name="$data[identifier]" id="$data[identifier]" type="hidden" value="$data[default]"/>
+            <div class="pic"><a><i></i><canvas id="canvas_$data[identifier]"></canvas></a></div>
+            <a href="javascript:;" class="del_img" onClick="delpic_img_{$data[identifier]}('$data[identifier]');" title="删除">—</a>
+        </li>
+    </ul>
+</div>
+<script>
+    var identifier = "$data[identifier]";
+    function handleFiles_{$data[identifier]}() {
+        var canvas, context, img, imgX = 0, imgY = 0, imgScale = 1;
+        var filesControl = $('#file_'+identifier).prop('files');
+
+        img = new Image();
+        var tmpcanvas = canvas = document.getElementById("canvas_" + identifier);
+        var tmpcontex = context = canvas.getContext("2d");
+        window.URL = window.URL || window.webkitURL;
+        if (window.URL) {
+            img.src = window.URL.createObjectURL(filesControl[0]);
+            img.onload = function(e) {
+                draw(tmpcontex,img,tmpcanvas,1,800);
+                $('#'+identifier).val(tmpcanvas.toDataURL("image/jpeg"));
+                draw(context,img,canvas,1,80);
+                $('#li_btnupimg_'+identifier).hide();
+                $('#li_canvas_'+identifier).show();
+            }
+        }
+    }
+    function delpic_img_{$data[identifier]}() {
+        $('#li_btnupimg_'+identifier).show();
+        $("#li_canvas_"+identifier).hide();
+        $("#"+identifier).val('');
+    }
+</script>
+<!--{else}-->
+<style type="text/css">
+    .am-form-file input[type="file"] {position: absolute;left: 0;z-index: 1;opacity: 0;cursor: pointer;}
+</style>
+<div class="am-form-file">
+    <button type="button" class="btn btn-secondary btn-sm"><i class="fa-1x fas fa-cloud-upload-alt"></i> 本地上传</button>
+    <input type="file" name="$data[identifier]" onChange="$('#{$data[identifier]}_html').html(this.value);$('#{$data[identifier]}_hidden').val(this.value);" />
+    <input type="hidden" id="{$data[identifier]}_hidden" name="{$data[identifier]}_hidden" value="$data[default]" $data[validform] />
+</div>
+<div id="{$data[identifier]}_html" class="m-1">
+    <!--{if $data[default]}-->
+    <div class="am-cf am-margin-vertical $data[css]"><a href="{echo copyImage($data[default])}" target="_blank">
+        <img src="{echo copyImage($data[default], 100, 100)}" style="height:80px;" class="am-img-thumbnail" /></a>
+        <div class="btn-delImg" style="position:absolute;top:2.3rem;left:0.2rem;" data-identifier="$data[identifier]" data-id="$data[row][id]" data-did="$data[formid]">
+            <span class="text-danger fa-2x ml-3 mt-6 fas fa-times"></span>
+        </div>
+    </div>
+    <!--{/if}-->
+</div>
+<!--{/if}-->

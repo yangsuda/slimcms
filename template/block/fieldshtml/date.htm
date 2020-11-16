@@ -1,0 +1,25 @@
+<!--{if $cfg[clienttype] > 0}-->
+<input type="date" $data[validform] class="form-control $data[css]" id="$data[identifier]" name="$data[identifier]" value="$data[default]" $data[maxlength]/>
+<!--{else}-->
+<!--{if $data[isLoadDatetimepicker]==1}-->
+<link rel="stylesheet" href="$cfg[resourceUrl]plugins/amaze.datetimepicker/css/amazeui.datetimepicker.css" />
+<script src="$cfg[resourceUrl]plugins/amaze.datetimepicker/js/amazeui.datetimepicker.min.utf8.js"></script>
+<!--{/if}-->
+<div class="am-input-group">
+        <span class="am-input-group-label">
+            <span class="am-icon-calendar"></span>
+        </span>
+    <input type="text" $data[validform] name="$data[identifier]" id="$data[identifier]" class="form-control $data[css]" value="$data[default]" $data[maxlength]/>
+</div>
+<script>
+    $(document).ready(function() {
+        $('#{$data[identifier]}').datetimepicker({
+            language: 'zh-CN',
+            autoclose: true,
+            format: 'yyyy-mm-dd',
+            startView: 2,
+            minView: 2,
+        });
+    });
+</script>
+<!--{/if}-->

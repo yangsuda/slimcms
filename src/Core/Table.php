@@ -106,7 +106,6 @@ class Table
     {
         $sql = 'SELECT ' . $fields . ' FROM ' . $this->tableName . ' main ' .
             $this->join . $this->where . $this->orderby . $this->limit;
-        echo $sql;
         return $sql;
     }
 
@@ -118,14 +117,15 @@ class Table
      */
     public function count(string $fields = '*', int $cacheTime = 0): int
     {
-        if ($this->redis) {
+        if ($this->redis->isAvailable()) {
             $cacheKey = $this->cacheKey(__FUNCTION__) . $this->md5key(func_get_args());
             $count = $cacheTime ? $this->redis->get($cacheKey) : 0;
         }
         if (empty($count)) {
+            $fields = $fields ?: '*';
             $sql = $this->selectSQL('count(' . $fields . ')');
             $count = $this->db->fetchColumn($sql);
-            $this->redis && $cacheTime && $this->redis->set($cacheKey, $count, $cacheTime);
+            $this->redis->isAvailable() && $cacheTime && $this->redis->set($cacheKey, $count, $cacheTime);
         }
         return (int)$count;
     }
@@ -155,7 +155,7 @@ class Table
      */
     public function fetch(string $fields = '*', int $cacheTime = 0)
     {
-        if ($this->redis && !$this->join) {
+        if ($this->redis->isAvailable() && !$this->join) {
             if ($this->whereIsNumber) {
                 $indexid = $this->whereIsNumber;
             } else {
@@ -224,7 +224,7 @@ class Table
                 $field1 = $cacheTime ? 'id' : (strpos($fields, ',') ? implode(',', $this->quoteField(explode(',', $fields))) : $fields);
                 $sql = $this->selectSQL($field1);
                 $list = $this->db->fetchList($sql, $indexField);
-                if ($this->redis) {
+                if ($this->redis->isAvailable()) {
                     foreach ($list as $k => $v) {
                         $data = $this->withWhere($v['id'])->fetch($fields);
                         $list[$k] = is_array($data) ? $data : [$fields => $data];
@@ -233,7 +233,7 @@ class Table
             }
             return $list;
         };
-        if ($this->redis) {
+        if ($this->redis->isAvailable()) {
             if ($this->join) {
                 $cacheTime = 0;
             }
@@ -267,7 +267,7 @@ class Table
             }
             return $arr;
         };
-        if ($this->redis) {
+        if ($this->redis->isAvailable()) {
             if ($this->join) {
                 $cacheTime = 0;
             }
@@ -331,7 +331,7 @@ class Table
      */
     private function updateFetchCache(int $id, array $data)
     {
-        if ($this->redis) {
+        if ($this->redis->isAvailable()) {
             $cachekey = $this->cacheKey($id);
             $cacheData = $this->redis->get($cachekey);
             if ($cacheData) {
@@ -360,7 +360,7 @@ class Table
     public function update(array $data): int
     {
         if ($this->where && !empty($data)) {
-            if ($this->redis) {
+            if ($this->redis->isAvailable()) {
                 $row = $this->fetchList('id');
                 foreach ($row as $v) {
                     $this->updateFetchCache((int)$v['id'], $data);
@@ -380,7 +380,7 @@ class Table
     public function delete(): int
     {
         if ($this->where) {
-            if ($this->redis) {
+            if ($this->redis->isAvailable()) {
                 $row = $this->fetchList('id');
                 foreach ($row as $v) {
                     $cachekey = $this->cacheKey($v['id']);
@@ -508,7 +508,7 @@ class Table
         return $field;
     }
 
-    private function field($field, $val, $glue = '=')
+    public function field($field, $val, $glue = '=')
     {
         $field = $this->quoteField($field);
         if (empty($val) && is_array($val)) {
@@ -695,7 +695,7 @@ class Table
     public function pageList(int $page = 1, string $fields = '*', int $pagesize = 30, int $cacheTime = 0, string $indexField = ''): array
     {
         $page = max(1, $page);
-        $field = strpos($fields, 'distinct') !== false ? $fields : '*';
+        $field = $fields ?: '*';
         $count = $this->count($field, $cacheTime);
         $maxpages = ceil($count / $pagesize);
         $page = $page > $maxpages ? $maxpages : $page;

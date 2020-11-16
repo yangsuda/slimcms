@@ -8,9 +8,11 @@ declare(strict_types=1);
 
 namespace SlimCMS\Core;
 
-use SlimCMS\Helper\Http;
+use App\Core\Upload;
+use App\Core\Ueditor;
 use SlimCMS\Abstracts\ModelAbstract;
 use SlimCMS\Helper\Str;
+use SlimCMS\Helper\Time;
 use SlimCMS\Interfaces\OutputInterface;
 
 class Forms extends ModelAbstract
@@ -38,7 +40,7 @@ class Forms extends ModelAbstract
         if (empty($table)) {
             return self::$output->withCode(200);
         }
-        $db = self::t('forms')->db();
+        $db = self::t()->db();
         $tableName = self::$setting['db']['tablepre'] . str_replace(self::$setting['db']['tablepre'], '', $table);
         if ($db->fetch("SHOW TABLES LIKE '" . $tableName . "'")) {
             return self::$output->withCode(22004, ['title' => $tableName]);
@@ -87,8 +89,7 @@ class Forms extends ModelAbstract
                 return self::$output->withCode($rs);
             }
         }
-        $referer = (string)aval($_SERVER, 'HTTP_REFERER');
-        return self::$output->withCode(200, 21032)->withReferer($referer);
+        return self::$output->withCode(200, 21032)->withReferer(self::$config['referer']);
     }
 
     /**
@@ -126,7 +127,7 @@ class Forms extends ModelAbstract
                 //判断属性；
                 $fields = self::fieldList(['formid' => $formid, 'available' => 1, 'datatype' => ['htmltext', 'imgs', 'img', 'media', 'addon']]);
                 if ($fields) {
-                    Form::delAttachment(['fields' => $fields, 'data' => $v]);
+                    self::delAttachment($fields, $v);
                 }
             }
 
@@ -143,24 +144,24 @@ class Forms extends ModelAbstract
         if (is_callable([self::t($form['table']), 'dataDelRealAfter'])) {
             self::t($form['table'])->dataDelRealAfter($list);
         }
-        $referer = Http::currentUrl() . '&p=forms/dataList&ids=';
+        $referer = self::currentUrl('&p=forms/dataList&ids=');
         return self::$output->withCode(200, 21023)->withReferer($referer);
     }
 
     /**
-     * 读取某个表单对应的详细数据
+     * 详细数据
      * @param int $formid
      * @param int $id
      * @param int $cacheTime
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function dataView(int $formid, int $id, int $cacheTime = 300): OutputInterface
+    public static function dataView(int $formid, int $id, int $cacheTime = 0): OutputInterface
     {
         if (empty($formid) || empty($id)) {
             return self::$output->withCode(21003);
         }
-        $cachekey = self::dataViewCacheKey($formid, $id);
+        $cachekey = self::cacheKey('dataView', $formid, $id);
         $data = $cacheTime > 0 ? self::$redis->get($cachekey) : [];
         if (empty($data)) {
             $form = self::t('forms')->withWhere($formid)->fetch();
@@ -178,7 +179,7 @@ class Forms extends ModelAbstract
                 return self::$output->withCode(21001);
             }
             $fields = self::fieldList(['formid' => $formid, 'available' => 1]);
-            Form::exchangeFieldValue($fields, $data);
+            self::exchangeFieldValue($fields, $data);
 
             //获取额外数据
             if (is_callable([self::t($form['table']), 'dataViewAfter'])) {
@@ -193,90 +194,98 @@ class Forms extends ModelAbstract
         return self::$output->withData($data)->withData(200);
     }
 
-    private static function dataViewCacheKey($formid, $id)
+    private static function cacheKey($key, ...$param): string
     {
-        return __CLASS__ . __FUNCTION__ . Str::md5key(func_get_args());
+        return __CLASS__ . ':' . $key . ':' . Str::md5key($param);
     }
 
     /**
-     * 某自定义表单下的数据统计
-     * @param $param
-     * @return array
+     * 数据统计
+     * @param array $param
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
      */
-    public static function dataCount($param)
+    public static function dataCount(array $param): OutputInterface
     {
-        if (empty($param['did'])) {
-            return self::result(21003);
+        if (empty($param['formid'])) {
+            return self::$output->withCode(21003);
         }
-        $list = [];
-        $arr = self::searchCondition($param);
-        if (!empty($param['cacheTime'])) {
-            $cachekey = __CLASS__ . ':' . __FUNCTION__ . ':param=' . md5(self::md5key($param) . self::md5key(aval($arr, 'data/where')));
-            $list = self::$redis->get($cachekey);
-        }
-        if (empty($list)) {
-            $form = Table::t('diyforms')->fetch($param['did']);
-            if (empty($form)) {
-                return self::result(22006);
-            }
-            if (!empty($param['joinFields'])) {
-                $param['fields'] = 'main.' . str_replace(',', ',main.', $param['fields']) . ',' . $param['joinFields'];
-            }
-
-            //处理筛选条件
-            $param['where'] = aval($param, 'where', []);
-            $dataCountBefore = method_exists(Table::t($form['table']), 'dataCountBefore');
-            $dataCountBefore && Table::t($form['table'])->dataCountBefore($param);
-
-            $param['where'] = !empty($param['where']) ? array_merge((array)$param['where'], (array)$arr['data']['where']) : $arr['data']['where'];
-            $list['count'] = Table::t($form['table'])->count($param['where']);
-            $list['form'] = $form;
-            $list['did'] = $param['did'];
-            //缓存保存
-            !empty($param['cacheTime']) && self::$redis->set($cachekey, $list, $param['cacheTime']);
-        }
-        return self::result(200, $list);
-    }
-
-    /**
-     * 某自定义表单下的列表数据
-     * @param unknown_type $row
-     */
-    public static function dataList($param)
-    {
-        if (empty($param['did'])) {
-            return self::result(21003);
-        }
-        $form = Table::t('diyforms')->fetch($param['did']);
-        if (empty($form)) {
-            return self::result(22006);
-        }
-
-        if (method_exists(Table::t($form['table']), 'dataListInit')) {
-            $rs = Table::t($form['table'])->dataListInit($param);
-            if ($rs['code'] != 200) {
-                return $rs;
-            }
-        }
-        self::$cfg['currenturl'] = Http::currentUrl();
-        $list = [];
         $arr = [];
+        $arr['where'] = [];
         if (empty($param['noinput'])) {
-            $arr = self::searchConditionPri($param);
+            $arr = self::searchCondition($param)->getData();
         }
         if (!empty($param['cacheTime'])) {
-            $cachekey = __CLASS__ . ':' . __FUNCTION__ . ':param=' . md5(self::md5key($param) . self::md5key(aval($arr, 'data/where')));
-            $list = self::$redis->get($cachekey);
+            $cachekey = self::cacheKey(__FUNCTION__, $param, $arr['where']);
+            $data = self::$redis->get($cachekey);
         }
-        if (empty($list)) {
-            if ($form['cpcheck'] == 1) {
-                $ifcheck = aval($param, 'ifcheck');
+        if (empty($data)) {
+            $form = self::t('forms')->withWhere($param['formid'])->fetch();
+            if (empty($form)) {
+                return self::$output->withCode(22006);
+            }
 
-                if ($ifcheck == '1' || $ifcheck == '2') {
+            if (is_callable([self::t($form['table']), 'dataCountBefore'])) {
+                $rs = self::t($form['table'])->dataCountBefore($param);
+                if ($rs != 200) {
+                    return self::$output->withCode($rs);
+                }
+            }
+
+            $where = !empty($param['where']) ? array_merge($param['where'], $arr['where']) : $arr['where'];
+            $countFields = (string)aval($param, 'countFields');
+            $data = [];
+            $data['count'] = self::t($form['table'])->withWhere($where)->count($countFields);
+            $data['form'] = $form;
+            $data['formid'] = $param['formid'];
+            //缓存保存
+            !empty($param['cacheTime']) && self::$redis->set($cachekey, $data, $param['cacheTime']);
+        }
+        return self::$output->withCode(200)->withData($data);
+    }
+
+    /**
+     * 列表数据
+     * @param array $param
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function dataList(array $param): OutputInterface
+    {
+        if (empty($param['formid'])) {
+            return self::$output->withCode(21003);
+        }
+        $form = self::t('forms')->withWhere($param['formid'])->fetch();
+        if (empty($form)) {
+            return self::$output->withCode(22006);
+        }
+
+        if (is_callable([self::t($form['table']), 'dataListInit'])) {
+            $rs = self::t($form['table'])->dataListInit($param);
+            if ($rs != 200) {
+                return self::$output->withCode($rs);
+            }
+        }
+
+        $cfg = &self::$config;
+        $cfg['currenturl'] = self::currentUrl();
+        $arr = [];
+        $arr['where'] = [];
+        if (empty($param['noinput'])) {
+            $arr = self::searchCondition($param)->getData();
+        }
+        if (!empty($param['cacheTime'])) {
+            $cachekey = self::cacheKey(__FUNCTION__, $param, $arr['where']);
+            $data = self::$redis->get($cachekey);
+        }
+        if (empty($data)) {
+            if ($form['cpcheck'] == 1) {
+                $ischeck = aval($param, 'ischeck');
+                if ($ischeck) {
                     $where = [];
-                    $where['ifcheck'] = $ifcheck;
+                    $where['ischeck'] = $ischeck == 1 ? 1 : 2;
                     $param['where'] = !empty($param['where']) ? array_merge((array)$param['where'], $where) : $where;
-                    empty($param['noinput']) && self::$cfg['currenturl'] .= '&ifcheck=' . $ifcheck;
+                    empty($param['noinput']) && $cfg['currenturl'] .= '&ischeck=' . $ischeck;
                 }
             }
 
@@ -288,16 +297,17 @@ class Forms extends ModelAbstract
                     $where = [];
                     $where['id'] = $id;
                     $param['where'] = !empty($param['where']) ? array_merge((array)$param['where'], $where) : $where;
-                    self::$cfg['currenturl'] .= '&id=' . (is_array($id) ? implode('`', $id) : $id);
+                    empty($param['noinput']) && $cfg['currenturl'] .= '&id=' . (is_array($id) ? implode('`', $id) : $id);
                 }
             }
 
             if (empty($param['fields'])) {
-                $inlistField = defined('MANAGE') && MANAGE == 1 ? 'inlistcp' : 'inlist';
-                $fields = self::fieldListPri(['formid' => $param['did'], 'available' => 1, $inlistField => 1, 'field' => 'identifier', 'onefield' => true]);
+                $inlistField = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
+                $fields = self::t('forms_fields')
+                    ->withWhere(['formid' => $param['did'], 'available' => 1, $inlistField => 1])
+                    ->onefieldList('identifier', 60);
                 $fields[] = 'createtime';
-                $fields[] = 'ifcheck';
-                $fields[] = 'operator_id';
+                $fields[] = 'ischeck';
                 $fields[] = 'id';
                 $param['fields'] = implode(',', $fields);
             }
@@ -305,217 +315,231 @@ class Forms extends ModelAbstract
                 $param['fields'] = 'main.' . str_replace(',', ',main.', $param['fields']) . ',' . $param['joinFields'];
             }
 
-            //处理筛选条件
-            $param['where'] = aval($param, 'where', []);
-            $dataListBefore = method_exists(Table::t($form['table']), 'dataListBefore');
-            if ($dataListBefore) {
-                $rs = Table::t($form['table'])->dataListBefore($param);
-                if ($rs['code'] != 200) {
-                    return $rs;
+            if (is_callable([self::t($form['table']), 'dataListBefore'])) {
+                $rs = self::t($form['table'])->dataListBefore($param);
+                if ($rs != 200) {
+                    return self::$output->withCode($rs);
                 }
             }
-            if (empty($param['noinput'])) {
-                $param['where'] = !empty($param['where']) ? array_merge((array)$param['where'], (array)$arr['data']['where']) : $arr['data']['where'];
-            }
 
-            //处理排序
-            $param['order'] = self::validOrder($param['did'], aval($param, 'order'), aval($param, 'orderForce'));
-            $list = Table::t($form['table'])->pageList($param);
-            foreach ($list['infolist'] as $k => $v) {
-                isset($v['ifcheck']) && $v['_ifcheck'] = $v['ifcheck'] == 1 ? '已审核' : '未审核';
-                $fields = self::fieldListPri(['formid' => $param['did'], 'available' => 1]);
-                Form::exchangeFieldValue($fields, $v);
-                $list['infolist'][$k] = $v;
+            $where = !empty($param['where']) ? array_merge($param['where'], $arr['where']) : $arr['where'];
+            $order = (string)aval($param, 'order');
+            $orderForce = (bool)aval($param, 'orderForce');
+            $order = self::validOrder($param['formid'], $order, $orderForce);
+            $by = (string)aval($param, 'by');
+            $page = (int)aval($param, 'page', 1);
+            $fields = (string)aval($param, 'fields');
+            $pagesize = (int)aval($param, 'pagesize', 30);
+            $indexField = (string)aval($param, 'indexField');
+            $joins = (array)aval($param, 'joins');
+            $data = self::t($form['table'])
+                ->withJoin($joins)
+                ->withWhere($where)
+                ->withOrderby($order, $by)
+                ->pageList($page, $fields, $pagesize, 0, $indexField);
+            $fields = self::fieldList(['formid' => $param['formid'], 'available' => 1]);
+            foreach ($data['list'] as &$v) {
+                isset($v['ischeck']) && $v['_ischeck'] = $v['ischeck'] == 1 ? '已审核' : '未审核';
+                self::exchangeFieldValue($fields, $v);
             }
             if (!empty($arr['tags'])) {
-                $list['tags'] = $arr['tags'];
+                $data['tags'] = $arr['tags'];
             }
-            $list['dataListBefore'] = $dataListBefore;
-            if (method_exists(Table::t($form['table']), 'dataListAfter')) {
-                $rs = Table::t($form['table'])->dataListAfter($list, $param);
-                if ($rs['code'] != 200) {
-                    return $rs;
+            $data['form'] = $form;
+            $data['formid'] = $param['formid'];
+
+            if (is_callable([self::t($form['table']), 'dataListAfter'])) {
+                $rs = self::t($form['table'])->dataListAfter($data, $param);
+                if ($rs != 200) {
+                    return self::$output->withCode($rs);
                 }
             }
-            $list['form'] = $form;
-            $list['did'] = $param['did'];
 
             //缓存保存
-            !empty($param['cacheTime']) && self::$redis->set($cachekey, $list, $param['cacheTime']);
+            !empty($param['cacheTime']) && self::$redis->set($cachekey, $data, $param['cacheTime']);
         }
-        return self::result(200, $list);
+        return self::$output->withCode(200)->withData($data);
     }
 
     /**
      * 获取生成的表单HTML
-     * @param $did
-     * @param string $row
-     * @return array
+     * @param int $formid
+     * @param array $row
+     * @param array $options
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
      */
-    public static function getFormHtml($did, $row = [])
+    public static function dataFormHtml(int $formid, array $row = [], array $options = []): OutputInterface
     {
-        if (empty($did)) {
-            return self::result(21003);
+        if (empty($formid)) {
+            return self::$output->withCode(21003);
         }
         if ($row && is_numeric($row)) {
-            $res = self::dataView($did, $row, 0);
-            if ($res['code'] != 200) {
+            $res = self::dataView($formid, $row);
+            if ($res->getCode() != 200) {
                 return $res;
             }
-            $row = $res['data']['data'];
+            $row = $res->getData();
         } else {
             $row = [];
         }
 
-        $condition = array();
-        if (is_numeric($did)) {
-            $condition['formid'] = $did;
-        } elseif (is_array($did)) {
-            $condition = $did;
-        }
+        $condition = [];
+        $condition['formid'] = $formid;
         $condition['available'] = 1;
-        if (CURSCRIPT != 'admincp') {
+        if (aval($options, 'infront') === true) {
             $condition['infront'] = 1;
         }
-        $form = Table::t('diyforms')->fetch($did);
+        $form = self::t('forms')->withWhere($formid)->fetch();
         if (empty($form)) {
-            return self::result(22006);
+            return self::$output->withCode(22006);
         }
-        $getFormHtmlBefore = method_exists(Table::t($form['table']), 'getFormHtmlBefore');
-        $getFormHtmlBefore && Table::t($form['table'])->getFormHtmlBefore($condition, $row);
 
-        $fields = (array)self::fieldListPri($condition);
+        if (is_callable([self::t($form['table']), 'getFormHtmlBefore'])) {
+            $rs = self::t($form['table'])->getFormHtmlBefore($condition, $row);
+            if ($rs != 200) {
+                return self::$output->withCode($rs);
+            }
+        }
+
+        $fields = (array)self::fieldList($condition);
         if (empty($row)) {
             $row = [];
             foreach ($fields as $k => $v) {
-                $row[$v['identifier']] = Request::input($v['identifier']);
+                $row[$v['identifier']] = self::input($v['identifier']);
             }
         }
-        $cachekey = __CLASS__ . __FUNCTION__ . ':did=' . $did;
-        $data = $did != 2 ? self::$redis->get($cachekey) : [];
+        $cachekey = self::cacheKey(__FUNCTION__, $formid, $options);
+        $data = self::$redis->get($cachekey);
         if (empty($data) || $row) {
-            $iscache = empty($row);
-            $row['did'] = $did;
-            $fieldshtml = Form::formHtml($fields, $row);
-            if (method_exists(Table::t($form['table']), 'getFormHtmlAfter')) {
-                $rs = Table::t($form['table'])->getFormHtmlAfter($fieldshtml, $fields, $row);
-                if ($rs['code'] != 200) {
-                    return $rs;
+            $fieldshtml = self::formHtml($formid, $fields, $row, $options);
+
+            if (is_callable([self::t($form['table']), 'getFormHtmlAfter'])) {
+                $rs = self::t($form['table'])->getFormHtmlAfter($fieldshtml, $fields, $row);
+                if ($rs != 200) {
+                    return self::$output->withCode($rs);
                 }
             }
+
             $data = ['fields' => $fields, 'fieldshtml' => $fieldshtml, 'data' => $row];
-            if ($iscache) {
-                self::$redis->set($cachekey, $data, 300);
-            }
+            empty($row) && !empty($options['cacheTime']) && self::$redis->set($cachekey, $data, $options['cacheTime']);
         }
-        return self::result(200, $data);
+        return self::$output->withCode(200)->withData($data);
     }
 
     /**
      * 保存自定义表单的数据
-     * @param unknown_type $did 自定义表单对应的ID
+     * @param int $formid 自定义表单对应的ID
      * @param array $row 原来的数据
      * @param array $data 要添加或修改的数据
      */
-    public static function dataSave($did, $row = '', $data = [], $referer = '')
+    public static function dataSave(int $formid, array $row = [], array $data = [], string $referer = ''): OutputInterface
     {
         //编辑数据
-        if (!empty($row) && is_numeric($row)) {
-            $res = self::dataView($did, $row);
-            if ($res['code'] != 200) {
+        if (is_numeric($row)) {
+            $res = self::dataView($formid, $row);
+            if ($res->getCode() != 200) {
                 return $res;
             }
-            $row = $res['data']['data'];
+            $row = $res->withData();
         }
-        $res = self::requiredCheck($did, $row, $data);
-        if ($res['code'] != 200) {
+        $res = self::requiredCheck($formid, $row, $data);
+        if ($res->getCode() != 200) {
             return $res;
         }
-        $form = Table::t('diyforms')->fetch($did);
+        $form = self::t('forms')->withWhere($formid)->fetch();
         if (empty($form)) {
-            return self::result(22006);
+            return self::$output->withCode(22006);
         }
-        $data = $data ?: self::getFormValuePri($did, $row);
+        $data = $data ?: self::getFormValue($formid, $row);
 
         //判断是否唯一
-        $uniques = self::fieldListPri(['formid' => $did, 'unique' => 1, 'available' => 1]);
+        $uniques = self::fieldList(['formid' => $formid, 'unique' => 1, 'available' => 1]);
         foreach ($uniques as $v) {
-            $exist_id = aval($data, $v['identifier']) ? Table::t($form['table'])->fetch([$v['identifier'] => $data[$v['identifier']]], 'id') : '';
+            $exist_id = aval($data, $v['identifier']) ?
+                self::t($form['table'])->withWhere([$v['identifier'] => $data[$v['identifier']]])->fetch('id')
+                : '';
             if ($exist_id && (empty($row['id']) || $exist_id != aval($row, 'id'))) {
-                return self::result(22004, '', array('title' => $v['title']));
+                return self::$output->withCode(22004, ['title' => $v['title']]);
             }
         }
 
-        if (method_exists(Table::t($form['table']), 'dataSaveBefore')) {
-            $rs = Table::t($form['table'])->dataSaveBefore($data, $row);
-            if ($rs['code'] != 200) {
-                return $rs;
+        if (is_callable([self::t($form['table']), 'dataSaveBefore'])) {
+            $rs = self::t($form['table'])->dataSaveBefore($data, $row);
+            if ($rs != 200) {
+                return self::$output->withCode($rs);
             }
         }
 
         if (!empty($row['id'])) {
-            Table::t($form['table'])->update($row['id'], $data);
+            self::t($form['table'])->withWhere($row['id'])->update($data);
             $data['id'] = $row['id'];
             $data['mngtype'] = 'edit';
             $row = array_merge($row, $data);
-            self::$redis->del(self::dataViewCacheKey($did, $row['id']));
+            self::$redis->del(self::cacheKey('dataView', $formid, $row['id']));
         } else {
-            $data['mid'] = !empty($data['mid']) ? $data['mid'] : self::$cfg['mid'];
-            $data['operator_id'] = !empty($data['operator_id']) ? $data['operator_id'] : aval(self::$cfg, 'admin/id');
             $data['createtime'] = TIMESTAMP;
             $data['ip'] = Ipdata::getip();
-            $data['id'] = Table::t($form['table'])->insert($data, true);
+            $data['id'] = self::t($form['table'])->insert($data, true);
             $data['mngtype'] = 'add';
             $row = $data;
         }
-        if (method_exists(Table::t($form['table']), 'dataSaveAfter')) {//数据插入完成之后处理对应的收尾逻辑
-            $rs = Table::t($form['table'])->dataSaveAfter($data, $row);
-            if ($rs['code'] != 200) {
-                return $rs;
+
+        if (is_callable([self::t($form['table']), 'dataSaveAfter'])) {
+            $rs = self::t($form['table'])->dataSaveAfter($data, $row);
+            if ($rs != 200) {
+                return self::$output->withCode($rs);
             }
         }
-        $referer = $referer ?: Http::currentUrl() . '&p=diyforms/dataList&id=';
-        return self::result(200, $data['id'], 21018, $referer);
+        $referer = $referer ?: self::currentUrl('&p=forms/dataList&id=');
+        return self::$output
+            ->withCode(200, 21018)
+            ->withData(['id' => $data['id']])
+            ->withReferer($referer);
     }
 
     /**
      * 必填检测
-     * @param unknown_type $did
+     * @param int $formid
+     * @param array $row
+     * @param array $data
+     * @return OutputInterface
      */
-    private static function requiredCheck($did, $row = [], $data = [])
+    private static function requiredCheck(int $formid, array $row = [], array $data = []): OutputInterface
     {
-        if (empty($did)) {
-            return self::result(27010);
+        if (empty($formid)) {
+            return self::$output->withCode(27010);
         }
-        $requireds = self::fieldListPri(['formid' => $did, 'required' => 1, 'available' => 1]);
+        $requireds = self::fieldList(['formid' => $formid, 'required' => 1, 'available' => 1]);
         foreach ($requireds as $v) {
             $msg = $v['errormsg'] ? $v['errormsg'] : $v['title'];
-            $val = aval($data, $v['identifier']) ?: Request::input($v['identifier']);
+            $val = aval($data, $v['identifier']) ?: self::input($v['identifier']);
             if ($v['datatype'] == 'img' || $v['datatype'] == 'media' || $v['datatype'] == 'addon') {
                 if (empty($row[$v['identifier']]) && empty($_FILES[$v['identifier']]['tmp_name']) && !$val) {
-                    return self::result(21008, '', array('ext_msg' => $msg));
+                    return self::$output->withCode(21008, ['ext_msg' => $msg]);
                 }
             } elseif (empty($row[$v['identifier']]) && !$val) {
-                return self::result(21008, '', array('ext_msg' => $msg));
+                return self::$output->withCode(21008, ['ext_msg' => $msg]);
             }
         }
-        return self::result(200);
+        return self::$output->withCode(200);
     }
 
     /**
      * 排序字段有效性检测
-     * @param $formid
+     * @param int $formid
      * @param string $order
      * @param bool $force
      * @return string
+     * @throws \SlimCMS\Error\TextException
      */
-    private static function validOrder($formid, $order = '', $force = false)
+    private static function validOrder(int $formid, string $order = '', bool $force = false): string
     {
         if ($force === true) {
             return $order;
         }
         if (empty($order)) {
-            $row = Table::t('diyforms_fields')->fetch(['formid' => $formid, 'available' => 1, 'defaultorder' => [1, 2]]);
+            $row = self::t('forms_fields')->withWhere(['formid' => $formid, 'available' => 1, 'defaultorder' => [1, 2]])->fetch();
             $order = 'main.id';
             if ($row) {
                 $by = $row['defaultorder'] == 1 ? 'desc' : 'asc';
@@ -537,7 +561,8 @@ class Forms extends ModelAbstract
             if ($v == 'id') {
                 continue;
             }
-            if (empty($v) || !Table::t('diyforms_fields')->count(['formid' => $formid, 'available' => 1, 'identifier' => $v, 'orderby' => 1])) {
+            $where = ['formid' => $formid, 'available' => 1, 'identifier' => $v, 'orderby' => 1];
+            if (empty($v) || !self::t('forms_fields')->withWhere($where)->count()) {
                 $valid = false;
                 break;
             }
@@ -555,36 +580,19 @@ class Forms extends ModelAbstract
      * @param string $order
      * @return array
      */
-    private static function fieldList($param)
+    private static function fieldList($where = '', $fields = '*', $limit = '', $order = 'displayorder desc,id')
     {
-        if (empty($param)) {
-            return self::result(21003);
-        }
-        $cachekey = __CLASS__ . __FUNCTION__ . ':param=' . Str::md5key($param);
+        $cachekey = self::cacheKey(__FUNCTION__, func_get_args());
         $list = self::$redis->get($cachekey);
         if (empty($list)) {
-            $post = [];
-            $post['onefield'] = aval($param, 'onefield', false);
-            $post['limit'] = aval($param, 'limit');
-            $post['order'] = aval($param, 'order', 'displayorder desc,id');
-            $post['field'] = aval($param, 'field', '*');
-            unset($param['onefield'], $param['limit'], $param['order'], $param['field']);
-            $post['condition'] = $param;
-            $list = Table::t('diyforms_fields')->fetchList($post);
+            $list = self::t('forms_fields')
+                ->withWhere($where)
+                ->withLimit($limit)
+                ->withOrderby($order)
+                ->fetchList($fields);
             self::$redis->set($cachekey, $list, 60);
         }
-        return self::result(200, $list);
-    }
-
-    /**
-     * 获取表单提交数据
-     * @param $did
-     * @return array
-     */
-    private static function getFormValue($did, $olddata = [], $implodeUrl = false)
-    {
-        $fields = self::fieldListPri(['formid' => $did, 'available' => 1]);
-        return Form::getFormValue($fields, $olddata, $implodeUrl);
+        return $list;
     }
 
     /**
@@ -592,117 +600,153 @@ class Forms extends ModelAbstract
      * @param $did
      * @return array
      */
-    private static function searchCondition($param)
+    private static function searchCondition(array $param): OutputInterface
     {
-        if (empty($param['did'])) {
-            return self::result(21003);
+        if (empty($param['formid'])) {
+            return self::$output->withCode(21003);
         }
-        $search_fields = self::fieldList(['formid' => $param['did'], 'available' => 1, 'search' => 1]);
-        $data = self::getFormValue($param['did'], '', true);
+        $search_fields = self::fieldList(['formid' => $param['formid'], 'available' => 1, 'search' => 1]);
+        $fields = self::fieldList(['formid' => $param['formid'], 'available' => 1]);
+        $data = self::getFormValue($fields);
+
+        $where = $tags = [];
+        $currenturl = '';
         if (!empty($search_fields)) {
             foreach ($search_fields as $v) {
-                if (aval($param, $v['identifier']) && !in_array($v['identifier'], ['func', 'where', 'did', 'order', 'fields', 'by', 'join', 'joinFields', 'cacheTime', 'url', 'page', 'pagesize', 'maxpages', 'autogoto', 'shownum'])) {
+                //使模板标签支持条件筛选
+                $arr = ['func', 'where', 'formid', 'order', 'fields', 'by', 'join', 'joinFields', 'cacheTime', 'url', 'page', 'pagesize', 'maxpages', 'autogoto', 'shownum'];
+                if (aval($param, $v['identifier']) && !in_array($v['identifier'], $arr)) {
                     $data[$v['identifier']] = $param[$v['identifier']];
+                }
+
+                $val = aval($data, $v['identifier']);
+                if (empty($v['rules']) && preg_match('/,/', $val)) {
+                    $where[] = self::t()->field($v['identifier'], $val, 'between');
+                } elseif ($v['datatype'] == 'checkbox') {
+                    !empty($val) && $where[] = self::t()->field($v['identifier'], $val, 'find');
+                } elseif ($v['datatype'] == 'text') {
+                    if (!empty($val)) {
+                        if (aval($v, 'precisesearch') == 1) {
+                            $where[$v['identifier']] = $val;
+                        } else {
+                            $where[] = self::t()->field($v['identifier'], $val, 'like');
+                        }
+                    }
+                } else {
+                    if (!empty($val)) {
+                        if (preg_match('/,/', $val)) {
+                            $where[$v['identifier']] = explode(',', $val);
+                        } else {
+                            $where[$v['identifier']] = $val;
+                        }
+                    }
+                }
+
+                if (!empty($v['rules'][$val])) {
+                    $tags[] = [$v['identifier'], aval($v['rules'], $val)];
+                } elseif (!empty($v['rules']) && !is_array($val) && preg_match('/,/', $val)) {
+                    $tags[] = [$v['identifier'], str_replace(',', '-', $val) . $v['units']];
+                }
+
+                if (!empty($val)) {
+                    if (strpos($val, ',')) {
+                        if ($v['datatype'] == 'date') {
+                            list($s, $e) = explode(',', $val);
+                            $currenturl .= '&' . $v['identifier'] . '_s' . '=' . Time::gmdate($s) .
+                                '&' . $v['identifier'] . '_e' . '=' . Time::gmdate($e);
+                        } elseif ($v['datatype'] == 'datetime') {
+                            list($s, $e) = explode(',', $val);
+                            $currenturl .= '&' . $v['identifier'] . '_s' . '=' . Time::gmdate($s, 'dt') .
+                                '&' . $v['identifier'] . '_e' . '=' . Time::gmdate($e, 'dt');
+                        } else {
+                            $val = str_replace(',', '`', $val);
+                            $currenturl .= '&' . $v['identifier'] . '=' . $val;
+                        }
+                    } else {
+                        $currenturl .= '&' . $v['identifier'] . '=' . $val;
+                    }
                 }
             }
         }
-        $data = Form::searchCondition($search_fields, $data);
-        return self::result(200, $data);
+        $currenturl = self::currentUrl($currenturl);
+        $data = ['tags' => $tags, 'fields' => $fields, 'where' => $where, 'currentUrl' => $currenturl];
+        return self::$output->withCode(200)->withData($data);
     }
 
     /**
      * 删除图集中某张图
-     * @param $did
-     * @param $id
-     * @param $field
-     * @param $pic
-     * @return array
+     * @param int $formid
+     * @param int $id
+     * @param string $field
+     * @param string $pic
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
      */
-    public static function imgsDel($did, $id, $field, $pic)
+    public static function imgsDel(int $formid, int $id, string $field, string $pic): OutputInterface
     {
-        if (empty($did) || empty($id) || empty($field) || empty($pic)) {
-            return self::result(21003);
+        if (empty($formid) || empty($id) || empty($field) || empty($pic)) {
+            return self::$output->withCode(21003);
         }
-        $res = self::dataView($did, $id);
-        if ($res['code'] != 200) {
+        $res = self::dataView($formid, $id);
+        if ($res->getCode() != 200) {
             return $res;
         }
-        if (empty($res['data']['data']['_' . $field])) {
-            return self::result(21001);
+        $data = $res->getData();
+        if (empty($data['row']['_' . $field])) {
+            return self::$output->withCode(21001);
         }
-        $pics = $res['data']['data']['_' . $field];
-        $pic = str_replace(trim(self::$cfg['cfg']['basehost'], '/'), '', $pic);
+        $pics = $data['row']['_' . $field];
+        $pic = str_replace(trim(self::$config['basehost'], '/'), '', $pic);
         preg_match('/(.*)_([\d]+)x([\d]+).(.*)/i', $pic, $match);
         if (!empty($match)) {
             $pic = $match[1] . '.' . $match[4];
         }
         $key = md5($pic);
         if (empty($pics[$key])) {
-            return self::result(21001);
+            return self::$output->withCode(21001);
         }
         unset($pics[$key]);
         Upload::uploadDel($pic);
-        return self::dataSave($did, $id, [$field => serialize($pics)]);
+        return self::dataSave($formid, $id, [$field => serialize($pics)]);
     }
 
     /**
-     * 联动菜单数据
-     * @param $egroup
-     * @return array
-     */
-    public static function enumsData($egroup)
-    {
-        $result = [];
-        if ($egroup) {
-            $infolist = Table::t('sysenum')->fetchList(['egroup' => $egroup], 'id,ename,evalue,reid', '', 'displayorder');
-            if (!empty($infolist)) {
-                foreach ($infolist as $k => $v) {
-                    if (empty($v['evalue'])) {
-                        unset($infolist[$k]);
-                    }
-                }
-            }
-            $result = ['status' => 1, 'infolist' => $infolist];
-        }
-        return self::result(200, $result);
-    }
-
-    /**
-     * 导出某个个自定义表单对应的数据
-     * @param type $did
+     * 导出某个表单对应的数据
+     * @param array $param
      * @return type
      */
-    public static function dataExport($param)
+    public static function dataExport(array $param): OutputInterface
     {
-        if (empty($param['did'])) {
-            return self::result(21001);
+        if (empty($param['formid'])) {
+            return self::$output->withCode(21001);
         }
-        $form = Table::t('diyforms')->fetch($param['did']);
+        $form = self::t('forms')->withWhere($param['formid'])->fetch();
         if (empty($form['table'])) {
-            return self::result(22006);
+            return self::$output->withCode(22006);
         }
-        $table = Table::t($form['table']);
 
-        $row = array();
-        $row['did'] = $param['did'];
+        $row = [];
+        $row['formid'] = $param['formid'];
         $row['page'] = aval($param, 'page', 1);
         $row['by'] = 'desc';
         $row['pagesize'] = aval($param, 'pagesize', 1000);
         $row['fields'] = '*';
         $result = self::dataList($row);
-        $inlistField = defined('MANAGE') ? 'inlistcp' : 'inlist';
-        $condition = ['formid' => $param['did'], 'available' => 1, $inlistField => 1];
-        if (method_exists($table, 'dataExportBefore')) {
-            $rs = $table->dataExportBefore($condition, $result);
-            if ($rs['code'] != 200) {
-                return $rs;
+        $inlistField = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
+        $condition = ['formid' => $param['formid'], 'available' => 1, $inlistField => 1];
+
+        if (is_callable([self::t($form['table']), 'dataExportBefore'])) {
+            $rs = self::t($form['table'])->dataExportBefore($condition, $result);
+            if ($rs != 200) {
+                return self::$output->withCode($rs);
             }
         }
+
         $res = self::fieldList($condition);//处理展示字段
-        $heads = array();
+        $heads = [];
         $heads['id'] = ['title' => '序号', 'datatype' => ''];
         if ($form['cpcheck'] == 1) {
-            $heads['ifcheck'] = ['title' => '审核状态', 'datatype' => ''];
+            $heads['ischeck'] = ['title' => '审核状态', 'datatype' => ''];
         }
         foreach ($res['data'] as $v) {
             if (in_array($v['datatype'], array('img', 'imgs'))) {
@@ -711,11 +755,428 @@ class Forms extends ModelAbstract
             $heads[$v['identifier']] = $v;
         }
         $heads['createtime'] = ['title' => '创建时间', 'datatype' => 'date'];
-        $result['data']['heads'] = &$heads;
+        $result = $result->withData($heads);
 
-        if (method_exists($table, 'dataExportAfter')) {
-            $table->dataExportAfter($result['data']);
+        if (is_callable([self::t($form['table']), 'dataExportAfter'])) {
+            $rs = self::t($form['table'])->dataExportAfter($result);
+            if ($rs != 200) {
+                return self::$output->withCode($rs);
+            }
         }
-        return $result;
+        return self::$output->withCode(200)->withData($result);
+    }
+
+    /**
+     * 对数据库查询数据进行转换处理
+     * @param array $fields
+     * @param array $v
+     * @return array
+     * @throws \SlimCMS\Error\TextException
+     */
+    private static function exchangeFieldValue(array $fields, array $v): array
+    {
+        if (empty($fields)) {
+            return [];
+        }
+        isset($v['createtime']) && $v['_createtime'] = $v['createtime'] ? Time::gmdate($v['createtime'], 'dt') : '';
+        foreach ($fields as $val) {
+            $identifier = &$val['identifier'];
+            if (!isset($v[$identifier])) {
+                continue;
+            }
+            $v[$identifier . '_units'] = $val['units'];
+            switch ($val['datatype']) {
+                case 'htmltext':
+                    $v[$identifier] = stripslashes($v[$identifier]);
+                    break;
+                case 'price':
+                    $v['_' . $identifier] = $v[$identifier] ? round($v[$identifier], 2) : '';
+                    break;
+                case 'date':
+                    $v['_' . $identifier] = $v[$identifier] ? Time::gmdate($v[$identifier]) : '';
+                    break;
+                case 'datetime':
+                    $v['_' . $identifier] = $v[$identifier] ? Time::gmdate($v[$identifier], 'dt') : '';
+                    break;
+                case 'float':
+                    $v['_' . $identifier] = $v[$identifier] ? round($v[$identifier], 4) : '';
+                    break;
+                case 'checkbox':
+                    if (!empty($v[$identifier])) {
+                        $rules = unserialize($val['rules']);
+                        $arr = [];
+                        foreach (explode(',', $v[$identifier]) as $_v) {
+                            if (!empty($_v)) {
+                                $arr[] = aval($rules, $_v);
+                            }
+                        }
+                        $v['_' . $identifier] = implode('、', $arr);
+                    }
+                    break;
+                case 'stepselect':
+                    if (strpos($val['title'], '|')) {
+                        list($val['title'], $identifier) = explode('|', $val['title']);
+                    }
+                    $v['_' . $identifier] = self::t('sysenum')
+                        ->withWhere(['egroup' => $identifier, 'evalue' => $v[$identifier]])
+                        ->fetch('ename');
+                    break;
+                case 'select':
+                case 'radio':
+                    $rules = unserialize($val['rules']);
+                    $v['_' . $identifier] = aval($rules, $v[$identifier]);
+                    break;
+                case 'img':
+                    $width = aval(self::$config, 'picWidth', 800);
+                    $height = aval(self::$config, 'picHeight', 800);
+                    $v['_' . $identifier] = copyImage($v[$identifier], $width, $height);
+                    break;
+                case 'imgs':
+                    $width = aval(self::$config, 'picWidth', 800);
+                    $height = aval(self::$config, 'picHeight', 800);
+                    $img = unserialize($v[$identifier]);
+                    if (is_array($img)) {
+                        foreach ($img as $k1 => $v1) {
+                            $v1['originalImg'] = $v1['img'];
+                            $v1['img'] = copyImage($v1['img'], $width, $height);
+                            $img[$k1] = $v1;
+                        }
+                    }
+                    $v['_' . $identifier] = !empty($v[$identifier]) ? $img : [];
+                    break;
+                case 'serialize':
+                    $v['_' . $identifier] = unserialize($v[$identifier]);
+                    break;
+                default:
+                    $v['_' . $identifier] = self::$request->htmlspecialchars($v[$identifier], 'de');
+                    break;
+            }
+        }
+        return $v;
+    }
+
+    /**
+     * 获取表单提交数据
+     * @param $did
+     * @return array
+     */
+    private static function getFormValue(array $fields, array $olddata = []): array
+    {
+        $cfg = &self::$config;
+        $data = [];
+        foreach ($fields as $k => $v) {
+            if (!empty($olddata['id']) && ($v['datatype'] == 'readonly' || $v['forbidedit'] == 2)) {
+                continue;
+            }
+            $identifier = &$v['identifier'];
+            if (!empty($v['rules'])) {
+                $v['rules'] = unserialize($v['rules']);
+                $val = self::input($identifier);
+                if (isset($val)) {
+                    if (is_array($val)) {
+                        $vals = $val;
+                    } else {
+                        $vals = $val || $val == '0' ? explode('`', $val) : [];
+                    }
+                    foreach ($vals as $val) {
+                        if (array_key_exists($val, $v['rules'])) {
+                            $data[$identifier][] = $val;
+                        }
+                    }
+                    $data[$identifier] = !empty($data[$identifier]) ? implode(',', $data[$identifier]) : '';
+                }
+                if ($v['datatype'] == 'checkbox') {
+                    $data[$identifier] = !empty($data[$identifier]) ? $data[$identifier] : '';
+                }
+            } else {
+                switch ($v['datatype']) {
+                    case 'htmltext':
+                        $val = (string)self::input($identifier, 'htmltext');
+                        if (isset($val)) {
+                            $data[$identifier] = Str::filterHtml($val);
+                        }
+                        break;
+                    case 'int':
+                        if (strpos(self::input($identifier), '`')) {
+                            $arr = explode('`', self::input($identifier));
+                            $val = array_map('intval', $arr);
+                            $data[$identifier] = implode(',', $val);
+                        } else {
+                            $val = Request::input($identifier, 'int');
+                            if (isset($val)) {
+                                $data[$identifier] = $val;
+                            }
+                        }
+                        break;
+                    case 'stepselect':
+                        if (strpos($v['title'], '|')) {
+                            list($v['title'], $identifier) = explode('|', $v['title']);
+                        }
+                        $val = self::input($identifier, 'int');
+                        if (isset($val)) {
+                            $data[$identifier] = $val;
+                        }
+                        break;
+                    case 'float':
+                    case 'tel':
+                    case 'price':
+                        $val = self::input($identifier, $v['datatype']);
+                        if (isset($val)) {
+                            $data[$identifier] = $val;
+                        }
+                        break;
+                    case 'date':
+                    case 'datetime':
+                        $vals = self::input($identifier . '_s');
+                        $vale = self::input($identifier . '_e');
+                        if ($vals && $vale) {
+                            $data[$identifier] = strtotime($vals) . ',' . strtotime($vale);
+                        } else {
+                            $val = self::input($identifier);
+                            if (isset($val)) {
+                                $data[$identifier] = strtotime($val);
+                            }
+                        }
+                        break;
+                    case 'imgs':
+                        $imgurls = array();
+                        if (!empty($olddata[$identifier])) {
+                            $imgurls = unserialize($olddata[$identifier]);
+                            foreach ($imgurls as $_k => $_v) {
+                                $_v['text'] = str_replace("'", "`", self::input('imgmsg' . $_k));
+                                $imgurls[$_k] = $_v;
+                            }
+                        }
+                        if ($cfg['clienttype'] > 0) {
+                            for ($i = 0; $i < 10; $i++) {
+                                $picUrl = self::input($identifier . '_' . $i, 'img');
+                                if ($picUrl) {
+                                    $key = md5($picUrl);
+                                    $imgurls[$key]['img'] = $picUrl;
+                                    $imgurls[$key]['text'] = '';
+                                    $imginfos = getimagesize(CSPUBLIC . $imgurls[$key]['img']);
+                                    $imgurls[$key]['width'] = $imginfos[0];
+                                    $imgurls[$key]['height'] = $imginfos[1];
+                                }
+                            }
+                        } else {
+                            isset($_SESSION) ? '' : @session_start();
+                            $res = Upload::getWebupload();
+                            if ($res['code'] != 200) {
+                                Output::showMsg($res);
+                            }
+                            $imgurls += (array)$res['data'];
+                        }
+                        $data[$identifier] = $imgurls ? serialize($imgurls) : '';
+                        break;
+                    case 'img':
+                    case 'media':
+                    case 'addon':
+                        $val = self::input($identifier);
+                        $rule = '';
+                        if (!empty($cfg['whitePicUrl'])) {
+                            $func = function ($val) {
+                                return str_replace('/', '\/', trim($val));
+                            };
+                            $rule = '^' . implode('|^', array_map($func, explode("\n", $cfg['whitePicUrl'])));
+                        }
+                        if ($val && $rule && preg_match('/' . $rule . '/', $val)) {
+                            $data[$identifier] = $val;
+                        } else {
+                            $data[$identifier] = self::input($identifier, $v['datatype']);
+                            if (!empty($olddata[$identifier])) {
+                                if (empty($data[$identifier])) {
+                                    unset($data[$identifier]);
+                                } else {
+                                    Upload::uploadDel($olddata[$identifier]);
+                                }
+                            }
+                        }
+                        break;
+                    case 'serialize':
+                        $val = self::input($identifier);
+                        $data[$identifier] = is_array($val) ? serialize($val) : self::$request->htmlspecialchars($val, 'de');
+                        break;
+                    default:
+                        $val = self::input($identifier);
+                        if (isset($val)) {
+                            $data[$identifier] = $val;
+                        }
+                        break;
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * 删除附件
+     * @param array $fields 字段列表
+     * @param array $data 某条数据
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function delAttachment(array $fields, array $data): OutputInterface
+    {
+        if (empty($fields) || empty($data)) {
+            return self::$output->withCode(21003);
+        }
+        foreach ($fields as $v) {
+            if (empty($data[$v['identifier']])) {
+                continue;
+            }
+            switch ($v['datatype']) {
+                case 'htmltext':
+                    //取出文章附件；
+                    $pattern = '/(\\' . rtrim(self::$setting['attachment']['dirname'], '/') . '.+?)(\"|\|| )/';
+                    preg_match_all($pattern, stripslashes($data[$v['identifier']]) . ' ', $delname);
+                    //移出重复附件；
+                    $delname = array_unique($delname['1']);
+                    foreach ($delname as $var) {
+                        Upload::uploadDel($var);
+                    }
+                    break;
+                case 'imgs':
+                    foreach (unserialize($data[$v['identifier']]) as $p) {
+                        Upload::uploadDel($p['img']);
+                    }
+                    break;
+                case 'media':
+                case 'addon':
+                case 'img':
+                    Upload::uploadDel($data[$v['identifier']]);
+                    break;
+            }
+        }
+        return self::$output->withCode(200);
+    }
+
+    /**
+     * 获取表单提交所需要的信息
+     * @param int $formid
+     * @param array $fields
+     * @param array $row
+     * @param array $options
+     * @return array
+     * @throws \SlimCMS\Error\TextException
+     */
+    private static function formHtml(int $formid, array $fields, array $row = [], array $options = []): array
+    {
+        foreach ($fields as $k => $v) {
+            $v['maxlength'] = $maxlength = !empty($v['maxlength']) ? 'maxlength="' . $v['maxlength'] . '"' : '';
+            $v['rules'] = !empty($v['rules']) ? unserialize($v['rules']) : array();
+            $v['default'] = !empty($row[$v['identifier']]) ? $row[$v['identifier']] : html_entity_decode($v['default']);
+
+            //Validform规则设置
+            $v['checkrule'] = (empty($v['checkrule']) && $v['required'] == 1) ? '*' : $v['checkrule'];
+            if ($v['required'] == 1) {
+                $text = in_array($v['datatype'], ['select', 'radio', 'checkbox']) ? '请选择' : ($v['datatype'] == 'img' ? '请上传' : '请输入');
+                empty($v['nullmsg']) && $v['nullmsg'] = $text . $v['title'];
+                empty($v['tip']) && $v['tip'] = $text . $v['title'];
+            }
+            $datatype = !empty($v['checkrule']) ? 'datatype="' . $v['checkrule'] . '" ' : '';
+            if (empty($v['intro']) && $datatype) {
+                $v['intro'] = in_array($v['datatype'], array('select', 'radio', 'checkbox')) ? '必选' : '';
+            }
+            $nullmsg = !empty($v['nullmsg']) ? 'nullmsg="' . $v['nullmsg'] . '" ' : '';
+            $ignore = empty($v['required']) ? 'ignore="ignore" ' : '';
+            $tip = !empty($v['tip']) ? 'placeholder="' . $v['tip'] . '" ' : '';
+            $errormsg = !empty($v['errormsg']) ? 'errormsg="' . $v['errormsg'] . '" ' : '';
+            $readonly = !empty($row['id']) && $v['forbidedit'] == 2 ? ' readonly' : '';
+            $v['validform'] = $validform = ' sucmsg="" ' . $datatype . $nullmsg . $tip . $errormsg . $ignore . $readonly;
+
+            $template = 'block/fieldshtml/' . $v['datatype'];
+            switch ($v['datatype']) {
+                case 'float':
+                case 'price':
+                case 'tel':
+                case 'int':
+                case 'text':
+                case 'select':
+                case 'radio':
+                case 'checkbox':
+                case 'multitext':
+                case 'media':
+                case 'hidden':
+                case 'readonly':
+                case 'addon':
+                    $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                    break;
+                case 'htmltext':
+                    if (self::$config['clienttype'] > 0) {
+                        //换行转换处理
+                        $v['default'] = str_replace(array('&lt;br /&gt;', '&lt;br&gt;'), "\n", $v['default']);
+                        $v['default'] = stripslashes($v['default']);
+                        $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                    } else {
+                        $v['default'] = stripslashes($v['default']);
+                        $config = ['identity' => aval($options, 'ueditorType')];
+                        $res = Ueditor::ueditor($v['identifier'], $v['default'], $config)->getData();
+                        $v['field'] = $res['ueditor'];
+                    }
+                    break;
+                case 'stepselect':
+                    if (strpos($v['title'], '|')) {
+                        list($v['title'], $v['identifier']) = explode('|', $v['title']);
+                    }
+                    static $loadonce = 0;
+                    $loadonce++;
+                    $v['loadonce'] = $loadonce;
+                    $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                    break;
+                case 'date':
+                case 'datetime':
+                    $type = $v['datatype'] == 'date' ? 'd' : 'dt';
+                    if (!empty($row[$v['identifier']])) {
+                        $v['default'] = Time::gmdate($row[$v['identifier']], $type);
+                    } else {
+                        $v['default'] = !empty($v['default']) ?
+                            Time::gmdate((TIMESTAMP + $v['default'] * 86400), $type) :
+                            (empty($row) ? Time::gmdate(TIMESTAMP, $type) : '');
+                    }
+                    static $isLoadDatetimepicker = 0;
+                    $isLoadDatetimepicker++;
+                    $v['isLoadDatetimepicker'] = $isLoadDatetimepicker;
+                    $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                    break;
+                case 'multidate':
+                    static $isLoadMultidate = 0;
+                    $isLoadMultidate++;
+                    $v['isLoadMultidate'] = $isLoadMultidate;
+                    $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                    break;
+                case 'imgs':
+                    $v['imgs'] = !empty($v['default']) ? unserialize($v['default']) : [];
+                    $v['formid'] = $formid;
+                    $v['row'] = $row;
+
+                    //清除session里的图片信息
+                    isset($_SESSION) ? '' : session_start();
+                    if (!empty($_SESSION['bigfile_info']) && is_array($_SESSION['bigfile_info'])) {
+                        foreach ($_SESSION['bigfile_info'] as $s_v) {
+                            Upload::uploadDel($s_v);
+                        }
+                    }
+                    $_SESSION['bigfile_info'] = [];
+                    $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                    break;
+                case 'img':
+                    static $isLoadh5upload = 0;
+                    $isLoadh5upload++;
+                    $v['isLoadh5upload'] = $isLoadh5upload;
+                    $v['formid'] = $formid;
+                    $v['row'] = $row;
+                    $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                    break;
+                case 'serialize':
+                    $val = var_export(unserialize($v['default']), true);
+                    $v['val'] = nl2br(str_replace(["array (\n", "),\n", ")"], '', $val));
+                    $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                    break;
+            }
+            $fields[$k] = $v;
+        }
+        return $fields;
     }
 }

@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 namespace SlimCMS\Abstracts;
+
 use DI\Container;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;

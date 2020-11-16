@@ -1,0 +1,18 @@
+<!--{if $cfg[clienttype] > 0 && count($data[rules] > 3}-->
+    <select class="form-control $data[css]" $data[validform] id="$data[identifier]" name="$data[identifier]">
+        <option value="">请选择</option>
+        <!--{loop $data[rules] $k $v}-->
+        <option value="$k" {echo $k==$data[default]?'selected':''}>$v</option>
+        <!--{/loop}-->
+    </select>
+<!--{else}-->
+    {eval $i = 0;}
+    <!--{loop $data[rules] $k $v}-->
+    {eval $i++;}
+    <span class="custom-control custom-radio mr-2">
+        <input type="radio" {echo $i==1?$data[validform]:''} class="custom-control-input $data[css]" id="{$data['identifier']}$k" name="$data['identifier']" value="$k" {echo $k==$data[default]?'checked':''}/>
+        <label class="custom-control-label" for="{$data['identifier']}$k">$v</label>
+    </span>
+    }
+    <!--{/loop}-->
+<!--{/if}-->

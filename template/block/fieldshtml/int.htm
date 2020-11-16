@@ -1,0 +1,5 @@
+<!--{if $cfg[clienttype] > 0}-->
+<input type="number" $data[validform] class="form-control $data[css]" id="$data[identifier]" name="$data[identifier]" value="$data[default]" $data[maxlength]>
+<!--{else}-->
+<input type="text" $data[validform] onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d-]/g,''))" onchange="value=value.replace(/[^\d-]/g,'');" onkeyup="value=value.replace(/[^\d-]/g,'');" class="form-control $data[css]" id="$data[identifier]" name="$data[identifier]" value="$data[default]" $data[maxlength]>
+<!--{/if}-->

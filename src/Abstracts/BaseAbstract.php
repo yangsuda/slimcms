@@ -61,9 +61,10 @@ abstract class BaseAbstract
         self::$setting = self::$container->get('settings');
     }
 
-    public static function t($name): Table
+    public static function t(string $name = ''): Table
     {
         static $objs = [];
+        $name = $name ?: 'forms';
         $className = ucfirst($name);
         $classname = '\App\Table\\' . $className . 'Table';
         if (!class_exists($classname)) {
@@ -73,6 +74,26 @@ abstract class BaseAbstract
             $objs[$name] = new $classname(self::$container, $name);
         }
         return $objs[$name];
+    }
+
+    protected static function currentUrl(string $nowurl = ''): string
+    {
+        $uri = self::$request->getRequest()->getUri();
+        if (preg_match('/\?/', $nowurl)) {
+            list($host, $nowurl) = explode('?', $nowurl);
+            $host .= '?';
+        } else {
+            $host = $uri->getPath().'?';
+            $nowurl = $uri->getQuery() . $nowurl;
+        }
+
+        parse_str($nowurl, $output);
+        foreach ($output as $k => $v) {
+            if ($v === '') {
+                unset($output[$k]);
+            }
+        }
+        return $host . http_build_query($output);
     }
 
     /**

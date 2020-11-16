@@ -1,0 +1,182 @@
+<!--{if $cfg[clienttype] > 0}-->
+<link rel="stylesheet" href="$cfg[resourceUrl]global_wap/css/upimgs.css" />
+<div class="block_upimgs">
+    <ul class="am-gallery" data-am-widget="gallery" data-am-gallery="{ pureview: {weChatImagePreview: false} }">
+        <li class="box_addimgs" id="btn_upimg_wap">
+            <input type="file" class="file_imgs" accept="image/*" multiple="multiple" onchange="handleFiles(this);" />
+            <button class="btn_imgs"><em></em><span>添加照片</span></button>
+        </li>
+        {eval $i = 0;}
+        <!--{if $data[imgs]}-->
+        <!--{loop $data[imgs] $ik $iv}-->
+        <li id="li_{$data[identifier]}_$i">
+            <div id="cover_$i" class="cover"></div>
+            <input name="{$data[identifier]}_$i" id="{$data[identifier]}_$i" type="hidden" class="html5img" value=""/>
+            <div class="pic"><a><i></i><img src="{echo copyImage($iv[img], 80, 80)}" data-rel="{echo copyImage($iv[img])}" source_link="$iv[img]"/><canvas id="canvas_{$data[identifier]}_$i"></canvas></a></div>
+            <a href="javascript:;" class="del_img" data-field="$data[identifier]" data-index="$i" data-img="$iv[img]" title="删除">—</a></li>
+        {eval $i++;}
+        <!--{/loop}-->
+        <!--{/if}-->
+        <!--{for n $i 10}-->
+        <li id="li_{$data[identifier]}_$n" style="display:none;">
+            <input name="{$data[identifier]}_$n" id="{$data[identifier]}_$n" type="hidden" class="html5img" value=""/>
+            <div class="pic"><a><i></i><canvas id="canvas_{$data[identifier]}_$n"></canvas></a></div>
+            <a href="javascript:;" class="del_img" data-field="$data[identifier]" data-index="$n" data-img="" title="删除">—</a>
+        </li>
+        <!--{/for}-->
+    </ul>
+</div>
+
+<div class="am-modal am-modal-alert" tabindex="-1" id="block-alert">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">操作提示</div>
+        <div class="am-modal-bd">
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn">确定</span>
+        </div>
+    </div>
+</div>
+
+<script src="$cfg[resourceUrl]global/js/exif.js" ></script>
+<script src='$cfg[resourceUrl]global_wap/js/image_upload.js' ></script>
+<script>
+    $(function(){
+        $('.del_img').click(function(){
+            $(this).parents("li").hide();
+            var field = $(this).data('field');
+            var index = $(this).data('index');
+            $("#"+field+'_'+index).val("");
+            var img = $(this).data('img');
+            $.get('{$cfg[basehost]}{$cfg[entryFileName]}?p=image/webuploadImageDel&pic='+img+'&id=data[row][id]&field='+field+'&formid=$data[formid]');
+        })
+    });
+    function handleFiles(obj) {
+        var canvas, context, imgX = 0, imgY = 0, imgScale = 1, tmpcanvas, tmpcontex, orientation, ort;
+        var files = obj.files,
+            img = new Array();
+        var id = "";
+        var over = 0;
+        for(var j=0;j<files.length;j++){
+            window.URL = window.URL || window.webkitURL;
+            if (window.URL) {
+                img[j] = new Image();
+                img[j].src = window.URL.createObjectURL(files[j]); //创建一个object URL，并不是你的本地路径
+                img[j].onload = function(e) {
+                    EXIF.getData(this, function(){
+                        id = $($(".html5img[value='']").get(0)).attr("id");
+                        canvas = document.getElementById("canvas_" + id);
+                        if (canvas == null) {
+                            if(over == 0){
+                                $('#block-alert .am-modal-bd').html("最多上传10张");
+                                $('#block-alert').modal();
+                            }
+                            over = 1;
+                            return;
+                        }
+                        context = canvas.getContext("2d");
+                        tmpcanvas = document.createElement('canvas');
+                        tmpcontex = tmpcanvas.getContext('2d');
+                        orientation = 1;
+                        ort = EXIF.getTag(this,'Orientation');
+                        orientation = isNaN(ort)?orientation:ort;
+                        draw(tmpcontex,this,tmpcanvas,orientation,1000);
+                        $('#'+id).val(tmpcanvas.toDataURL("image/jpeg"));
+                        draw(context,this,canvas,orientation,80);
+                        $("#li_" + id).show();
+                    });
+                }
+            }
+        }
+
+        $(".html5img").each(function(i) {
+            if (!id && !$($(".html5img").get(i)).val() && !$($(".html5img").get(i)).attr('key')) {
+                id = $($(".html5img").get(i)).attr("id");
+            }
+        });
+        canvas = document.getElementById("canvas_" + id);
+        if (canvas == null) {
+            $('#block-alert .am-modal-bd').html("最多上传10张");
+            $('#block-alert').modal();
+            return;
+        }
+        context = canvas.getContext("2d");
+        var tmpcanvas = document.createElement('canvas');
+        var tmpcontex = tmpcanvas.getContext('2d');
+        window.URL = window.URL || window.webkitURL;
+        if (window.URL) {
+            img.src = window.URL.createObjectURL(files[0]); //创建一个object URL，并不是你的本地路径
+            img.onload = function(e) {
+                var orientation = 1;
+                EXIF.getData(this, function(){
+                    var ort = EXIF.getTag(this,'Orientation');
+                    orientation = isNaN(ort)?orientation:ort;
+                    draw(tmpcontex,img,tmpcanvas,orientation,1000);
+                    $('#'+id).val(tmpcanvas.toDataURL("image/jpeg"));
+                    draw(context,img,canvas,orientation,90);
+                });
+            }
+        }
+        $("#li_" + id).show();
+    }
+</script>
+<!--{else}-->
+<link rel="stylesheet" href="$cfg[resourceUrl]plugins/webuploader/0.1.5/webuploader.css" />
+<script src="$cfg[resourceUrl]plugins/webuploader/0.1.5/webuploader.min.js"></script>
+<link rel="stylesheet" href="$cfg[resourceUrl]plugins/webuploader/image-upload/css/css.css" />
+<script src="$cfg[resourceUrl]plugins/webuploader/image-upload/js/upload.js"></script>
+<script>
+    var _setText = '1';
+</script>
+<style>
+    .pc_area,.pc_area *{ box-sizing:border-box !important; }
+    .area_tit{ position:absolute; top:0; left:0; width:100%; text-align:center;}
+    .area_tit span{ display:inline-block; padding:5px 50px; border-radius:0 0 5px 5px; color:#fff; }
+</style>
+<div id="uploader">
+    <div class="queueList">
+        <div class="am-cf placeholder" style="overflow:hidden;" id="dndArea" >
+            <div style="float:left; width:100%; ">
+                <div class="pc_area">
+                    <div class="area_tit"><span style="background-color:#00b7ee;"><i class="am-icon-internet-explorer"></i> 使用电脑传图</span></div>
+                    <div id="filePicker"></div>
+                    <p>或将照片拖到这里</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="statusBar" style='display:none;'>
+        <div class="progress">
+            <span class="text">0%</span>
+            <span class="percentage"></span>
+        </div>
+        <div style="overflow:hidden;">
+            <div class="btns">
+                <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
+            </div>
+            <div class="info"></div>
+        </div>
+    </div>
+</div>
+
+<div class="mod_list_photo" data-id='$data[row][id]' data-forrmid="$data[formid]" data-identifier='{$data[identifier]'>
+<ul>
+    <!--{if $data[imgs]}-->
+    <!--{loop $data[imgs] $ik $iv}-->
+    <li class="libtn" id='oldpic$ik'>
+        <div class="box_photo">
+            <em><a href="{echo copyImage($iv[img], 2000, 2000)}" target="_blank" title="查看"><i></i><img src="{echo copyImage($iv[img], 160, 160)}" /></a></em>
+        </div>
+        <div class="btn_photo">
+            <a data-ref="$iv[img]" data-formid="$data[formid]" class="btn_delete_pic" title="删除"><span>删除</span></a>
+            <a href="{echo copyImage($iv[img], 2000, 2000)}" target="_blank" title="查看" class="btn_view_pic"><span>查看</span></a>
+        </div>
+        <div class="box_text">
+            <input type='text' class="form-control" name='imgmsg$ik' value='$iv[text]' placeholder="图片未命名" />
+        </div>
+    </li>
+    <!--{/loop}-->
+    <!--{/if}-->
+</ul>
+</div>
+<!--{/if}-->

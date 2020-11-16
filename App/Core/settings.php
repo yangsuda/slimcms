@@ -16,9 +16,9 @@ use SlimCMS\Interfaces\TemplateInterface;
 use SlimCMS\Interfaces\DatabaseInterface;
 use App\Core\Routes;
 use App\Core\Redis;
+use App\Core\Template;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Output;
-use SlimCMS\Core\Template;
 use SlimCMS\Core\Database;
 
 
@@ -40,21 +40,19 @@ return function (ContainerBuilder $containerBuilder) {
     $cfg = require_once CSDATA . 'ConfigCache.php';
     $cfg += $settings;
 
-    $cfg += [
-        'referer' => aval($_SERVER, 'HTTP_REFERER'),
-        'clienttype' => 0,
-    ];
+    $cfg['cfg']['referer'] = aval($_SERVER, 'HTTP_REFERER');
+    $cfg['cfg']['clienttype'] = 0;
 
     //防止最后不加/导致ueditor等加载出错
     $cfg['cfg']['basehost'] = rtrim($cfg['cfg']['basehost'], '/') . '/';
 
     $agent = $_SERVER['HTTP_USER_AGENT'];
     if (!empty($cfg['referer']) && strpos($cfg['referer'], 'servicewechat.com')) {
-        $cfg['clienttype'] = 2;//微信小程序
+        $cfg['cfg']['clienttype'] = 2;//微信小程序
     } elseif (preg_match('/MicroMessenger/i', $agent)) {
-        $cfg['clienttype'] = 3;//微信WAP
+        $cfg['cfg']['clienttype'] = 3;//微信WAP
     } elseif (preg_match('/NetFront|iPhone|MIDP-2.0|Opera Mini|UCWEB|Android|Windows CE/i', $agent)) {
-        $cfg['clienttype'] = 1;//WAP
+        $cfg['cfg']['clienttype'] = 1;//WAP
     }
 
     if (strpos(aval($_SERVER, 'HTTP_ACCEPT_ENCODING'), 'gzip') === false || !function_exists('ob_gzhandler')) {

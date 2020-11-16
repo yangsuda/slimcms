@@ -77,7 +77,7 @@ class Template implements TemplateInterface
 
         $template = preg_replace_callback("/\"(http)?[\w\.\/:]+\?[^\"]+?&[^\"]+?\"/", [__CLASS__, 'transamp'], $template);
         $template = preg_replace("/\<\?(\s{1})/is", "<?php\\1", $template);
-        $template = preg_replace("/\<\?\=(.+?)\?\>/is", "<?php echo \\1;?>", $template);
+        $template = preg_replace("/\<\?\=(.+?)\?\>/is", "<?php echo \\1??'';?>", $template);
         return $template;
     }
 
@@ -146,7 +146,7 @@ class Template implements TemplateInterface
 
     private static function echoTag($matches)
     {
-        $expr = '<?php echo ' . $matches[1] . '; ?>';
+        $expr = '<?php echo ' . $matches[1] . '??\'\'; ?>';
         return self::stripvtags($expr);
     }
 
@@ -267,9 +267,9 @@ class Template implements TemplateInterface
             }
             self::$cacheFile = 'template/' . CURSCRIPT . '_' . str_replace('/', '_', $file) . '.tpl.php';
         } else {
-            $tplfile = '/template/' . $file;
+            $tplfile = '/template/' . $file . '.htm';
             if (!is_file(CSROOT . $tplfile)) {
-                $tplfile = '/template/default/' . basename($file);
+                $tplfile = '/template/default/' . basename($file) . '.htm';
             }
             self::$cacheFile = 'template/' . md5($file) . '.tpl.php';
         }

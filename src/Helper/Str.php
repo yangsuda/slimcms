@@ -29,7 +29,7 @@ class Str
         return md5(str_replace($search, $replace, $key));
     }
 
-    public static function random($length, $numeric = 0)
+    public static function random(int $length, int $numeric = 0)
     {
         $seed = base_convert(md5(microtime() . $_SERVER['DOCUMENT_ROOT']), 16, $numeric ? 10 : 35);
         $seed = $numeric ? (str_replace('0', '', $seed) . '012340567890') : ($seed . 'zZ' . strtoupper($seed));
@@ -46,7 +46,7 @@ class Str
         return $hash;
     }
 
-    public static function delHtml($document, $type = 1)
+    public static function delHtml(string $document, int $type = 1): string
     {
         if ($type == 1) {
             $document = preg_replace("#<\/p>#i", "\n", $document);
@@ -106,13 +106,13 @@ class Str
 
     /**
      * 截取字符串
-     * @param $str
-     * @param $start
-     * @param $length
+     * @param string $str
+     * @param int $start
+     * @param int $length
      * @param string $etc
      * @return string
      */
-    public static function substr($str, $start, $length, $etc = '')
+    public static function substr(string $str, int $start, int $length, string $etc = ''): string
     {
         $i = 0;
         //完整排除之前的UTF8字符
@@ -147,25 +147,17 @@ class Str
         return $result;
     }
 
-    public static function substrDot($str, $len, $dot = '...')
-    {
-        $new_str = self::substr($str, $len);
-        if (strlen($str) > strlen($new_str)) {
-            return $new_str . $dot;
-        }
-        return $new_str;
-    }
-
-    public static function round($val, $lang = 0)
+    public static function round(float $val, int $lang = 0)
     {
         return !empty($val) ? round($val, $lang) : '';
     }
 
     /**
      * 过滤内容数据
-     * @param type $html 内容
+     * @param string $html
+     * @return string
      */
-    public static function filterHtml($html)
+    public static function filterHtml(string $html): string
     {
         $html = preg_replace(array("'<div.*?>'si", "'</div>'si", "'<p><img(.*?)>'si"), array("", "", "<p style='text-align:center'><img\\1></p>\n<p>"), $html);
         $html = self::filterDangerImg($html);
@@ -174,10 +166,10 @@ class Str
 
     /**
      * 过滤掉字符串中带有非图片url的图片链接
-     * @param $body 要过滤的字符串
+     * @param string $html 要过滤的字符串
      * @return string 过滤后的字符串
      */
-    private static function filterDangerImg($html)
+    private static function filterDangerImg(string $html): string
     {
         preg_match_all("/<img src(.*?)=(.*?)>/i", $html, $match);
         $danger_urls = [];

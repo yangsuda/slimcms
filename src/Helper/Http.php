@@ -14,35 +14,6 @@ use Exception;
 
 class Http
 {
-    /**
-     * 获取当前URL
-     * @return string
-     */
-    public static function currentUrl(string $nowurl = ''): string
-    {
-        if (empty($nowurl)) {
-            $nowurl = '/' . $_SERVER["PHP_SELF"];
-            if (!empty($_SERVER["QUERY_STRING"])) {
-                $nowurl = "?" . $_SERVER["QUERY_STRING"];
-            }
-        }
-        $host = '';
-        if (preg_match('/\?/', $nowurl)) {
-            list($host, $nowurl) = explode('?', $nowurl);
-            $host .= '?';
-        }
-
-        parse_str($nowurl, $output);
-        foreach ($output as $k => $v) {
-            if ($v === '' && !preg_match('/\?/', $k)) {
-                unset($output[$k]);
-            }
-        }
-        $nowurl = urldecode($host . http_build_query($output));
-        $nowurl = empty($nowurl) ? '?' . $_SERVER["QUERY_STRING"] : $nowurl;
-        return $nowurl;
-    }
-
     public static function curlGet(string $url, array $setopt = [])
     {
         $ch = curl_init(); //初始化curl模块

@@ -618,9 +618,9 @@ function DelAlbPic(fid){
 $(function(){
     $('.btn_set_cover').click(function() {
         var obj = $(this);
-        var id = $(this).parents('div.mod_list_photo').attr('id');
-        var did = $(this).parents('div.mod_list_photo').attr('did');
-        var pic = $(this).attr('ref');
+        var id = $(this).parents('div.mod_list_photo').data('id');
+        var did = $(this).parents('div.mod_list_photo').data('formid');
+        var pic = $(this).data('ref');
         $.getJSON(basehost+'&p=image/webuploadCover&id=' + id + '&did=' + did + '&pic=' + pic + '&rand=' + Math.random(), function(result) {
             if(result.code==200) {
                 $('.cover_photo').remove();
@@ -633,8 +633,8 @@ $(function(){
     $('.btn_delete_pic').click(function(){
         var pic = $(this).parents('li');
         var path = $(this).attr('ref');
-        var id = $(this).parents('div.mod_list_photo').attr('id');
-        var field = $(this).parents('div.mod_list_photo').attr('identifier');
+        var id = $(this).parents('div.mod_list_photo').data('id');
+        var field = $(this).parents('div.mod_list_photo').data('identifier');
         var did = $(this).attr('did');
         $.get(basehost+'&p=image/webuploadImageDel&pic='+path+'&id='+id+'&field='+field+'&did='+did);
         pic.remove();

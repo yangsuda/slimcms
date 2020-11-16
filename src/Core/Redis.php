@@ -50,10 +50,19 @@ class Redis
     public function selectDB(int $dbindex = 1)
     {
         if (empty(self::$redis)) {
-            return null;
+            return $this;
         }
         self::$redis->select($dbindex);
         return $this;
+    }
+
+    /**
+     * 是否可用
+     * @return bool
+     */
+    public function isAvailable()
+    {
+        return !empty(self::$redis);
     }
 
     private function cacheKey(&$key)

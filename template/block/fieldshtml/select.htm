@@ -1,0 +1,9 @@
+<select class="form-control $data[css]" $data[validform] id="$data[identifier]" name="$data[identifier]">
+    <option value="">{echo aval($data, 'tip', '请选择')}</option>
+    <!--{loop $data[rules] $k $v}-->
+    <!--{if $k}-->
+    <option value="$k" {echo $k==$data[default]?'selected':''}>$v</option>
+    <!--{/if}-->
+    <!--{/loop}-->
+}
+</select>

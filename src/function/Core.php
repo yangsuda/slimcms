@@ -82,7 +82,7 @@ function versionCheck($ver,$operator='<=')
  */
 function copyImage($pic, $width = 1000, $height = 1000)
 {
-    return cs090\core\Image::copyImage($pic, $width, $height);
+    return SlimCMS\Core\Image::copyImage($pic, $width, $height);
 }
 
 /**
