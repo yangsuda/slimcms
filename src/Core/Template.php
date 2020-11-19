@@ -11,6 +11,7 @@ namespace SlimCMS\Core;
 use SlimCMS\Error\TextException;
 use SlimCMS\Interfaces\TemplateInterface;
 
+
 class Template implements TemplateInterface
 {
     private static $cacheFile = '';
@@ -155,9 +156,9 @@ class Template implements TemplateInterface
         $param = str_replace(['<?=', '?>'], ['".', '."'], $matches[1]);
         if (strpos($param, ' ')) {
             list($url, $name) = explode(' ', $param);
-            $expr = '<?php echo rewriteUrl("' . $url . '","' . $name . '"); ?>';
+            $expr = '<?php echo \App\Core\Forms::url("' . $url . '","' . $name . '"); ?>';
         } else {
-            $expr = '<?php echo rewriteUrl("' . $param . '"); ?>';
+            $expr = '<?php echo \App\Core\Forms::url("' . $param . '"); ?>';
         }
         return self::stripvtags($expr);
     }

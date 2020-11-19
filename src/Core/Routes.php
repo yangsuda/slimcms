@@ -10,7 +10,7 @@ use SlimCMS\Interfaces\RouteInterface;
 use App\Core\Request;
 use App\Core\Response;
 
-class Routes implements RouteInterface
+class   Routes implements RouteInterface
 {
     /**
      * {@inheritdoc}
@@ -55,7 +55,7 @@ class Routes implements RouteInterface
                 $obj = new $classname($request, $response);
             }
             if (!is_callable([$obj, $method])) {
-                return $response->output($request->getOutput());
+                return $response->output($request->getOutput()->withCode(21009));
             }
             return $obj->$method();
         };

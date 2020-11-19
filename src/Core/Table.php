@@ -14,6 +14,7 @@ use SlimCMS\Error\TextException;
 use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\DatabaseInterface;
 use App\Core\Redis;
+use App\Core\Forms;
 
 class Table
 {
@@ -22,7 +23,7 @@ class Table
      * 表名
      * @var string
      */
-    private $tableName = '';
+    protected $tableName = '';
 
     /**
      * 数据库连接实例
@@ -95,6 +96,11 @@ class Table
     public function db()
     {
         return $this->db;
+    }
+
+    protected static function t(string $name): Table
+    {
+        return Forms::t($name);
     }
 
     /**
@@ -289,9 +295,12 @@ class Table
      */
     public function withJoin(array $join): Table
     {
-        $clone = clone $this;
-        $clone->join = ' left join ' . $this->tablepre . implode(' left join ' . $this->tablepre, $join);
-        return $clone;
+        if (!empty($join)) {
+            $clone = clone $this;
+            $clone->join = ' left join ' . $this->tablepre . implode(' left join ' . $this->tablepre, $join);
+            return $clone;
+        }
+        return $this;
     }
 
     /**
@@ -301,9 +310,12 @@ class Table
      */
     public function withLimit($limit): Table
     {
-        $clone = clone $this;
-        $clone->limit = strpos($limit, 'limit') !== false ? ' ' . $limit : ' limit ' . $limit;
-        return $clone;
+        if (!empty($limit)) {
+            $clone = clone $this;
+            $clone->limit = strpos((string)$limit, 'limit') !== false ? ' ' . $limit : ' limit ' . $limit;
+            return $clone;
+        }
+        return $this;
     }
 
     /**
@@ -696,8 +708,8 @@ class Table
     {
         $page = max(1, $page);
         $field = $fields ?: '*';
-        $count = $this->count($field, $cacheTime);
-        $maxpages = ceil($count / $pagesize);
+        $count = $this->count('*', $cacheTime);
+        $maxpages = (int)ceil($count / $pagesize);
         $page = $page > $maxpages ? $maxpages : $page;
         $start = ($page - 1) * $pagesize;
         $this->limit = ' limit ' . $start . ',' . $pagesize;

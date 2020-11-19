@@ -7,7 +7,7 @@
 <!--{if $data[default]}-->
 <div class="am-cf am-margin-vertical $data[css]"><a href="{echo copyImage($data[default])}" target="_blank">
     <img src="{echo copyImage($data[default], 100, 100)}" style="height:80px;" class="am-img-thumbnail" /></a>
-    <div class="btn-delImg" style="position:absolute;top:2.3rem;left:0.2rem;" data-identifier="$data[identifier]" data-id="$data[row][id]" data-did="$data[formid]">
+    <div class="btn-delImg" style="position:absolute;top:2.3rem;left:0.2rem;" data-identifier="$data[identifier]" data-id="$data[row][id]" data-fid="$data[fid]">
         <span class="text-danger fa-2x ml-3 mt-6 fas fa-times"></span>
     </div>
 </div>
@@ -65,7 +65,7 @@
     <!--{if $data[default]}-->
     <div class="am-cf am-margin-vertical $data[css]"><a href="{echo copyImage($data[default])}" target="_blank">
         <img src="{echo copyImage($data[default], 100, 100)}" style="height:80px;" class="am-img-thumbnail" /></a>
-        <div class="btn-delImg" style="position:absolute;top:2.3rem;left:0.2rem;" data-identifier="$data[identifier]" data-id="$data[row][id]" data-did="$data[formid]">
+        <div class="btn-delImg" style="position:absolute;top:2.3rem;left:0.2rem;" data-identifier="$data[identifier]" data-id="$data[row][id]" data-fid="$data[fid]">
             <span class="text-danger fa-2x ml-3 mt-6 fas fa-times"></span>
         </div>
     </div>

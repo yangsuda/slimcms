@@ -175,8 +175,8 @@ class Request extends MessageAbstract
                 }
                 $uploadData = is_string($val) ? $val : ['files' => $_FILES[$k], 'width' => $width, 'height' => $height];
                 $res = Upload::upload($uploadData);
-                if ($res['code'] != 200 && $res['code'] != 23001) {
-                    Output::showMsg($res);
+                if ($res->getCode() != 200 && $res->getCode() != 23001) {
+                    return $this->output($res);
                 }
                 $data[$k] = $res['data'] ?: '';
             } elseif (preg_match('/^int/i', $v)) {
@@ -225,8 +225,8 @@ class Request extends MessageAbstract
             } elseif ($v == 'media' || $v == 'addon') {
                 $uploadData = ['files' => $_FILES[$k], 'type' => $v];
                 $res = Upload::upload($uploadData);
-                if ($res['code'] != 200 && $res['code'] != 23001) {
-                    Output::showMsg($res);
+                if ($res->getCode() != 200 && $res->getCode() != 23001) {
+                    return $this->output($res);
                 }
                 $data[$k] = $res['data'] ?: '';
             }

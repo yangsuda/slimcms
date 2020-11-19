@@ -48,6 +48,8 @@ class Output implements OutputInterface
     {
         $this->app = $app;
         $this->container = $app->getContainer()->get('DI\Container');
+        $cfg = $this->container->get('cfg');
+        $this->referer = $cfg['referer'];
         return $this;
     }
 
@@ -109,6 +111,7 @@ class Output implements OutputInterface
         $clone = clone $this;
         $clone->code = $code;
         $clone->msg = $clone->promptMsg($code, $param);
+        $code != 200 && $clone->data = [];
         return $clone;
     }
 
@@ -123,11 +126,19 @@ class Output implements OutputInterface
     /**
      * {@inheritDoc}
      */
-    public function withData(array $data): OutputInterface
+    public function withData(array $data, bool $merge = true): OutputInterface
     {
         $clone = clone $this;
-        $clone->data = array_merge($clone->data, $data);
+        $clone->data = $merge === true ? array_merge($clone->data, $data) : $data;
         return $clone;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getTemplate(): string
+    {
+        return $this->template;
     }
 
     /**

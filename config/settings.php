@@ -15,14 +15,14 @@ return [
                 'dbpw' => 'root',
                 'dbcharset' => 'utf8',
                 'pconnect' => '0',
-                'dbname' => 'zheshanghui',
+                'dbname' => 'slimcms',
                 'tablepre' => 'cs_',
                 'connecttype' => ':',
             ],
         'redis' =>
             [
                 'prefix' => 'y1cdF6_',
-                'server' => '127.0.0.1',
+                'server' => '',
                 'port' => 6379,
                 'password' => 's5RY-D4aKuz',
                 'pconnect' => 0,
@@ -52,7 +52,7 @@ return [
             ],
         'security' =>
             [
-                'authkey' => 'tu548R8dWl68L9ewJkkEj',
+                'authkey' => 'lD2kk8EaO8DAoPkd2kE2Z',
                 'attackevasive' => '0',
                 'uploadForbidFile' => 'php|pl|cgi|asp|aspx|jsp|php3|shtm|shtml|js',
                 'uploadCheckWords' => '_GET|_POST|_COOKIE|assert|call_|create_|eval|_SERVER|function|defined|global|base64_',

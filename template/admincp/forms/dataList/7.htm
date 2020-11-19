@@ -1,0 +1,138 @@
+<!--{template html_head}-->
+<link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css" />
+</head>
+<style type="text/css">
+    div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+        justify-content: flex-end !important;
+    }
+</style>
+<body class="adminbody">
+
+<div id="main">
+    <!--{template head}-->
+    <!--{template leftMenu}-->
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <!--{template navigation_list}-->
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="card mb-3">
+                            <!--{template search}-->
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table id="form$data[fid]" class="table table-hover display dataTable">
+                                                    <thead>
+                                                    <tr role="row" align="center">
+                                                        <!--{if $data[form][cpdel]==1}-->
+                                                        <th width="45">选择</th>
+                                                        <!--{/if}-->
+                                                        <th class="{echo $data[by]=='asc'?'sorting_asc':'sorting_desc'}" data-order="id">
+                                                            ID
+                                                        </th>
+                                                        <!--{loop $data[listFields] $k $v}-->
+                                                        <th class="{echo in_array($v[id],$data[orderFields])?($data[by]=='asc'?'sorting_asc':'sorting_desc'):''}" data-order="$v[identifier]" aria-controls="form$data[fid]" aria-label="$v[title]">
+                                                            $v[title]
+                                                        </th>
+                                                        <!--{/loop}-->
+                                                        <th>创建时间</th>
+                                                        <!--{if $data[form][cpcheck]==1}-->
+                                                        <th width="60">审核状态</th>
+                                                        <!--{/if}-->
+                                                        <th width="90">操作</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <!--{loop $data[list] $v}-->
+                                                    <tr align='center' bgcolor="#FFFFFF">
+                                                        <!--{if $data[form][cpdel]==1}-->
+                                                        <td>
+                                                            <label class="am-checkbox-inline"><input name="ids" type="checkbox" id="diyid_$v[id]" value="$v[id]" /><span style="display:inline-block;"></span></label>
+                                                        </td>
+                                                        <!--{/if}-->
+                                                        <td class="text-dark">$v[id]</td>
+                                                        <!--{loop $data[listFields] $f_v}-->
+                                                        <!--{if $f_v[datatype] == 'img'}-->
+                                                        <td><a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="{echo copyImage($v[$f_v['identifier']],60,60)}" width="60" /></a></td>
+                                                        <!--{elseif $f_v[datatype] == 'imgs'}-->
+                                                        <td class="text-dark">{echo count($v['_'.$f_v['identifier']])}</td>
+                                                        <!--{else}-->
+                                                        <td class="text-dark">{eval $val = aval($v,'_'.$f_v['identifier']);}{echo is_array($val)?aval($v,$f_v['identifier']):aval($v,'_'.$f_v['identifier'])}</td>
+                                                        <!--{/if}-->
+                                                        <!--{/loop}-->
+                                                        <td class="text-dark">$v[_createtime]</td>
+                                                        <!--{if $data[form][cpcheck]==1}-->
+                                                        <th>
+                                                            <!--{if $v[ischeck]}-->
+                                                            <span style="line-height:1;cursor: pointer;" class="btn btn-success btn-sm btn-check" data-id="$v[id]" data-ischeck="2">已审核</span>
+                                                            <!--{else}-->
+                                                            <span style="line-height:1;cursor: pointer;" class="btn btn-danger btn-sm btn-check" data-id="$v[id]" data-ischeck="1">未审核</span>
+                                                            <!--{/if}-->
+                                                        </th>
+                                                        <!--{/if}-->
+                                                        <td>
+                                                            <a href="{url &p=forms/dataSave&id=$v[id]}">编辑</a> <span class="text-info">|</span>
+                                                            <a href="javascript:void(0)" class="recovery" data-id="$v[id]">恢复</a>
+                                                        </td>
+                                                    </tr>
+                                                    <!--{/loop}-->
+                                                    <!--{if $data[form][cpdel]==1}-->
+                                                    <tr>
+                                                        <td height="36" colspan="{echo count($data[listFields])+($data[form][cpcheck]==1?5:4)}">
+                                                            <span onClick="$('input[type=checkbox]').prop('checked', true);" style="line-height:1" class="btn btn-dark btn-sm">全选</span>
+                                                            <span onClick="$('input[type=checkbox]').prop('checked', false);" style="line-height:1" class="btn btn-dark btn-sm">取消</span>
+                                                            <!--{if $data[form][cpcheck]==1}-->
+                                                            <span onClick="AuditSel();" style="line-height:1" class="btn btn-dark btn-sm">审核</span>
+                                                            <!--{/if}-->
+                                                            <span onClick="DelSel()" style="line-height:1" class="btn btn-dark btn-sm">删除</span>
+
+                                                        </td>
+                                                    </tr>
+                                                    <!--{/if}-->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <!--{if !empty($data[mult])}-->
+                                        <div class="row">
+                                            <div class="col-sm-12 col-md-12">
+                                                <div class="dataTables_paginate paging_simple_numbers" id="paginate">$data[mult]</div>
+                                            </div>
+                                        </div>
+                                        <!--{/if}-->
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--{template modal_msg}-->
+    <!--{template listjs}-->
+    <script>
+        $(function () {
+            $('.recovery').click(function () {
+                var id = $(this).data('id');
+                var that = $(this);
+                $.getJSON('?p=main/recovery&id='+id,function (res) {
+                    resultMsg(res.msg,res.code);
+                    if(res.code==200){
+                        that.parents('tr').hide();
+                    }
+                })
+            })
+        })
+    </script>
+
+</div>
+<!--{template footer}-->
+</body>
+</html>

@@ -73,6 +73,24 @@ abstract class MessageAbstract
     }
 
     /**
+     * 返回提示数据
+     * @param $code
+     * @return array
+     */
+    public function output(OutputInterface $output): ResponseInterface
+    {
+        $content = $output->analysisTemplate();
+        $this->response = $this->response->withHeader('Content-type', 'text/html');
+        $this->response->getBody()->write($content);
+        return $this->response;
+    }
+
+    public function cookie(): CookieInterface
+    {
+        return self::$cookie;
+    }
+
+    /**
      * 返回请求对象
      * @return ServerRequestInterface
      */

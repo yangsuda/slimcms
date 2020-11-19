@@ -48,7 +48,7 @@
             var index = $(this).data('index');
             $("#"+field+'_'+index).val("");
             var img = $(this).data('img');
-            $.get('{$cfg[basehost]}{$cfg[entryFileName]}?p=image/webuploadImageDel&pic='+img+'&id=data[row][id]&field='+field+'&formid=$data[formid]');
+            $.get('{$cfg[basehost]}{$cfg[entryFileName]}?p=image/webuploadImageDel&pic='+img+'&id=data[row][id]&field='+field+'&fid=$data[fid]');
         })
     });
     function handleFiles(obj) {
@@ -159,7 +159,7 @@
     </div>
 </div>
 
-<div class="mod_list_photo" data-id='$data[row][id]' data-forrmid="$data[formid]" data-identifier='{$data[identifier]'>
+<div class="mod_list_photo" data-id='$data[row][id]' data-forrmid="$data[fid]" data-identifier='{$data[identifier]'>
 <ul>
     <!--{if $data[imgs]}-->
     <!--{loop $data[imgs] $ik $iv}-->
@@ -168,7 +168,7 @@
             <em><a href="{echo copyImage($iv[img], 2000, 2000)}" target="_blank" title="查看"><i></i><img src="{echo copyImage($iv[img], 160, 160)}" /></a></em>
         </div>
         <div class="btn_photo">
-            <a data-ref="$iv[img]" data-formid="$data[formid]" class="btn_delete_pic" title="删除"><span>删除</span></a>
+            <a data-ref="$iv[img]" data-fid="$data[fid]" class="btn_delete_pic" title="删除"><span>删除</span></a>
             <a href="{echo copyImage($iv[img], 2000, 2000)}" target="_blank" title="查看" class="btn_view_pic"><span>查看</span></a>
         </div>
         <div class="box_text">

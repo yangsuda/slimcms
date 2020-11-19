@@ -3,12 +3,14 @@
 /**
  * 后台控制类
  */
+declare(strict_types=1);
 
 namespace App\Control\main;
 
 use Slim\Psr7\Stream;
 use Slim\Psr7\UploadedFile;
 use SlimCMS\Abstracts\ControlAbstract;
+use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Ueditor;
 use SlimCMS\Helper\Http;
 
@@ -16,9 +18,9 @@ class MainControl extends ControlAbstract
 {
     public function test()
     {
-        //$row = self::t('admin')->withWhere(2)->fetch();
-        //var_dump($row);
-        //exit;
+        $row = self::$request->getRequest()->getQueryParams();
+        var_dump($row);
+        exit;
         /*$post = [];
 
         $post['test'] = new UploadedFile(
@@ -29,13 +31,16 @@ class MainControl extends ControlAbstract
 
         $a = self::$request->getRequest()->withUploadedFiles($post)->getUploadedFiles();
         var_dump($a['test']->moveTo(CSPUBLIC.'33.xls'));exit;*/
-        $b = Http::currentUrl();
-        var_dump(self::currentUrl('&p=forms/dataList&id='),$b);exit;
+
         $p = self::input('p');
+        var_dump(self::url('&p=forms/dataList&id='), $p);
+        exit;
+
         $output = self::$output->withCode(22004, ['title' => 'aa']);
         //return $this->response($output)
         $a = Ueditor::config();
-        var_dump($a);exit;
+        var_dump($a);
+        exit;
         //$content1 = self::$output->withData(['identifier'=>'bb1','default'=>'bb'])->withTemplate('block/fieldshtml/text')->analysisTemplate(true);
         //var_dump($content,$content1);exit;
         return $this->view($output);

@@ -2,6 +2,7 @@
 /**
  * 默认控制类
  */
+declare(strict_types=1);
 
 namespace App\Control\main;
 
@@ -15,6 +16,6 @@ class DefaultControl extends ControlAbstract
      */
     public function index()
     {
-        return $this->view(self::$output,'index');
+        return $this->view(self::$output, 'index');
     }
 }

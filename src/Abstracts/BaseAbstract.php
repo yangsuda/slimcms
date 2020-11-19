@@ -1,6 +1,6 @@
 <?php
 /**
- * 默认控制类
+ * control、model共同继承抽象类
  */
 
 declare(strict_types=1);
@@ -11,6 +11,7 @@ use App\Core\Redis;
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
 use SlimCMS\Core\Table;
+use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\OutputInterface;
 
 abstract class BaseAbstract
@@ -76,33 +77,13 @@ abstract class BaseAbstract
         return $objs[$name];
     }
 
-    protected static function currentUrl(string $nowurl = ''): string
-    {
-        $uri = self::$request->getRequest()->getUri();
-        if (preg_match('/\?/', $nowurl)) {
-            list($host, $nowurl) = explode('?', $nowurl);
-            $host .= '?';
-        } else {
-            $host = $uri->getPath().'?';
-            $nowurl = $uri->getQuery() . $nowurl;
-        }
-
-        parse_str($nowurl, $output);
-        foreach ($output as $k => $v) {
-            if ($v === '') {
-                unset($output[$k]);
-            }
-        }
-        return $host . http_build_query($output);
-    }
-
     /**
      * 获取外部传入数据
      * @param $name
      * @param string $type
      * @return array|mixed|\都不存在时的默认值|null
      */
-    public static function input(string $name, string $type = 'string')
+    protected static function input($name, string $type = 'string')
     {
         return self::$request->input($name, $type);
     }
@@ -112,9 +93,72 @@ abstract class BaseAbstract
      * @param $result
      * @return array|\Psr\Http\Message\ResponseInterface
      */
-    public static function response(OutputInterface $output = null)
+    protected static function response(OutputInterface $output = null)
     {
         $output = $output ?? self::$output;
         return self::$response->output($output);
+    }
+
+    /**
+     * 生成缓存KEY
+     * @param $key
+     * @param mixed ...$param
+     * @return string
+     */
+    protected static function cacheKey($key, ...$param): string
+    {
+        return get_called_class() . ':' . $key . ':' . Str::md5key($param);
+    }
+
+    /**
+     * URL处理
+     * @param string $url
+     * @return string
+     */
+    public static function url(string $url = ''): string
+    {
+        $uri = self::$request->getRequest()->getUri();
+        if (empty($url) || preg_match('/^&/', $url)) {
+            $url = $uri->getQuery() . $url;
+        }
+        if (strpos($url, '?') !== false) {
+            list($path, $url) = explode('?', $url);
+        }
+        if (empty($path)) {
+            $path = ltrim($uri->getPath(), '/');
+        }
+        parse_str($url, $output);
+        foreach ($output as $k => $v) {
+            if ($v === '') {
+                unset($output[$k]);
+            }
+        }
+        $url = http_build_query($output);
+
+        if (empty(self::$config['rewriteUrl'])) {
+            $url = (preg_match('/^http/', $path) ? $path : rtrim(self::$config['basehost'], '/') . '/' . $path) . '?' . $url;
+            return $url;
+        }
+
+        $entre = CURSCRIPT == 'index' ? '' : CURSCRIPT . '/';
+        $url = rtrim(self::$config['basehost'], '/') . '/' . $entre . trim($output['p'], '/') . '/';
+        $jsoncallback = !empty($output['jsoncallback']);
+        unset($output['p'], $output['q'], $output['jsoncallback']);
+        if (!empty($output)) {
+            $arr = [];
+            foreach ($output as $k => $v) {
+                $v = is_array($v) ? implode('`', $v) : $v;
+                if (!empty($v) || $v == '0') {
+                    $arr[] = urlencode(str_replace(['-', '_'], ['&#045;', '&#095;'], $k) . '-' . str_replace(['-', '_'], ['&#045;', '&#095;'], $v));
+                }
+            }
+            if ($arr) {
+                $val = implode('_', $arr);
+                $url .= urlencode($val) . '.html';
+                //方便JS中url的拼接生成URL
+                $url = str_replace(['%2527%2B', '%2B%2527'], ['\'+', '+\''], $url);
+            }
+        }
+        return $url . ($jsoncallback ? '?jsoncallback=?' : '');
     }
 }

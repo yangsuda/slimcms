@@ -1,0 +1,90 @@
+<!--{template html_head}-->
+<link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css" />
+<script src="$cfg[resourceUrl]validform/js/Validform_min.js"></script>
+<link rel="stylesheet" href="$cfg[resourceUrl]validform/css/validform.css" />
+</head>
+<body class="adminbody">
+
+<div id="main">
+    <!--{template head}-->
+    <!--{template leftMenu}-->
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <!--{template navigation_save}-->
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="card mb-3">
+                            <div class="card-body m-4">
+                                <form name="form1" action="{url &}" enctype="multipart/form-data" method="post" class="validform">
+                                    <input type="hidden" name="formhash" value="$data[formhash]" />
+                                    <!--{if aval($data,'id')}-->
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label">ID：</label>
+                                        <div class="col-sm-6">
+                                            $data[id]
+                                        </div>
+                                        <div class="col-sm-4 text-muted">
+                                        </div>
+                                    </div>
+                                    <!--{/if}-->
+                                    <!--{loop $fieldshtml $v}-->
+                                    <!--{if $v[forbidedit]=='1'}-->
+                                    <!--{eval !isset($allowedit) && $allowedit=1;}-->
+                                    <!--{/if}-->
+                                    <!--{if $v[datatype]=='hidden'}-->
+                                    $v[field]
+                                    <!--{else}-->
+                                    <!--{template normalfield_save}-->
+                                    <!--{/if}-->
+                                    <!--{/loop}-->
+                                    <!--{if $cfg[ccode] == 'Y'}-->
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label">验证码：</label>
+                                        <div class="col-sm-2">
+                                            <img id="vdimgck" align="absmiddle" onClick="this.src='{url ?p=login/captcha}#'+Math.random()" alt="看不清？点击更换"
+                                                 src="{url ?p=login/captcha}" style="cursor: pointer; position:absolute; right:12px; top:5px;height: 30px; z-index:1000;"/>
+                                            <input type="text" id="ccode" class="form-control"   placeholder="请填写验证码" nullmsg="请填写验证码"  name="ccode" required/>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="col-sm-8 text-muted"></div>
+                                    </div>
+                                    <!--{/if}-->
+                                    <!--{if !empty($allowedit)}-->
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label"></label>
+                                        <div class="col-sm-10">
+                                            <button type="submit" class="btn btn-primary">提　交</button>
+                                        </div>
+                                    </div>
+                                    <!--{/if}-->
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--{template modal_msg}-->
+
+</div>
+<!--{template footer}-->
+
+<script>
+    $(function () {
+        $(".validform").Validform({
+            tiptype: function(msg, o) {
+                if (!o.obj.is("form")) {
+                    var objtip = o.obj.parents(".form-group").find(".invalid-feedback");
+                    objtip.text(msg);
+                }
+            },
+            showAllError: true,
+        });
+    })
+</script>
+</body>
+</html>

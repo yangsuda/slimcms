@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SlimCMS\Handlers;
 
 use Psr\Http\Message\ResponseInterface as Response;
+use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Handlers\ErrorHandler;
 use SlimCMS\Core\Error;
 use SlimCMS\Error\JsonError;
@@ -42,8 +43,7 @@ class HttpErrorHandler extends ErrorHandler
     {
 
         $exception = $this->exception;
-        if ($exception instanceof TextException) {
-            $encodedOutput = json_encode($exception->getResult(), JSON_PRETTY_PRINT);
+        $func = function ($encodedOutput){
             $response = $this->responseFactory->createResponse();
             if ($this->contentType !== null && array_key_exists($this->contentType, $this->errorRenderers)) {
                 $response = $response->withHeader('Content-type', $this->contentType);
@@ -52,6 +52,17 @@ class HttpErrorHandler extends ErrorHandler
             }
             $response->getBody()->write($encodedOutput);
             return $response;
+        };
+        if ($exception instanceof TextException) {
+            $encodedOutput = json_encode($exception->getResult(), JSON_PRETTY_PRINT);
+            return $func($encodedOutput);
+        }
+        if ($exception instanceof HttpInternalServerErrorException) {
+            $data = [];
+            $data['code'] = $exception->getCode();
+            $data['msg'] = $exception->getMessage();
+            $encodedOutput = json_encode($data, JSON_PRETTY_PRINT);
+            return $func($encodedOutput);
         }
         return parent::respond();
     }

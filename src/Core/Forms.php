@@ -18,15 +18,39 @@ use SlimCMS\Interfaces\OutputInterface;
 class Forms extends ModelAbstract
 {
     /**
+     * 表单提交校验
+     * @param string $formhash
+     * @return OutputInterface
+     */
+    public static function submitCheck($formhash): OutputInterface
+    {
+        if (empty($formhash)) {
+            return self::$output->withCode(24024);
+        }
+        $server = self::$request->getRequest()->getServerParams();
+        $referer = '';
+        if (!empty($server['HTTP_REFERER'])) {
+            $parse = parse_url(aval($server, 'HTTP_REFERER'));
+            $referer = $parse['host'];
+        }
+        $parse = parse_url(self::$config['basehost']);
+        $host = $parse['host'];
+        if ($server['REQUEST_METHOD'] == 'POST' && $formhash == self::$request->getFormHash() && empty($server['HTTP_X_FLASH_VERSION']) && $host == $referer) {
+            return self::$output->withCode(200);
+        }
+        return self::$output->withCode(24024);
+    }
+
+    /**
      * 某表单详细
-     * @param int $formid
+     * @param int $fid
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function formView(int $formid): OutputInterface
+    public static function formView($fid): OutputInterface
     {
-        $form = self::t('diyforms')->withWhere($formid)->fetch();
-        $data = ['form' => $form, 'formid' => $formid];
+        $form = self::t('forms')->withWhere($fid)->fetch();
+        $data = ['form' => $form, 'fid' => $fid];
         return self::$output->withData($data);
     }
 
@@ -47,9 +71,9 @@ class Forms extends ModelAbstract
         }
         $sql = "CREATE TABLE IF NOT EXISTS `" . $tableName . "`(
 				`id` int(11) NOT NULL AUTO_INCREMENT,
-				`ischeck` tinyint(1) NOT NULL default '2',
-				`createtime` int(11) NOT NULL default '0',
-				`ip` varchar(20) NOT NULL default '',
+				`ischeck` tinyint(1) NOT NULL default '2' COMMENT '是否审核(1=已审核，2=未审核)',
+				`createtime` int(11) NOT NULL default '0' COMMENT '创建时间',
+				`ip` varchar(20) NOT NULL default '' COMMENT '创建IP',
 				PRIMARY KEY  (`id`)\r\n) ENGINE=MyISAM DEFAULT CHARSET=" . self::$setting['db']['dbcharset'] . "; ";
         $query = $db->query($sql);
         $db->affectedRows($query);
@@ -58,18 +82,18 @@ class Forms extends ModelAbstract
 
     /**
      * 数据审核操作
-     * @param int $formid
+     * @param int $fid
      * @param array $ids
      * @param int $ischeck
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function dataCheck(int $formid, array $ids, int $ischeck = 1): OutputInterface
+    public static function dataCheck(int $fid, array $ids, int $ischeck = 1): OutputInterface
     {
-        if (empty($formid) || empty($ids)) {
-            return self::$output->withCode(21003);
+        if (empty($fid) || empty($ids)) {
+            return self::$output->withCode(21002);
         }
-        $form = self::t('forms')->withWhere($formid)->fetch();
+        $form = self::t('forms')->withWhere($fid)->fetch();
         if (empty($form)) {
             return self::$output->withCode(22006);
         }
@@ -94,17 +118,17 @@ class Forms extends ModelAbstract
 
     /**
      * 删除数据
-     * @param int $formid
+     * @param int $fid
      * @param array $ids
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function dataDel(int $formid, array $ids): OutputInterface
+    public static function dataDel(int $fid, array $ids): OutputInterface
     {
-        if (empty($formid) || empty($ids)) {
-            return self::$output->withCode(21003);
+        if (empty($fid) || empty($ids)) {
+            return self::$output->withCode(21002);
         }
-        $form = self::t('diyforms')->withWhere($formid)->fetch();
+        $form = self::t('forms')->withWhere($fid)->fetch();
         if (empty($form)) {
             return self::$output->withCode(22006);
         }
@@ -120,12 +144,12 @@ class Forms extends ModelAbstract
                 }
             }
 
-            $form['isarchive'] == 1 && self::dataSave(7, '', ['formid' => $formid, 'aid' => $v['id'], 'content' => serialize($v)]);//归档记录
+            $form['isarchive'] == 1 && self::dataSave(7, '', ['formid' => $fid, 'aid' => $v['id'], 'content' => serialize($v)]);//归档记录
 
             //判断删除文章附件变量是否开启；
             if (self::$config['isDelAttachment'] == 'Y') {
                 //判断属性；
-                $fields = self::fieldList(['formid' => $formid, 'available' => 1, 'datatype' => ['htmltext', 'imgs', 'img', 'media', 'addon']]);
+                $fields = self::fieldList(['formid' => $fid, 'available' => 1, 'datatype' => ['htmltext', 'imgs', 'img', 'media', 'addon']]);
                 if ($fields) {
                     self::delAttachment($fields, $v);
                 }
@@ -144,27 +168,27 @@ class Forms extends ModelAbstract
         if (is_callable([self::t($form['table']), 'dataDelRealAfter'])) {
             self::t($form['table'])->dataDelRealAfter($list);
         }
-        $referer = self::currentUrl('&p=forms/dataList&ids=');
+        $referer = self::url('&p=forms/dataList&ids=');
         return self::$output->withCode(200, 21023)->withReferer($referer);
     }
 
     /**
      * 详细数据
-     * @param int $formid
+     * @param int $fid
      * @param int $id
      * @param int $cacheTime
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function dataView(int $formid, int $id, int $cacheTime = 0): OutputInterface
+    public static function dataView(int $fid, int $id, int $cacheTime = 0): OutputInterface
     {
-        if (empty($formid) || empty($id)) {
-            return self::$output->withCode(21003);
+        if (empty($fid) || empty($id)) {
+            return self::$output->withCode(21002);
         }
-        $cachekey = self::cacheKey('dataView', $formid, $id);
+        $cachekey = self::cacheKey('dataView', $fid, $id);
         $data = $cacheTime > 0 ? self::$redis->get($cachekey) : [];
         if (empty($data)) {
-            $form = self::t('forms')->withWhere($formid)->fetch();
+            $form = self::t('forms')->withWhere($fid)->fetch();
             if (empty($form)) {
                 return self::$output->withCode(22006);
             }
@@ -178,7 +202,7 @@ class Forms extends ModelAbstract
             if (empty($data)) {
                 return self::$output->withCode(21001);
             }
-            $fields = self::fieldList(['formid' => $formid, 'available' => 1]);
+            $fields = self::fieldList(['formid' => $fid, 'available' => 1]);
             self::exchangeFieldValue($fields, $data);
 
             //获取额外数据
@@ -194,11 +218,6 @@ class Forms extends ModelAbstract
         return self::$output->withData($data)->withData(200);
     }
 
-    private static function cacheKey($key, ...$param): string
-    {
-        return __CLASS__ . ':' . $key . ':' . Str::md5key($param);
-    }
-
     /**
      * 数据统计
      * @param array $param
@@ -207,8 +226,8 @@ class Forms extends ModelAbstract
      */
     public static function dataCount(array $param): OutputInterface
     {
-        if (empty($param['formid'])) {
-            return self::$output->withCode(21003);
+        if (empty($param['fid'])) {
+            return self::$output->withCode(21002);
         }
         $arr = [];
         $arr['where'] = [];
@@ -220,7 +239,7 @@ class Forms extends ModelAbstract
             $data = self::$redis->get($cachekey);
         }
         if (empty($data)) {
-            $form = self::t('forms')->withWhere($param['formid'])->fetch();
+            $form = self::t('forms')->withWhere($param['fid'])->fetch();
             if (empty($form)) {
                 return self::$output->withCode(22006);
             }
@@ -237,7 +256,7 @@ class Forms extends ModelAbstract
             $data = [];
             $data['count'] = self::t($form['table'])->withWhere($where)->count($countFields);
             $data['form'] = $form;
-            $data['formid'] = $param['formid'];
+            $data['fid'] = $param['fid'];
             //缓存保存
             !empty($param['cacheTime']) && self::$redis->set($cachekey, $data, $param['cacheTime']);
         }
@@ -252,10 +271,10 @@ class Forms extends ModelAbstract
      */
     public static function dataList(array $param): OutputInterface
     {
-        if (empty($param['formid'])) {
-            return self::$output->withCode(21003);
+        if (empty($param['fid'])) {
+            return self::$output->withCode(21002);
         }
-        $form = self::t('forms')->withWhere($param['formid'])->fetch();
+        $form = self::t('forms')->withWhere($param['fid'])->fetch();
         if (empty($form)) {
             return self::$output->withCode(22006);
         }
@@ -267,12 +286,14 @@ class Forms extends ModelAbstract
             }
         }
 
-        $cfg = &self::$config;
-        $cfg['currenturl'] = self::currentUrl();
+        $currenturl = self::url();
+        $param['get'] = [];
         $arr = [];
         $arr['where'] = [];
         if (empty($param['noinput'])) {
             $arr = self::searchCondition($param)->getData();
+            $param['get'] = $arr['get'];
+            $currenturl = $arr['currentUrl'];
         }
         if (!empty($param['cacheTime'])) {
             $cachekey = self::cacheKey(__FUNCTION__, $param, $arr['where']);
@@ -282,29 +303,30 @@ class Forms extends ModelAbstract
             if ($form['cpcheck'] == 1) {
                 $ischeck = aval($param, 'ischeck');
                 if ($ischeck) {
+                    $param['get']['ischeck'] = $ischeck;
                     $where = [];
                     $where['ischeck'] = $ischeck == 1 ? 1 : 2;
                     $param['where'] = !empty($param['where']) ? array_merge((array)$param['where'], $where) : $where;
-                    empty($param['noinput']) && $cfg['currenturl'] .= '&ischeck=' . $ischeck;
+                    empty($param['noinput']) && $currenturl .= '&ischeck=' . $ischeck;
                 }
             }
 
             if (empty($param['noinput'])) {
                 //根据ID筛选
                 $id = aval($param, 'id');
-                $id = strpos($id, '`') ? array_map('intval', explode('`', $id)) : (int)$id;
+                $id = $id && strpos($id, '`') ? array_map('intval', explode('`', $id)) : (int)$id;
                 if ($id) {
                     $where = [];
                     $where['id'] = $id;
                     $param['where'] = !empty($param['where']) ? array_merge((array)$param['where'], $where) : $where;
-                    empty($param['noinput']) && $cfg['currenturl'] .= '&id=' . (is_array($id) ? implode('`', $id) : $id);
+                    empty($param['noinput']) && $currenturl .= '&id=' . (is_array($id) ? implode('`', $id) : $id);
                 }
             }
 
             if (empty($param['fields'])) {
                 $inlistField = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
                 $fields = self::t('forms_fields')
-                    ->withWhere(['formid' => $param['did'], 'available' => 1, $inlistField => 1])
+                    ->withWhere(['formid' => $param['fid'], 'available' => 1, $inlistField => 1])
                     ->onefieldList('identifier', 60);
                 $fields[] = 'createtime';
                 $fields[] = 'ischeck';
@@ -325,8 +347,8 @@ class Forms extends ModelAbstract
             $where = !empty($param['where']) ? array_merge($param['where'], $arr['where']) : $arr['where'];
             $order = (string)aval($param, 'order');
             $orderForce = (bool)aval($param, 'orderForce');
-            $order = self::validOrder($param['formid'], $order, $orderForce);
-            $by = (string)aval($param, 'by');
+            $order = self::validOrder($param['fid'], $order, $orderForce);
+            $by = (string)aval($param, 'by', 'desc');
             $page = (int)aval($param, 'page', 1);
             $fields = (string)aval($param, 'fields');
             $pagesize = (int)aval($param, 'pagesize', 30);
@@ -337,16 +359,19 @@ class Forms extends ModelAbstract
                 ->withWhere($where)
                 ->withOrderby($order, $by)
                 ->pageList($page, $fields, $pagesize, 0, $indexField);
-            $fields = self::fieldList(['formid' => $param['formid'], 'available' => 1]);
+            $fields = self::fieldList(['formid' => $param['fid'], 'available' => 1]);
             foreach ($data['list'] as &$v) {
                 isset($v['ischeck']) && $v['_ischeck'] = $v['ischeck'] == 1 ? '已审核' : '未审核';
-                self::exchangeFieldValue($fields, $v);
+                $fields && $v = self::exchangeFieldValue($fields, $v);
             }
             if (!empty($arr['tags'])) {
                 $data['tags'] = $arr['tags'];
             }
             $data['form'] = $form;
-            $data['formid'] = $param['formid'];
+            $data['fid'] = $param['fid'];
+            $data['by'] = $by;
+            $data['currenturl'] = self::url($currenturl);
+            $data['get'] = $param['get'];
 
             if (is_callable([self::t($form['table']), 'dataListAfter'])) {
                 $rs = self::t($form['table'])->dataListAfter($data, $param);
@@ -363,19 +388,19 @@ class Forms extends ModelAbstract
 
     /**
      * 获取生成的表单HTML
-     * @param int $formid
+     * @param int $fid
      * @param array $row
      * @param array $options
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function dataFormHtml(int $formid, array $row = [], array $options = []): OutputInterface
+    public static function dataFormHtml(int $fid, $row = [], array $options = []): OutputInterface
     {
-        if (empty($formid)) {
-            return self::$output->withCode(21003);
+        if (empty($fid)) {
+            return self::$output->withCode(21002);
         }
         if ($row && is_numeric($row)) {
-            $res = self::dataView($formid, $row);
+            $res = self::dataView($fid, $row);
             if ($res->getCode() != 200) {
                 return $res;
             }
@@ -385,12 +410,12 @@ class Forms extends ModelAbstract
         }
 
         $condition = [];
-        $condition['formid'] = $formid;
+        $condition['formid'] = $fid;
         $condition['available'] = 1;
         if (aval($options, 'infront') === true) {
             $condition['infront'] = 1;
         }
-        $form = self::t('forms')->withWhere($formid)->fetch();
+        $form = self::t('forms')->withWhere($fid)->fetch();
         if (empty($form)) {
             return self::$output->withCode(22006);
         }
@@ -409,10 +434,10 @@ class Forms extends ModelAbstract
                 $row[$v['identifier']] = self::input($v['identifier']);
             }
         }
-        $cachekey = self::cacheKey(__FUNCTION__, $formid, $options);
+        $cachekey = self::cacheKey(__FUNCTION__, $fid, $options);
         $data = self::$redis->get($cachekey);
         if (empty($data) || $row) {
-            $fieldshtml = self::formHtml($formid, $fields, $row, $options);
+            $fieldshtml = self::formHtml($fid, $fields, $row, $options);
 
             if (is_callable([self::t($form['table']), 'getFormHtmlAfter'])) {
                 $rs = self::t($form['table'])->getFormHtmlAfter($fieldshtml, $fields, $row);
@@ -421,7 +446,7 @@ class Forms extends ModelAbstract
                 }
             }
 
-            $data = ['fields' => $fields, 'fieldshtml' => $fieldshtml, 'data' => $row];
+            $data = ['fields' => $fields, 'fieldshtml' => $fieldshtml, 'data' => $row, 'form' => $form];
             empty($row) && !empty($options['cacheTime']) && self::$redis->set($cachekey, $data, $options['cacheTime']);
         }
         return self::$output->withCode(200)->withData($data);
@@ -429,32 +454,32 @@ class Forms extends ModelAbstract
 
     /**
      * 保存自定义表单的数据
-     * @param int $formid 自定义表单对应的ID
+     * @param int $fid 自定义表单对应的ID
      * @param array $row 原来的数据
      * @param array $data 要添加或修改的数据
      */
-    public static function dataSave(int $formid, array $row = [], array $data = [], string $referer = ''): OutputInterface
+    public static function dataSave(int $fid, array $row = [], array $data = [], string $referer = ''): OutputInterface
     {
         //编辑数据
         if (is_numeric($row)) {
-            $res = self::dataView($formid, $row);
+            $res = self::dataView($fid, $row);
             if ($res->getCode() != 200) {
                 return $res;
             }
             $row = $res->withData();
         }
-        $res = self::requiredCheck($formid, $row, $data);
+        $res = self::requiredCheck($fid, $row, $data);
         if ($res->getCode() != 200) {
             return $res;
         }
-        $form = self::t('forms')->withWhere($formid)->fetch();
+        $form = self::t('forms')->withWhere($fid)->fetch();
         if (empty($form)) {
             return self::$output->withCode(22006);
         }
-        $data = $data ?: self::getFormValue($formid, $row);
+        $data = $data ?: self::getFormValue($fid, $row);
 
         //判断是否唯一
-        $uniques = self::fieldList(['formid' => $formid, 'unique' => 1, 'available' => 1]);
+        $uniques = self::fieldList(['formid' => $fid, 'unique' => 1, 'available' => 1]);
         foreach ($uniques as $v) {
             $exist_id = aval($data, $v['identifier']) ?
                 self::t($form['table'])->withWhere([$v['identifier'] => $data[$v['identifier']]])->fetch('id')
@@ -476,7 +501,7 @@ class Forms extends ModelAbstract
             $data['id'] = $row['id'];
             $data['mngtype'] = 'edit';
             $row = array_merge($row, $data);
-            self::$redis->del(self::cacheKey('dataView', $formid, $row['id']));
+            self::$redis->del(self::cacheKey('dataView', $fid, $row['id']));
         } else {
             $data['createtime'] = TIMESTAMP;
             $data['ip'] = Ipdata::getip();
@@ -491,7 +516,7 @@ class Forms extends ModelAbstract
                 return self::$output->withCode($rs);
             }
         }
-        $referer = $referer ?: self::currentUrl('&p=forms/dataList&id=');
+        $referer = $referer ?: self::url('&p=forms/dataList&id=');
         return self::$output
             ->withCode(200, 21018)
             ->withData(['id' => $data['id']])
@@ -500,17 +525,17 @@ class Forms extends ModelAbstract
 
     /**
      * 必填检测
-     * @param int $formid
+     * @param int $fid
      * @param array $row
      * @param array $data
      * @return OutputInterface
      */
-    private static function requiredCheck(int $formid, array $row = [], array $data = []): OutputInterface
+    private static function requiredCheck(int $fid, array $row = [], array $data = []): OutputInterface
     {
-        if (empty($formid)) {
+        if (empty($fid)) {
             return self::$output->withCode(27010);
         }
-        $requireds = self::fieldList(['formid' => $formid, 'required' => 1, 'available' => 1]);
+        $requireds = self::fieldList(['formid' => $fid, 'required' => 1, 'available' => 1]);
         foreach ($requireds as $v) {
             $msg = $v['errormsg'] ? $v['errormsg'] : $v['title'];
             $val = aval($data, $v['identifier']) ?: self::input($v['identifier']);
@@ -527,19 +552,19 @@ class Forms extends ModelAbstract
 
     /**
      * 排序字段有效性检测
-     * @param int $formid
+     * @param int $fid
      * @param string $order
      * @param bool $force
      * @return string
      * @throws \SlimCMS\Error\TextException
      */
-    private static function validOrder(int $formid, string $order = '', bool $force = false): string
+    private static function validOrder(int $fid, string $order = '', bool $force = false): string
     {
         if ($force === true) {
             return $order;
         }
         if (empty($order)) {
-            $row = self::t('forms_fields')->withWhere(['formid' => $formid, 'available' => 1, 'defaultorder' => [1, 2]])->fetch();
+            $row = self::t('forms_fields')->withWhere(['formid' => $fid, 'available' => 1, 'defaultorder' => [1, 2]])->fetch();
             $order = 'main.id';
             if ($row) {
                 $by = $row['defaultorder'] == 1 ? 'desc' : 'asc';
@@ -561,7 +586,7 @@ class Forms extends ModelAbstract
             if ($v == 'id') {
                 continue;
             }
-            $where = ['formid' => $formid, 'available' => 1, 'identifier' => $v, 'orderby' => 1];
+            $where = ['formid' => $fid, 'available' => 1, 'identifier' => $v, 'orderby' => 1];
             if (empty($v) || !self::t('forms_fields')->withWhere($where)->count()) {
                 $valid = false;
                 break;
@@ -575,10 +600,12 @@ class Forms extends ModelAbstract
 
     /**
      * 字段列表
-     * @param $did
-     * @param string $field
+     * @param string $where
+     * @param string $fields
+     * @param string $limit
      * @param string $order
-     * @return array
+     * @return array|bool|mixed|string|null
+     * @throws \SlimCMS\Error\TextException
      */
     private static function fieldList($where = '', $fields = '*', $limit = '', $order = 'displayorder desc,id')
     {
@@ -597,16 +624,17 @@ class Forms extends ModelAbstract
 
     /**
      * 生成筛选条件
-     * @param $did
-     * @return array
+     * @param array $param
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
      */
     private static function searchCondition(array $param): OutputInterface
     {
-        if (empty($param['formid'])) {
-            return self::$output->withCode(21003);
+        if (empty($param['fid'])) {
+            return self::$output->withCode(21002);
         }
-        $search_fields = self::fieldList(['formid' => $param['formid'], 'available' => 1, 'search' => 1]);
-        $fields = self::fieldList(['formid' => $param['formid'], 'available' => 1]);
+        $search_fields = self::fieldList(['formid' => $param['fid'], 'available' => 1, 'search' => 1]);
+        $fields = self::fieldList(['formid' => $param['fid'], 'available' => 1]);
         $data = self::getFormValue($fields);
 
         $where = $tags = [];
@@ -620,7 +648,7 @@ class Forms extends ModelAbstract
                 }
 
                 $val = aval($data, $v['identifier']);
-                if (empty($v['rules']) && preg_match('/,/', $val)) {
+                if (empty($v['rules']) && $val && preg_match('/,/', $val)) {
                     $where[] = self::t()->field($v['identifier'], $val, 'between');
                 } elseif ($v['datatype'] == 'checkbox') {
                     !empty($val) && $where[] = self::t()->field($v['identifier'], $val, 'find');
@@ -668,26 +696,26 @@ class Forms extends ModelAbstract
                 }
             }
         }
-        $currenturl = self::currentUrl($currenturl);
-        $data = ['tags' => $tags, 'fields' => $fields, 'where' => $where, 'currentUrl' => $currenturl];
+        $currenturl = self::url($currenturl);
+        $data = ['tags' => $tags, 'fields' => $fields, 'where' => $where, 'currentUrl' => $currenturl, 'get' => $data];
         return self::$output->withCode(200)->withData($data);
     }
 
     /**
      * 删除图集中某张图
-     * @param int $formid
+     * @param int $fid
      * @param int $id
      * @param string $field
      * @param string $pic
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function imgsDel(int $formid, int $id, string $field, string $pic): OutputInterface
+    public static function imgsDel(int $fid, int $id, string $field, string $pic): OutputInterface
     {
-        if (empty($formid) || empty($id) || empty($field) || empty($pic)) {
-            return self::$output->withCode(21003);
+        if (empty($fid) || empty($id) || empty($field) || empty($pic)) {
+            return self::$output->withCode(21002);
         }
-        $res = self::dataView($formid, $id);
+        $res = self::dataView($fid, $id);
         if ($res->getCode() != 200) {
             return $res;
         }
@@ -707,7 +735,7 @@ class Forms extends ModelAbstract
         }
         unset($pics[$key]);
         Upload::uploadDel($pic);
-        return self::dataSave($formid, $id, [$field => serialize($pics)]);
+        return self::dataSave($fid, $id, [$field => serialize($pics)]);
     }
 
     /**
@@ -717,23 +745,23 @@ class Forms extends ModelAbstract
      */
     public static function dataExport(array $param): OutputInterface
     {
-        if (empty($param['formid'])) {
+        if (empty($param['fid'])) {
             return self::$output->withCode(21001);
         }
-        $form = self::t('forms')->withWhere($param['formid'])->fetch();
+        $form = self::t('forms')->withWhere($param['fid'])->fetch();
         if (empty($form['table'])) {
             return self::$output->withCode(22006);
         }
 
         $row = [];
-        $row['formid'] = $param['formid'];
+        $row['fid'] = $param['fid'];
         $row['page'] = aval($param, 'page', 1);
         $row['by'] = 'desc';
         $row['pagesize'] = aval($param, 'pagesize', 1000);
         $row['fields'] = '*';
         $result = self::dataList($row);
         $inlistField = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
-        $condition = ['formid' => $param['formid'], 'available' => 1, $inlistField => 1];
+        $condition = ['formid' => $param['fid'], 'available' => 1, $inlistField => 1];
 
         if (is_callable([self::t($form['table']), 'dataExportBefore'])) {
             $rs = self::t($form['table'])->dataExportBefore($condition, $result);
@@ -857,8 +885,10 @@ class Forms extends ModelAbstract
 
     /**
      * 获取表单提交数据
-     * @param $did
+     * @param array $fields
+     * @param array $olddata
      * @return array
+     * @throws \SlimCMS\Error\TextException
      */
     private static function getFormValue(array $fields, array $olddata = []): array
     {
@@ -897,12 +927,12 @@ class Forms extends ModelAbstract
                         }
                         break;
                     case 'int':
-                        if (strpos(self::input($identifier), '`')) {
+                        if (self::input($identifier) && strpos(self::input($identifier), '`')) {
                             $arr = explode('`', self::input($identifier));
                             $val = array_map('intval', $arr);
                             $data[$identifier] = implode(',', $val);
                         } else {
-                            $val = Request::input($identifier, 'int');
+                            $val = self::input($identifier, 'int');
                             if (isset($val)) {
                                 $data[$identifier] = $val;
                             }
@@ -1020,7 +1050,7 @@ class Forms extends ModelAbstract
     public static function delAttachment(array $fields, array $data): OutputInterface
     {
         if (empty($fields) || empty($data)) {
-            return self::$output->withCode(21003);
+            return self::$output->withCode(21002);
         }
         foreach ($fields as $v) {
             if (empty($data[$v['identifier']])) {
@@ -1054,14 +1084,14 @@ class Forms extends ModelAbstract
 
     /**
      * 获取表单提交所需要的信息
-     * @param int $formid
+     * @param int $fid
      * @param array $fields
      * @param array $row
      * @param array $options
      * @return array
      * @throws \SlimCMS\Error\TextException
      */
-    private static function formHtml(int $formid, array $fields, array $row = [], array $options = []): array
+    private static function formHtml($fid, array $fields, array $row = [], array $options = []): array
     {
         foreach ($fields as $k => $v) {
             $v['maxlength'] = $maxlength = !empty($v['maxlength']) ? 'maxlength="' . $v['maxlength'] . '"' : '';
@@ -1148,7 +1178,7 @@ class Forms extends ModelAbstract
                     break;
                 case 'imgs':
                     $v['imgs'] = !empty($v['default']) ? unserialize($v['default']) : [];
-                    $v['formid'] = $formid;
+                    $v['fid'] = $fid;
                     $v['row'] = $row;
 
                     //清除session里的图片信息
@@ -1165,7 +1195,7 @@ class Forms extends ModelAbstract
                     static $isLoadh5upload = 0;
                     $isLoadh5upload++;
                     $v['isLoadh5upload'] = $isLoadh5upload;
-                    $v['formid'] = $formid;
+                    $v['fid'] = $fid;
                     $v['row'] = $row;
                     $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
                     break;
@@ -1178,5 +1208,63 @@ class Forms extends ModelAbstract
             $fields[$k] = $v;
         }
         return $fields;
+    }
+
+    /**
+     * 后台列表展示字段
+     * @param $fid
+     * @param int $limit
+     * @return OutputInterface
+     */
+    public static function listFields(int $fid, $limit = 15, $fieldName = 'inlistcp'): OutputInterface
+    {
+        if (empty($fid)) {
+            return self::$output->withCode(21002);
+        }
+        $listFields = self::fieldList(['formid' => $fid, 'available' => 1, $fieldName => 1], '*', $limit);
+        return self::$output->withCode(200)->withData(['listFields' => $listFields]);
+    }
+
+    /**
+     * 参与搜索字段
+     * @param $fid
+     * @return OutputInterface
+     */
+    public static function searchFields(int $fid): OutputInterface
+    {
+        if (empty($fid)) {
+            return self::$output->withCode(21002);
+        }
+        $searchFields = self::fieldList(['formid' => $fid, 'available' => 1, 'search' => 1]);
+        if (!empty($searchFields)) {
+            foreach ($searchFields as &$v) {
+                if ($v['datatype'] == 'stepselect') {
+                    $v['default'] = self::input($v['identifier'], 'int');
+                    static $loadonce = 0;
+                    $loadonce++;
+                    $v['loadonce'] = $loadonce;
+                    $template = 'block/fieldshtml/' . $v['datatype'];
+                    $v['fieldHtml'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
+                }
+            }
+        }
+        return self::$output->withCode(200)->withData(['searchFields' => $searchFields]);
+    }
+
+    /**
+     * 参与排序字段
+     * @param $fid
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function orderFields(int $fid): OutputInterface
+    {
+        if (empty($fid)) {
+            return self::$output->withCode(21002);
+        }
+        $where = ['formid' => $fid, 'available' => 1, 'orderby' => 1];
+        $data = [];
+        $data['orderFields'] = self::t('forms_fields')->withWhere($where)->onefieldList('id');
+        return self::$output->withCode(200)->withData($data);
     }
 }

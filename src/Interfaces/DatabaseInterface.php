@@ -44,7 +44,7 @@ interface DatabaseInterface
      * @param int $columnNumber
      * @return string
      */
-    public function fetchColumn(string $sql, $columnNumber = 0): string;
+    public function fetchColumn(string $sql, $columnNumber = 0);
 
     /**
      * 返回插入数据的自增ID

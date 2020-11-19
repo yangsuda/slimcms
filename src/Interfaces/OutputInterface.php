@@ -16,6 +16,10 @@ interface OutputInterface extends JsonSerializable
      */
     public function __invoke(App $app);
 
+    public function __set($name, $value);
+
+    public function __get($name);
+
     /**
      * 返回提示文字
      * @return string
@@ -48,6 +52,12 @@ interface OutputInterface extends JsonSerializable
      * @return OutputInterface
      */
     public function withData(array $data): self;
+
+    /**
+     * 获取模板
+     * @return string
+     */
+    public function getTemplate(): string;
 
     /**
      * 设置解析的模板

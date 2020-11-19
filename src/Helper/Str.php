@@ -199,8 +199,7 @@ class Str
     public static function serializeData($str)
     {
         if ($str) {
-            //不知为何有时会莫名出来choices=,先过滤掉
-            $arr = explode("\n", str_replace('choices=', '', $str));
+            $arr = explode("\n", $str);
             $row = array();
             $i = 0;
             if (!preg_match('/=/', $str)) {

@@ -1,0 +1,113 @@
+<style type="text/css">
+    .modal-dialog-centered {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        min-height: calc(80%);
+    }
+    .modal-dialog {
+        max-width: 700px;
+    }
+</style>
+<div class="modal fade" id="alertMsg" tabindex="-1" role="dialog" aria-labelledby="alertMsg" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 500px;">
+            <span class="msg"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmMsg" tabindex="-1" role="dialog" aria-labelledby="confirmMsg" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-3 col-md-3 text-right">
+                        <i class="fa fa-warning bigfonts text-warning" style="font-size: 40px; line-height:100px;"></i>
+                    </div>
+                    <div class="msg col-sm-9 col-md-9 text-left" style="font-size: 20px; line-height:100px;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary btn-submit">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="resultMsg" tabindex="-1" role="dialog" aria-labelledby="resultMsg" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="width: 500px;">
+            <div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin:0.7rem 1rem">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fa-2x mr-2 far fa-check-circle bigfonts text-success"
+                   style="font-size: 50px; line-height:50px;"></i>
+                <div class="msg" style="font-size: 20px; line-height:50px;margin-bottom:2rem"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmMsg(msg, callback) {
+        $('#confirmMsg .msg').text(msg);
+        $('#confirmMsg').modal();
+        $('#confirmMsg .btn-submit').click(function () {
+            typeof callback === 'function' && callback();
+        })
+    }
+
+    function alertMsg(msg, ttl = 2000) {
+        $('#alertMsg .msg').text(msg);
+        $('#alertMsg').modal();
+        setTimeout(function () {
+            $('#alertMsg').modal('hide');
+        }, ttl);
+    }
+
+    function resultMsg(msg, code, ttl = 2000) {
+        if(code==200){
+            $('#resultMsg i').prop('class','fa-2x mr-2 far fa-check-circle bigfonts text-success');
+        }else{
+            $('#resultMsg i').prop('class','fa-2x mr-2 far fa-times-circle bigfonts text-danger');
+        }
+        $('#resultMsg .msg').text(msg);
+        $('#resultMsg').modal();
+        setTimeout(function () {
+            $('#resultMsg').modal('hide');
+        }, ttl);
+    }
+
+    $(function () {
+        $('.btn-delImg').click(function () {
+            var that = $(this);
+            var identifier = that.data('identifier');
+            var id = that.data('id');
+            var fid = that.data('fid');
+            $.getJSON('?p=main/delImg&identifier='+identifier+'&id='+id+'&fid='+fid,function (res) {
+                if(res.code!=200){
+                    alert(res.msg);
+                }else{
+                    that.parents('.am-margin-vertical').hide();
+                }
+            });
+        })
+        <!--{if !empty($data[errorMsg])}-->
+        resultMsg('$data[errorMsg]', $data[errorCode]);
+        <!--{/if}-->
+    })
+</script>

@@ -1,6 +1,6 @@
 <?php
 /**
- * 默认控制类
+ * model继承抽象类
  */
 
 declare(strict_types=1);

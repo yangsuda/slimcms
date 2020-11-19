@@ -114,7 +114,7 @@ class Database implements DatabaseInterface
     /**
      * {@inheritDoc}
      */
-    public function fetchColumn(string $sql, $columnNumber = 0): string
+    public function fetchColumn(string $sql, $columnNumber = 0)
     {
         $query = $this->query($sql);
         $data = $query->fetchColumn($columnNumber);

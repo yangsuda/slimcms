@@ -29,12 +29,23 @@ class Response extends MessageAbstract
             return $this->jsonCallback($output);
         }
         $contentType = $this->determineContentType();
-        if (strpos($contentType, 'json')) {
-            $this->response = $this->response->withHeader('Content-type', $contentType);
-            $encodedOutput = json_encode($output, JSON_PRETTY_PRINT);
-            $this->response->getBody()->write($encodedOutput);
-            return $this->response;
+        $contentType = $contentType ?: 'application/json';
+        if ($contentType == 'text/html') {
+            return $this->view($output);
         }
+        $this->response = $this->response->withHeader('Content-type', $contentType);
+        $encodedOutput = json_encode($output, JSON_PRETTY_PRINT);
+        $this->response->getBody()->write($encodedOutput);
+        return $this->response;
+    }
+
+    /**
+     * 模板渲染
+     * @param OutputInterface $output
+     * @return ResponseInterface
+     */
+    public function view(OutputInterface $output): ResponseInterface
+    {
         $content = $output->analysisTemplate();
         $this->response = $this->response->withHeader('Content-type', 'text/html');
         $this->response->getBody()->write($content);

@@ -1,0 +1,88 @@
+<!--{template html_head}-->
+<link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css" />
+</head>
+<style type="text/css">
+    div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+        justify-content: flex-end !important;
+    }
+</style>
+<body class="adminbody">
+
+<div id="main">
+    <!--{template head}-->
+    <!--{template leftMenu}-->
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="row m-1">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div class="form-group row">
+                                    <label class="col-sm-2">用户名：</label>
+                                    <div class="col-sm-6 mb-2">
+                                        $data[admin][userid]
+                                    </div>
+                                    <div class="col-sm-4 text-muted">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2">姓名：</label>
+                                    <div class="col-sm-6 mb-2">
+                                        $data[admin][realname]
+                                    </div>
+                                    <div class="col-sm-4 text-muted">
+                                    </div>
+                                </div>
+                                <!--{if !empty($data[admin][headimgurl])}-->
+                                <div class="form-group row">
+                                    <label class="col-sm-2">头像：</label>
+                                    <div class="col-sm-6 mb-2">
+                                        <img src="{echo copyImage($data[admin][headimgurl],100,100)}">
+                                    </div>
+                                    <div class="col-sm-4 text-muted">
+                                    </div>
+                                </div>
+                                <!--{/if}-->
+                                <div class="form-group row">
+                                    <label class="col-sm-2">所属用户组：</label>
+                                    <div class="col-sm-6 mb-2">
+                                        $data[admin][_groupid][groupname]
+                                    </div>
+                                    <div class="col-sm-4 text-muted">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 mb-2">上次登陆时间：</label>
+                                    <div class="col-sm-6">
+                                        {echo date('Y-m-d H:i:s',$data[admin][logintime])}
+                                    </div>
+                                    <div class="col-sm-4 text-muted">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 mb-2">上次登陆IP：</label>
+                                    <div class="col-sm-6">
+                                        $data[admin][loginip]
+                                    </div>
+                                    <div class="col-sm-4 text-muted">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!--{template footer}-->
+</body>
+</html>

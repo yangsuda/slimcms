@@ -20,46 +20,6 @@ function aval($arr, $val, $default = null)
 }
 
 /**
- * 伪静态URL处理
- */
-function rewriteUrl($url, $scriptname = '')
-{
-    $cfg = \cs090\core\Config::$config;
-    if (preg_match('/^&/', $url)) {
-        $url = \cs090\helper\Http::currentUrl() . $url;
-    }
-    $scriptname = $scriptname ?: CURSCRIPT;
-    if (empty($cfg['cfg']['rewritestatus'])) {
-        return $url;
-    }
-
-    $query = parse_url($url, PHP_URL_QUERY);
-    parse_str($query, $output);
-    $basehost = aval($cfg, 'cfg/' . $scriptname . 'host', aval($cfg, 'cfg/basehost'));
-    $basepath = preg_match('/\/' . $scriptname . '\//i', $url) ? '' : $basehost;
-
-    $url = rtrim($basepath, '/') . '/' . rtrim($output['p'], '/') . '/';
-    $jsoncallback = !empty($output['jsoncallback']);
-    unset($output['p'], $output['q'], $output['jsoncallback']);
-    if (!empty($output)) {
-        $arr = array();
-        foreach ($output as $k => $v) {
-            $v = is_array($v) ? implode('`', $v) : $v;
-            if (!empty($v) || $v == '0') {
-                $arr[] = urlencode(str_replace(array('-', '_'), array('&#045;', '&#095;'), $k) . '-' . str_replace(array('-', '_'), array('&#045;', '&#095;'), $v));
-            }
-        }
-        if ($arr) {
-            $val = implode('_', $arr);
-            $url .= urlencode($val) . '.html';
-            //方便JS中url的拼接生成URL
-            $url = str_replace(array('%2527%2B', '%2B%2527'), array('\'+', '+\''), $url);
-        }
-    }
-    return $url . ($jsoncallback ? '?jsoncallback=?' : '');
-}
-
-/**
  * 版本比较
  * @param $ver
  * @param string $operator

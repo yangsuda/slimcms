@@ -1,7 +1,9 @@
 <?php
 /**
- * 默认控制类
+ * control继承抽象类
  */
+
+declare(strict_types=1);
 
 namespace SlimCMS\Abstracts;
 
@@ -14,16 +16,25 @@ abstract class ControlAbstract extends BaseAbstract
      * @param array $result
      * @return array|\Psr\Http\Message\ResponseInterface
      */
-    public function view(OutputInterface $output = null, string $template = null)
+    public function view(OutputInterface $output = null, string $template = '')
     {
         $p = self::input('p');
         $output = $output ?? self::$output;
-        $template = $template ?? $p;
+        $template = $template ?: $p;
         if (empty($template)) {
             return self::response($output->withCode(21017));
         }
-        $output = $output->withTemplate($template);
-        return self::response($output);
+        $data = [];
+        $data['formhash'] = self::$request->getFormHash();
+        $data['errorCode'] = self::$request->cookie()->get('errorCode');
+        $data['errorMsg'] = self::$request->cookie()->get('errorMsg');
+        $data['currentUrl'] = self::url();
+        $output = $output->withTemplate((string)$template)->withData($data);
+
+        //删除操作时临时生成的cookie提示信息
+        self::$request->getCookie()->set('errorCode');
+        self::$request->getCookie()->set('errorMsg');
+        return self::$response->view($output);
     }
 
     /**
@@ -50,12 +61,4 @@ abstract class ControlAbstract extends BaseAbstract
         $output->jsonCallback = $jsonCallback;
         return self::response($output);
     }
-
-    public function __destruct()
-    {
-        //删除操作时临时生成的cookie提示信息
-        self::$request->getCookie()->set('errorCode');
-        self::$request->getCookie()->set('errorMsg');
-    }
-
 }

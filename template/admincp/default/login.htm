@@ -1,0 +1,115 @@
+<!--{template html_head}-->
+<link href="$cfg[resourceUrl]assets/css/login.css" rel="stylesheet">
+</head>
+<body>
+<div class="login-menu">
+    <div class="container">
+        <nav class="nav">
+            <a class="nav-link active" href="#" style="font-size:22px;">$cfg[webname]后台管理系统</a>
+        </nav>
+    </div>
+</div>
+<div class="container h-100">
+    <div class="row h-100 justify-content-center align-items-center">
+        <div class="card">
+            <h4 class="card-header">登陆</h4>
+
+            <div class="card-body">
+                <form name="form1" action="{url ?p=login}" method="post" class="validform">
+                    <input type="hidden" name="formhash" value="$data[formhash]"/>
+                    <input type="hidden" name="referer" value="$referer"/>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-prepend"><span class="input-group-text"><i
+                                            class="fa-1x mr-1 fas fa-user-alt" aria-hidden="true"></i></span></span>
+                                    <input type="text" name="userid" class="form-control" datatype="*"
+                                           placeholder="请填写用户名" nullmsg="请填写用户名" required/>
+                                </div>
+                                <div class="help-block with-errors text-danger"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-prepend"><span class="input-group-text"><i
+                                            class="fa-1x mr-1 fas fa-unlock-alt" aria-hidden="true"></i></span></span>
+                                    <input type="password" name="pwd" class="form-control" datatype="*"
+                                           placeholder="请填写密码" nullmsg="请填写密码" required/>
+                                </div>
+                                <div class="help-block with-errors text-danger"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-prepend"><span class="input-group-text"><i
+                                            class="fa-1x mr-1 fas fa-check" aria-hidden="true"></i></span></span>
+                                    <img id="vdimgck" align="absmiddle"
+                                         onClick="this.src='{url ?p=login/captcha}#'+Math.random()" alt="看不清？点击更换"
+                                         src="{url ?p=login/captcha}"
+                                         style="cursor: pointer; position:absolute; right:10px; top:5px;height: 30px; z-index:1000;"/>
+                                    <input type="text" id="ccode" class="form-control" placeholder="请填写验证码"
+                                           nullmsg="请填写验证码" name="ccode" required/>
+                                </div>
+                                <div class="help-block with-errors text-danger"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="help-block with-errors text-danger msg"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="hidden" name="redirect" value=""/>
+                            <input type="submit" class="btn btn-primary btn-lg btn-block" value="登陆" name="submit"/>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="clear"></div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="$cfg[resourceUrl]validform/js/Validform_min.js"></script>
+<link rel="stylesheet" href="$cfg[resourceUrl]validform/css/validform_channel.css"/>
+
+<script>
+    $(function () {
+        $(".validform").Validform({
+            tiptype: function (msg, o, cssctl) {
+            },
+            showAllError: true,
+            ignoreHidden: true,
+            ajaxPost: true,
+            callback: function (res) {
+                if (res.code != 200) {
+                    $('#vdimgck').prop('src', '{url ?p=login/captcha}#' + Math.random());
+                    $('.msg').addClass('Validform_wrong').html(res.msg);
+                } else {
+                    location = res.referer;
+                }
+            }
+        });
+    })
+</script>
+
+</body>
+</html>

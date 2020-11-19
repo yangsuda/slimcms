@@ -1,0 +1,54 @@
+<style type="text/css">
+    .headerbar-left i {
+        line-height: 50px !important;
+    }
+    .headerbar .headerbar-left {
+        width: 50px;
+    }
+    .navbar-custom {
+        margin-left: 50px;
+    }
+    .table td, .table th {
+        padding: .45rem;
+    }
+</style>
+<!-- top bar navigation -->
+<div class="headerbar">
+    <!-- LOGO -->
+    <div class="headerbar-left">
+        <button class="button-menu-mobile open-left">
+            <i class="fa fa-fw fa-bars"></i>
+        </button>
+    </div>
+
+    <nav class="navbar-custom">
+        <ul class="list-inline float-right mb-0">
+            <li class="list-inline-item dropdown notif">
+                <a class="nav-link dropdown-toggle nav-user" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                    <!--{if !empty($data[admin][headimgurl])}-->
+                    <img src="{echo copyImage($data[admin][headimgurl],100,100)}" alt="$data[admin][userid]" class="avatar-rounded">
+                    <!--{else}-->
+                    <img src="$cfg[resourceUrl]assets/images/avatars/admin.png" alt="$data[admin][userid]" class="avatar-rounded">
+                    <!--{/if}-->
+                </a>
+                <div class="dropdown-menu dropdown-menu-right profile-dropdown">
+                    <!-- item-->
+                    <div class="dropdown-item noti-title">
+                        <h5 class="text-overflow"><small>您好, $data[admin][userid]</small> </h5>
+                    </div>
+                    <!-- item-->
+                    <a href="?p=loginout" class="dropdown-item notify-item">
+                        <i class="fa fa-power-off"></i> <span>退出</span>
+                    </a>
+                </div>
+            </li>
+        </ul>
+
+        <ul class="list-inline menu-left mb-0">
+            <li class="float-left">
+                <a href="?p=main/index" class="logo"><span>$cfg[webname]后台管理系统</span></a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<!-- End Navigation -->
