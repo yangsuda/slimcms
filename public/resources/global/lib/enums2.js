@@ -22,28 +22,24 @@ function Enums() {
         self.ajax_get_enums_list();
     }
     this.ajax_get_enums_list = function() {
-        $.getJSON(basehost+"&p=enumsData&egroup=" + self.egroup + "&rand=" + Math.random(), function(result) {
-            if(result.data.status == 1) {
-                var _infolist = result.data.infolist;
-                if(_infolist.length == 0) {
-                    alert("没有相关的数据，检查egroup的输入是否正确");
+        $.getJSON(basehost+"&p=main/enumsData&egroup=" + self.egroup + "&rand=" + Math.random(), function(result) {
+            var _infolist = result.data.list;
+            if(Object.keys(_infolist).length>0) {
+                if(self.evalue == 0 || self.get_reid(_infolist, self.evalue) == -1) {
+                    self.draw_html(_infolist);
                 } else {
-                    if(self.evalue == 0 || self.get_reid(result.data.infolist, self.evalue) == -1) {
-                        self.draw_html(result.data.infolist);
-                    } else {
-                        self.draw_html_by_evalue(result.data.infolist, self.evalue);
-                    }
-                    self.draw_input();
-                    if($('select').selected != undefined) {
-                        if(res == 'android' || res == 'iphone') {
+                    self.draw_html_by_evalue(_infolist, self.evalue);
+                }
+                self.draw_input();
+                if($('select').selected != undefined) {
+                    if(res == 'android' || res == 'iphone') {
 
-                        } else {
-                            $('#' + self.egroup + '_span select').chosen({ allow_single_deselect: true, disable_search_threshold: 10, search_contains: true, });
-                        }
+                    } else {
+                        $('#' + self.egroup + '_span select').chosen({ allow_single_deselect: true, disable_search_threshold: 10, search_contains: true, });
                     }
-                    if(typeof enums_callback === 'function') {
-                        enums_callback(self);
-                    }
+                }
+                if(typeof enums_callback === 'function') {
+                    enums_callback(self);
                 }
             }
         });

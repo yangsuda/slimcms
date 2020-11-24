@@ -2,11 +2,11 @@
     $(function () {
         $('.sorting_desc').click(function () {
             var order = $(this).data('order');
-            location='$data[currenturl]&order='+order+'&by=asc';
+            location='{url &order='+order+'&by=asc}';
         })
         $('.sorting_asc').click(function () {
             var order = $(this).data('order');
-            location='$data[currenturl]&order='+order+'&by=desc';
+            location='{url &order='+order+'&by=desc}';
         })
     })
 </script>
@@ -31,7 +31,7 @@
             return ;
         }
         confirmMsg('你确定要审核这些信息吗?',function () {
-            location = "?p=forms/dataCheck&ischeck=1&fid=$data[fid]&ids="+nid;
+            location = '{url ?p=forms/dataCheck&ischeck=1&fid=$data[fid]&ids='+nid+'}';
         })
     }
 
@@ -42,7 +42,7 @@
             return;
         }
         confirmMsg('你确定要删除这些信息吗?',function () {
-            location = "$data[currenturl]&p=forms/dataDel&ids=" + nid;
+            location = '{url &p=forms/dataDel&ids='+nid+'}';
         })
     }
 
@@ -51,7 +51,7 @@
             var ischeck = $(this).data('ischeck');
             var id = $(this).data('id');
             var that = $(this);
-            $.getJSON('?p=forms/dataCheck&ischeck='+ischeck+'&fid=$data[fid]&ids='+id,function (res) {
+            $.getJSON('{url ?p=forms/dataCheck&ischeck='+ischeck+'&fid=$data[fid]&ids='+id+'}',function (res) {
                 if(res['code']!=200){
                     alert(res.msg);
                 }else{

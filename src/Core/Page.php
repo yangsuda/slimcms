@@ -90,10 +90,6 @@ class Page extends ModelAbstract
     public static function simplepage($num, $perpage, $curpage, $mpurl, $shownum = false)
     {
         $a_name = '';
-        if (empty($mpurl)) {
-            $cfg = Config::$config;
-            $mpurl = Http::currentUrl($cfg['currenturl']);
-        }
         if (strpos($mpurl, '#') !== FALSE) {
             $a_strs = explode('#', $mpurl);
             $mpurl = $a_strs[0];

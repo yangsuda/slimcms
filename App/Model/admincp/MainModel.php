@@ -1,53 +1,53 @@
 <?php
 
-namespace app\model\admincp;
+declare(strict_types=1);
 
+namespace App\Model\admincp;
 
-use cs090\core\Table;
-use cs090\core\Upload;
-use cs090\helper\Http;
-use cs090\helper\Ipdata;
+use App\Core\Upload;
+use SlimCMS\Abstracts\ModelAbstract;
+use SlimCMS\Interfaces\OutputInterface;
 
-class MainModel extends AdmincpModel
+class MainModel extends ModelAbstract
 {
     /**
      * 恢复数据
      * @param $id
      * @return array
      */
-    public static function recovery($id)
+    public static function recovery(int $id): OutputInterface
     {
         if (empty($id)) {
-            return self::result(21002);
+            return self::$output->withCode(21002);
         }
         $row = Table::t('archivedata')->fetch($id);
         if (empty($row)) {
-            return self::result(21001);
+            return self::$output->withCode(21001);
         }
         $content = unserialize($row['content']);
-        $table = Table::t('forms')->fetch($row['formid'], 'table');
-        Table::t($table)->insert($content);
-        Table::t('archivedata')->delete($id);
-        return self::result(200, '', 211031);
+        $table = self::t('forms')->withWhere($row['formid'])->fetch('table');
+        self::t($table)->insert($content);
+        self::t('archivedata')->delete($id);
+        return self::$output->withCode(200, 211031);
     }
 
     /**
      * 指定此三个文件夹文件做安全校验
      */
-    public static function fileVerify()
+    public static function fileVerify(): OutputInterface
     {
         $dirs = ['app', 'template', 'vendor'];
         foreach ($dirs as $dir) {
             self::getFiles(CSROOT . $dir);
         }
         //检测是否有删除
-        $list = Table::t('fileverify')->fetchList();
+        $list = self::t('fileverify')->fetchList();
         foreach ($list as $v) {
             if (!is_file(CSROOT . $v['filename'])) {
-                Table::t('fileverify')->update($v['id'], ['status' => 4]);
+                self::t('fileverify')->withWhere($v['id'])->update(['status' => 4]);
             }
         }
-        return self::result(200, '', 21017, '?p=forms/dataList&did=3');
+        return self::$output->withCode(200, 21017);
     }
 
     /**
@@ -68,12 +68,14 @@ class MainModel extends AdmincpModel
                     $file = $directory . '/' . $resource;
                     $srcverifykey = md5_file($file);
                     $filename = str_replace(CSROOT, '', $file);
-                    $row = Table::t('fileverify')->fetch(['filename' => $filename]);
+                    $row = self::t('fileverify')->withWhere(['filename' => $filename])->fetch();
                     if (empty($row)) {
-                        Table::t('fileverify')->insert(['filename' => $filename, 'srcverifykey' => $srcverifykey, 'status' => 3, 'createtime' => TIMESTAMP, 'ip' => Ipdata::getip()]);
+                        $data = ['filename' => $filename, 'srcverifykey' => $srcverifykey, 'status' => 3, 'createtime' => TIMESTAMP, 'ip' => Ipdata::getip()];
+                        self::t('fileverify')->insert($data);
                     } else {
                         $status = $row['srcverifykey'] == $srcverifykey ? 1 : 2;
-                        Table::t('fileverify')->update($row['id'], ['curverifykey' => $srcverifykey, 'status' => $status]);
+                        $data = ['curverifykey' => $srcverifykey, 'status' => $status];
+                        self::t('fileverify')->withWhere($row['id'])->update($data);
                     }
                 }
             }
@@ -86,21 +88,22 @@ class MainModel extends AdmincpModel
      * @param $file
      * @return array
      */
-    public static function updateVerifyKey($file)
+    public static function updateVerifyKey(string $file): OutputInterface
     {
         if (empty($file)) {
-            return self::result(21002);
+            return self::$output->withCode(21002);
         }
-        $row = Table::t('fileverify')->fetch(['filename' => $file]);
+        $row = self::t('fileverify')->withWhere(['filename' => $file])->fetch();
         if (empty($row)) {
-            return self::result(21001);
+            return self::$output->withCode(21001);
         }
         if (!is_file(CSROOT . $row['filename'])) {
-            Table::t('fileverify')->delete($row['id']);
+            self::t('fileverify')->withWhere($row['id'])->delete();
         } else {
-            Table::t('fileverify')->update($row['id'], ['srcverifykey' => $row['curverifykey'], 'status' => 1]);
+            $data = ['srcverifykey' => $row['curverifykey'], 'status' => 1];
+            self::t('fileverify')->withWhere($row['id'])->update($data);
         }
-        return self::result(200, '', 21017, '?p=forms/dataList&did=3');
+        return self::$output->withCode(200, 21017);
     }
 
     /**
@@ -108,133 +111,18 @@ class MainModel extends AdmincpModel
      * @param $param
      * @return array
      */
-    public static function delImg($param)
+    public static function delImg(array $param): OutputInterface
     {
-        if (empty($param['did']) || empty($param['id']) || empty($param['identifier'])) {
-            return self::result(21002);
+        if (empty($param['fid']) || empty($param['id']) || empty($param['identifier'])) {
+            return self::$output->withCode(21002);
         }
-        $tableName = Table::t('forms')->fetch($param['did'], 'table');
-        $row = Table::t($tableName)->fetch($param['id']);
+        $tableName = self::t('forms')->withWhere($param['fid'])->fetch('table');
+        $row = self::t($tableName)->withWhere($param['id'])->fetch();
         if (empty($row[$param['identifier']])) {
-            return self::result(21001);
+            return self::$output->withCode(21001);
         }
         Upload::uploadDel($row[$param['identifier']]);
-        Table::t($tableName)->update($param['id'], [$param['identifier'] => '']);
-        return self::result(200);
-    }
-
-    /**
-     * 生成海报
-     * @param $openid
-     * @return array
-     */
-    public static function sharePic($openid)
-    {
-        if (empty($openid)) {
-            return self::result(21002);
-        }
-        $user = Table::t('members')->fetch(['openid' => $openid]);
-        if (empty($user)) {
-            return self::result(21001);
-        }
-        $scene = $user['id'];
-        $font = CSDATA . "fonts/nokia.ttf";
-        $newpic = '/uploads/tmp/' . $scene . '.png';
-        $dst = imagecreatefromstring(file_get_contents(CSPUBLIC . '/common/images/poster.jpg'));
-        imagesavealpha($dst, true);
-
-        //昵称
-        //$black = imagecolorallocate($dst, 0, 0, 0);
-        //$nickname = self::toEntities(self::filterEmoji($user['nickname']));
-        //imagettftext($dst, 15, 0, 125, 745, $black, $font, $nickname);
-
-        //头像
-        $picurl = '/uploads/tmp/head' . md5($scene) . '.jpg';
-        $data = Http::curlGet($user['headimgurl']);
-        $data && file_put_contents(CSPUBLIC . $picurl, $data);
-
-        //二维码
-        $qrurl = self::$cfg['cfg']['basehost'] . self::$cfg['cfg']['entryFileName'].'?p=qrcode&scene=' . $scene . '&page=/pages/index/index';
-        $qrcodeurl = '/uploads/tmp/qrcode' . $scene . '.jpg';
-        file_put_contents(CSPUBLIC . $qrcodeurl, Http::curlGet($qrurl));
-
-        //头像
-        if ($data) {
-            $srcpic = str_replace(self::$cfg['cfg']['basehost'], CSPUBLIC, copyImage($picurl, 110, 110));
-            $src = imagecreatefromstring(file_get_contents($srcpic));
-            Upload::uploadDel($picurl);
-            imagecopy($dst, $src, 40, 950, 0, 0, 110, 110);
-        }
-
-        //头像边角处理
-        $src = imagecreatefromstring(file_get_contents(CSPUBLIC . '/common/images/face_bg.png'));
-        imagecopy($dst, $src, 40, 950, 0, 0, 110, 110);
-
-        //二维码
-        $srcpic = str_replace(self::$cfg['cfg']['basehost'], CSPUBLIC, copyImage($qrcodeurl, 142, 142));
-        $src = imagecreatefromstring(file_get_contents($srcpic));
-        Upload::uploadDel($picurl);
-        imagecopy($dst, $src, 446, 935, 0, 0, 142, 142);
-
-
-        imagepng($dst, CSPUBLIC . $newpic);
-        imagedestroy($dst);
-        return self::result(200, self::$cfg['cfg']['basehost'] . trim($newpic, '/'));
-    }
-
-    /**
-     * 过滤emoji表情
-     * @param $str
-     * @return string|string[]|null
-     */
-    private static function filterEmoji($str)
-    {
-        $str = preg_replace_callback(    //执行一个正则表达式搜索并且使用一个回调进行替换
-            '/./u',
-            function (array $match) {
-                return strlen($match[0]) >= 4 ? '' : $match[0];
-            },
-            $str);
-
-        return $str;
-    }
-
-    private static function toEntities($string)
-    {
-        $len = strlen($string);
-        $buf = "";
-        for ($i = 0; $i < $len; $i++) {
-            if (ord($string[$i]) <= 127) {
-                $buf .= $string[$i];
-            } else if (ord($string[$i]) < 192) {
-                //unexpected 2nd, 3rd or 4th byte
-                $buf .= "&#xfffd";
-            } else if (ord($string[$i]) < 224) {
-                //first byte of 2-byte seq
-                $buf .= sprintf("&#%d;",
-                    ((ord($string[$i + 0]) & 31) << 6) +
-                    (ord($string[$i + 1]) & 63)
-                );
-                $i += 1;
-            } else if (ord($string[$i]) < 240) {
-                //first byte of 3-byte seq
-                $buf .= sprintf("&#%d;",
-                    ((ord($string[$i + 0]) & 15) << 12) +
-                    ((ord($string[$i + 1]) & 63) << 6) +
-                    (ord($string[$i + 2]) & 63)
-                );
-                $i += 2;
-            } else {
-                //first byte of 4-byte seq
-                $buf .= sprintf("&#%d;",
-                    ((ord($string[$i + 0]) & 7) << 18) +
-                    ((ord($string[$i + 1]) & 63) << 12) +
-                    ((ord($string[$i + 2]) & 63) << 6) +
-                    (ord($string[$i + 3]) & 63)
-                );
-                $i += 3;
-            }
-        }
-        return $buf;
+        self::t($tableName)->withWhere($param['id'])->update([$param['identifier'] => '']);
+        return self::$output->withCode(200);
     }
 }

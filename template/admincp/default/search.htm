@@ -17,14 +17,14 @@
         </div>
         <!--{elseif in_array($v[datatype],array('date','datetime'))}-->
         <div class="form-group mr-3 mb-1">
-            <input placeholder="$v[title]" type='text' name='$v[identifier]_s' id='$v[identifier]_s' value="{echo cs090\core\Request::input($v[identifier].'_s')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
+            <input placeholder="$v[title]" type='text' name='$v[identifier]_s' id='$v[identifier]_s' value="{echo aval($data,'get/'.$v[identifier].'_s')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
             <script>
-                $(document).ready(function() {$('#$v[identifier]_s').datetimepicker({language: 'zh-CN',autoclose: true,format: 'yyyy-mm-dd{echo $v[datatype]=="date"?"":" hh:ii"}',startView: 2,minView: 2,});});
+                $(document).ready(function() {$('#$v[identifier]_s').datetimepicker({language: 'zh-CN',autoclose: true,format: 'yyyy-mm-dd{echo $v[datatype]=="date"?"":" hh:ii"}',{echo $v[datatype]=="date"?"startView: 2,minView: 2,":""}});});
             </script>
             <label class=" ml-1 mr-1">至</label>
-            <input placeholder="$v[title]" type='text' name='$v[identifier]_e' id='$v[identifier]_e' value="{echo cs090\core\Request::input($v[identifier].'_e')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
+            <input placeholder="$v[title]" type='text' name='$v[identifier]_e' id='$v[identifier]_e' value="{echo aval($data,'get/'.$v[identifier].'_e')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
             <script>
-                $(document).ready(function() {$('#$v[identifier]_e').datetimepicker({language: 'zh-CN',autoclose: true,format: 'yyyy-mm-dd{echo $v[datatype]=="date"?"":" hh:ii"}',startView: 2,minView: 2,});});
+                $(document).ready(function() {$('#$v[identifier]_e').datetimepicker({language: 'zh-CN',autoclose: true,format: 'yyyy-mm-dd{echo $v[datatype]=="date"?"":" hh:ii"}',{echo $v[datatype]=="date"?"startView: 2,minView: 2,":""}});});
             </script>
         </div>
         <!--{elseif in_array($v[datatype],array('multidate'))}-->

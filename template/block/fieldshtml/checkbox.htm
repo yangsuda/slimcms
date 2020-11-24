@@ -1,4 +1,4 @@
-<!--{if $cfg[clienttype] > 0 && count($data[rules] > 3}-->
+<!--{if $cfg[clienttype] > 0 && count($data[rules]) > 3}-->
     <select multiple="multiple" class="form-control $data[css]" $data[validform] id="$data[identifier]" name="{$data[identifier]}[]">
         <!--{loop $data[rules] $k $v}-->
         <option value="$k" {echo in_array($k,explode(',',$data[default]))?'selected':''}>$v</option>

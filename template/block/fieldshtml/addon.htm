@@ -6,7 +6,7 @@
     <input type="file" name="$data[identifier]" onChange="$('#{$data[identifier]}_html').html(this.value);$('#{$data[identifier]}_hidden').val(this.value);" />
     <input type="hidden" id="{$data[identifier]}_hidden" name="{$data[identifier]}_hidden" value="$data[default]" $data[validform] />
 </div>
-<div class="m-1">
+<div id="{$data[identifier]}_html" class="m-1">
     <!--{if $data[default]}-->
     <a href="$data[default]">$data[default]</a>
     <!--{/if}-->

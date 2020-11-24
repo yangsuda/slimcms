@@ -19,18 +19,17 @@
                             <div class="card-body m-4">
                                 <form name="form1" action="{url &}" enctype="multipart/form-data" method="post" class="validform">
                                     <input type="hidden" name="formhash" value="$data[formhash]" />
-                                    <input type="hidden" name="referer" value="$data[currenturl]" />
-                                    <!--{if aval($data,'id')}-->
+                                    <!--{if aval($data,'data/id')}-->
                                     <div class="form-group row">
                                         <label class="col-sm-2 col-form-label">ID：</label>
                                         <div class="col-sm-6">
-                                            $data[id]
+                                            $data[data][id]
                                         </div>
                                         <div class="col-sm-4 text-muted">
                                         </div>
                                     </div>
                                     <!--{/if}-->
-                                    <!--{loop $fieldshtml $v}-->
+                                    <!--{loop $data[fieldshtml] $v}-->
                                     <!--{if $v[forbidedit]=='1'}-->
                                     <!--{eval !isset($allowedit) && $allowedit=1;}-->
                                     <!--{/if}-->
@@ -41,7 +40,7 @@
                                         <label class="col-sm-2 col-form-label">$v[title]{echo $v[required]==1?'*':''}：</label>
                                         <div class="col-sm-6">
                                             <select class="form-control" name="groupid">
-                                                <!--{loop $data[groups] $k1 $v1}-->
+                                                <!--{loop $data[data][groups] $k1 $v1}-->
                                                 <option value="$v1[id]" {echo $v[default]==$v1[id]?'selected':''}>$v1[groupname]</option>
                                                 {/loop}
                                             </select>

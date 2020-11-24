@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace App\Control\admincp;
 
+use App\Model\admincp\MainModel;
+
 class MainControl extends AdmincpControl
 {
     /**
@@ -25,8 +27,9 @@ class MainControl extends AdmincpControl
      */
     public function recovery()
     {
-        $id = self::input('id', 'int');
-        return MainModel::recovery($id);
+        $id = (int)self::input('id', 'int');
+        $res = MainModel::recovery($id);
+        return self::response($res);
     }
 
     /**
@@ -35,7 +38,8 @@ class MainControl extends AdmincpControl
      */
     public function fileVerify()
     {
-        return MainModel::fileVerify();
+        $res = MainModel::fileVerify()->withReferer(self::url('?p=forms/dataList&fid=3'));
+        return self::response($res);
     }
 
     /**
@@ -44,8 +48,9 @@ class MainControl extends AdmincpControl
      */
     public function updateVerifyKey()
     {
-        $file = self::input('file');
-        return MainModel::updateVerifyKey($file);
+        $file = (string)self::input('file');
+        $res = MainModel::updateVerifyKey($file)->withReferer(self::url('?p=forms/dataList&fid=3'));
+        return self::response($res);
     }
 
     /**
@@ -54,17 +59,8 @@ class MainControl extends AdmincpControl
      */
     public function delImg()
     {
-        $param = self::input(['did' => 'int', 'id' => 'int', 'identifier' => 'string']);
-        return MainModel::delImg($param);
-    }
-
-    /**
-     * 删除奖品设置
-     * @return array
-     */
-    public function prizeDel()
-    {
-        $prizeid = self::input('prizeid', 'int');
-        return LotteryModel::prizeDel($prizeid);
+        $param = self::input(['fid' => 'int', 'id' => 'int', 'identifier' => 'string']);
+        $res = MainModel::delImg($param);
+        return self::response($res);
     }
 }

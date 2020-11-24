@@ -139,6 +139,9 @@ class Database implements DatabaseInterface
      */
     private function checkQuery(string $sql)
     {
+        if (!preg_match('/^(SELECT|UPDATE|INSERT|REPLACE|DELETE)/i',$sql)) {
+            return '';
+        }
         $querysafe = $this->setting['security']['querysafe'];
         if ($querysafe['status']) {
             $sql = str_replace(array('\\\\', '\\\'', '\\"', '\'\''), '', $sql);

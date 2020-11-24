@@ -53,8 +53,8 @@ class Forms_fieldsTable extends Table
     {
         if (!empty($row['identifier']) && !empty($row['formid'])) {
             $form = self::t('forms')->withWhere($row['formid'])->fetch();
-            if (in_array($row['identifier'], ['id', 'ifcheck', 'fid', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache', 'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group'])) {
-                return 21051;
+            if (in_array($row['identifier'], ['id', 'ischeck', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache', 'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group'])) {
+                return 21059;
             }
             self::t($form['table'])->fieldUpdate($row);
         }
@@ -80,13 +80,12 @@ class Forms_fieldsTable extends Table
      * @param $data
      * @return array
      */
-    public function getFormHtmlBefore(&$condition, &$data): int
+    public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {
-        if (empty($data['displayorder'])) {
-            $formid = self::input('formid', 'int');
-            $list = self::t('forms_fields')->withWhere(['formid' => $formid])->withLimit(1)->fetchList('displayorder');
+        if (empty($data['displayorder']) && !empty($data['formid'])) {
+            $list = self::t('forms_fields')->withWhere(['formid' => $data['formid']])->withLimit(1)->fetchList('displayorder');
             if (!empty($list[0]['displayorder'])) {
-                $_GET['displayorder'] = $list[0]['displayorder'] - 1;
+                $data['displayorder'] = $list[0]['displayorder'] - 1;
             }
         }
         return 200;

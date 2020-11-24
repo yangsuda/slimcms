@@ -183,7 +183,7 @@ class Table
                 $this->fetchTTL && $this->redis->set($cachekey, $data, $this->fetchTTL);
             }
         } else {
-            $sql = $this->selectSQL($fields);
+            $sql = $this->selectSQL('*');
             $data = $this->db->fetch($sql);
         }
 

@@ -133,11 +133,12 @@ abstract class BaseAbstract
                 unset($output[$k]);
             }
         }
+
         $url = http_build_query($output);
 
         if (empty(self::$config['rewriteUrl'])) {
             $url = (preg_match('/^http/', $path) ? $path : rtrim(self::$config['basehost'], '/') . '/' . $path) . '?' . $url;
-            return $url;
+            return str_replace('%27', '\'', $url);
         }
 
         $entre = CURSCRIPT == 'index' ? '' : CURSCRIPT . '/';

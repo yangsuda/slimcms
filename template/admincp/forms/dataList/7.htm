@@ -122,7 +122,7 @@
             $('.recovery').click(function () {
                 var id = $(this).data('id');
                 var that = $(this);
-                $.getJSON('?p=main/recovery&id='+id,function (res) {
+                $.getJSON('{url ?p=main/recovery&id='+id+'}',function (res) {
                     resultMsg(res.msg,res.code);
                     if(res.code==200){
                         that.parents('tr').hide();

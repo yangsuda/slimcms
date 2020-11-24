@@ -98,7 +98,7 @@
             var identifier = that.data('identifier');
             var id = that.data('id');
             var fid = that.data('fid');
-            $.getJSON('?p=main/delImg&identifier='+identifier+'&id='+id+'&fid='+fid,function (res) {
+            $.getJSON('{url ?p=main/delImg&identifier='+identifier+'&id='+id+'&fid='+fid+'}',function (res) {
                 if(res.code!=200){
                     alert(res.msg);
                 }else{

@@ -11,6 +11,7 @@ namespace SlimCMS\Core;
 use App\Core\Upload;
 use App\Core\Ueditor;
 use SlimCMS\Abstracts\ModelAbstract;
+use SlimCMS\Helper\Ipdata;
 use SlimCMS\Helper\Str;
 use SlimCMS\Helper\Time;
 use SlimCMS\Interfaces\OutputInterface;
@@ -113,7 +114,7 @@ class Forms extends ModelAbstract
                 return self::$output->withCode($rs);
             }
         }
-        return self::$output->withCode(200, 21032)->withReferer(self::$config['referer']);
+        return self::$output->withCode(200, 21032);
     }
 
     /**
@@ -168,8 +169,7 @@ class Forms extends ModelAbstract
         if (is_callable([self::t($form['table']), 'dataDelRealAfter'])) {
             self::t($form['table'])->dataDelRealAfter($list);
         }
-        $referer = self::url('&p=forms/dataList&ids=');
-        return self::$output->withCode(200, 21023)->withReferer($referer);
+        return self::$output->withCode(200, 21023);
     }
 
     /**
@@ -203,7 +203,7 @@ class Forms extends ModelAbstract
                 return self::$output->withCode(21001);
             }
             $fields = self::fieldList(['formid' => $fid, 'available' => 1]);
-            self::exchangeFieldValue($fields, $data);
+            $fields && $data = self::exchangeFieldValue($fields, $data);
 
             //获取额外数据
             if (is_callable([self::t($form['table']), 'dataViewAfter'])) {
@@ -212,10 +212,10 @@ class Forms extends ModelAbstract
                     return self::$output->withCode($rs);
                 }
             }
-            $data = ['row' => $data, 'form' => $form];
+            $data = ['row' => $data, 'form' => $form, 'fields' => $fields];
             $cacheTime && self::$redis->set($cachekey, $data, $cacheTime);
         }
-        return self::$output->withData($data)->withData(200);
+        return self::$output->withData($data)->withCode(200);
     }
 
     /**
@@ -286,7 +286,7 @@ class Forms extends ModelAbstract
             }
         }
 
-        $currenturl = self::url();
+        $currenturl = self::$request->getRequest()->getUri()->getQuery();
         $param['get'] = [];
         $arr = [];
         $arr['where'] = [];
@@ -314,7 +314,7 @@ class Forms extends ModelAbstract
             if (empty($param['noinput'])) {
                 //根据ID筛选
                 $id = aval($param, 'id');
-                $id = $id && strpos($id, '`') ? array_map('intval', explode('`', $id)) : (int)$id;
+                $id = $id && strpos((string)$id, '`') ? array_map('intval', explode('`', $id)) : (int)$id;
                 if ($id) {
                     $where = [];
                     $where['id'] = $id;
@@ -397,16 +397,22 @@ class Forms extends ModelAbstract
     public static function dataFormHtml(int $fid, $row = [], array $options = []): OutputInterface
     {
         if (empty($fid)) {
-            return self::$output->withCode(21002);
+            return self::$output->withCode(27010);
         }
         if ($row && is_numeric($row)) {
             $res = self::dataView($fid, $row);
             if ($res->getCode() != 200) {
                 return $res;
             }
-            $row = $res->getData();
+            $val = $res->getData();
+            $row = $val['row'];
+            $form = $val['form'];
         } else {
             $row = [];
+            $form = self::t('forms')->withWhere($fid)->fetch();
+            if (empty($form)) {
+                return self::$output->withCode(22006);
+            }
         }
 
         $condition = [];
@@ -415,18 +421,6 @@ class Forms extends ModelAbstract
         if (aval($options, 'infront') === true) {
             $condition['infront'] = 1;
         }
-        $form = self::t('forms')->withWhere($fid)->fetch();
-        if (empty($form)) {
-            return self::$output->withCode(22006);
-        }
-
-        if (is_callable([self::t($form['table']), 'getFormHtmlBefore'])) {
-            $rs = self::t($form['table'])->getFormHtmlBefore($condition, $row);
-            if ($rs != 200) {
-                return self::$output->withCode($rs);
-            }
-        }
-
         $fields = (array)self::fieldList($condition);
         if (empty($row)) {
             $row = [];
@@ -434,6 +428,14 @@ class Forms extends ModelAbstract
                 $row[$v['identifier']] = self::input($v['identifier']);
             }
         }
+
+        if (is_callable([self::t($form['table']), 'getFormHtmlBefore'])) {
+            $rs = self::t($form['table'])->getFormHtmlBefore($fields, $row, $form);
+            if ($rs != 200) {
+                return self::$output->withCode($rs);
+            }
+        }
+
         $cachekey = self::cacheKey(__FUNCTION__, $fid, $options);
         $data = self::$redis->get($cachekey);
         if (empty($data) || $row) {
@@ -446,7 +448,7 @@ class Forms extends ModelAbstract
                 }
             }
 
-            $data = ['fields' => $fields, 'fieldshtml' => $fieldshtml, 'data' => $row, 'form' => $form];
+            $data = ['fields' => $fields, 'fieldshtml' => $fieldshtml, 'data' => $row, 'form' => $form, 'fid' => $fid];
             empty($row) && !empty($options['cacheTime']) && self::$redis->set($cachekey, $data, $options['cacheTime']);
         }
         return self::$output->withCode(200)->withData($data);
@@ -458,25 +460,32 @@ class Forms extends ModelAbstract
      * @param array $row 原来的数据
      * @param array $data 要添加或修改的数据
      */
-    public static function dataSave(int $fid, array $row = [], array $data = [], string $referer = ''): OutputInterface
+    public static function dataSave(int $fid, $row = [], array $data = []): OutputInterface
     {
         //编辑数据
-        if (is_numeric($row)) {
+        if ($row && is_numeric($row)) {
             $res = self::dataView($fid, $row);
             if ($res->getCode() != 200) {
                 return $res;
             }
-            $row = $res->withData();
+            $val = $res->getData();
+            $row = $val['row'];
+            $form = $val['form'];
+            $fields = $val['fields'];
+        } else {
+            $row = $row ?: [];
+            $form = self::t('forms')->withWhere($fid)->fetch();
+            if (empty($form)) {
+                return self::$output->withCode(22006);
+            }
+            $fields = self::fieldList(['formid' => $fid, 'available' => 1]);;
         }
         $res = self::requiredCheck($fid, $row, $data);
         if ($res->getCode() != 200) {
             return $res;
         }
-        $form = self::t('forms')->withWhere($fid)->fetch();
-        if (empty($form)) {
-            return self::$output->withCode(22006);
-        }
-        $data = $data ?: self::getFormValue($fid, $row);
+
+        $data = $data ?: self::getFormValue($fields, $row);
 
         //判断是否唯一
         $uniques = self::fieldList(['formid' => $fid, 'unique' => 1, 'available' => 1]);
@@ -516,11 +525,7 @@ class Forms extends ModelAbstract
                 return self::$output->withCode($rs);
             }
         }
-        $referer = $referer ?: self::url('&p=forms/dataList&id=');
-        return self::$output
-            ->withCode(200, 21018)
-            ->withData(['id' => $data['id']])
-            ->withReferer($referer);
+        return self::$output->withCode(200, 21018)->withData(['id' => $data['id']]);
     }
 
     /**
@@ -576,7 +581,7 @@ class Forms extends ModelAbstract
             return 'rand()';
         }
         $fields = (array)$order;
-        if (strpos($order, ',')) {
+        if (strpos((string)$order, ',')) {
             $fields = explode(',', str_replace([' desc', ' asc'], '', $order));
         }
 
@@ -648,7 +653,7 @@ class Forms extends ModelAbstract
                 }
 
                 $val = aval($data, $v['identifier']);
-                if (empty($v['rules']) && $val && preg_match('/,/', $val)) {
+                if (empty($v['rules']) && $val && preg_match('/,/', (string)$val)) {
                     $where[] = self::t()->field($v['identifier'], $val, 'between');
                 } elseif ($v['datatype'] == 'checkbox') {
                     !empty($val) && $where[] = self::t()->field($v['identifier'], $val, 'find');
@@ -662,7 +667,7 @@ class Forms extends ModelAbstract
                     }
                 } else {
                     if (!empty($val)) {
-                        if (preg_match('/,/', $val)) {
+                        if (preg_match('/,/', (string)$val)) {
                             $where[$v['identifier']] = explode(',', $val);
                         } else {
                             $where[$v['identifier']] = $val;
@@ -672,20 +677,28 @@ class Forms extends ModelAbstract
 
                 if (!empty($v['rules'][$val])) {
                     $tags[] = [$v['identifier'], aval($v['rules'], $val)];
-                } elseif (!empty($v['rules']) && !is_array($val) && preg_match('/,/', $val)) {
+                } elseif (!empty($v['rules']) && !is_array($val) && preg_match('/,/', (string)$val)) {
                     $tags[] = [$v['identifier'], str_replace(',', '-', $val) . $v['units']];
                 }
 
                 if (!empty($val)) {
-                    if (strpos($val, ',')) {
+                    if (strpos((string)$val, ',')) {
                         if ($v['datatype'] == 'date') {
                             list($s, $e) = explode(',', $val);
-                            $currenturl .= '&' . $v['identifier'] . '_s' . '=' . Time::gmdate($s) .
-                                '&' . $v['identifier'] . '_e' . '=' . Time::gmdate($e);
+                            $sdate = Time::gmdate($s);
+                            $edate = Time::gmdate($e);
+                            $currenturl .= '&' . $v['identifier'] . '_s' . '=' . $sdate .
+                                '&' . $v['identifier'] . '_e' . '=' . $edate;
+                            $data[$v['identifier'] . '_s'] = $sdate;
+                            $data[$v['identifier'] . '_e'] = $edate;
                         } elseif ($v['datatype'] == 'datetime') {
                             list($s, $e) = explode(',', $val);
-                            $currenturl .= '&' . $v['identifier'] . '_s' . '=' . Time::gmdate($s, 'dt') .
-                                '&' . $v['identifier'] . '_e' . '=' . Time::gmdate($e, 'dt');
+                            $sdate = Time::gmdate($s, 'dt');
+                            $edate = Time::gmdate($e, 'dt');
+                            $currenturl .= '&' . $v['identifier'] . '_s' . '=' . $sdate .
+                                '&' . $v['identifier'] . '_e' . '=' . $edate;
+                            $data[$v['identifier'] . '_s'] = $sdate;
+                            $data[$v['identifier'] . '_e'] = $edate;
                         } else {
                             $val = str_replace(',', '`', $val);
                             $currenturl .= '&' . $v['identifier'] . '=' . $val;
@@ -696,7 +709,6 @@ class Forms extends ModelAbstract
                 }
             }
         }
-        $currenturl = self::url($currenturl);
         $data = ['tags' => $tags, 'fields' => $fields, 'where' => $where, 'currentUrl' => $currenturl, 'get' => $data];
         return self::$output->withCode(200)->withData($data);
     }
@@ -736,6 +748,29 @@ class Forms extends ModelAbstract
         unset($pics[$key]);
         Upload::uploadDel($pic);
         return self::dataSave($fid, $id, [$field => serialize($pics)]);
+    }
+
+    /**
+     * 联动菜单数据
+     * @param $egroup
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function enumsData($egroup): OutputInterface
+    {
+        $result = [];
+        if ($egroup) {
+            $list = self::t('sysenum')->withWhere(['egroup' => $egroup])->withOrderby('displayorder')->fetchList('id,ename,evalue,reid');
+            if (!empty($list)) {
+                foreach ($list as $k => $v) {
+                    if (empty($v['evalue'])) {
+                        unset($list[$k]);
+                    }
+                }
+            }
+            $result = ['list' => $list];
+        }
+        return self::$output->withCode(200)->withData($result);
     }
 
     /**
@@ -842,7 +877,7 @@ class Forms extends ModelAbstract
                     }
                     break;
                 case 'stepselect':
-                    if (strpos($val['title'], '|')) {
+                    if (strpos((string)$val['title'], '|')) {
                         list($val['title'], $identifier) = explode('|', $val['title']);
                     }
                     $v['_' . $identifier] = self::t('sysenum')
@@ -927,8 +962,9 @@ class Forms extends ModelAbstract
                         }
                         break;
                     case 'int':
-                        if (self::input($identifier) && strpos(self::input($identifier), '`')) {
-                            $arr = explode('`', self::input($identifier));
+                        $val = self::input($identifier);
+                        if ($val && strpos((string)$val, '`')) {
+                            $arr = explode('`', $val);
                             $val = array_map('intval', $arr);
                             $data[$identifier] = implode(',', $val);
                         } else {
@@ -939,7 +975,7 @@ class Forms extends ModelAbstract
                         }
                         break;
                     case 'stepselect':
-                        if (strpos($v['title'], '|')) {
+                        if (strpos((string)$v['title'], '|')) {
                             list($v['title'], $identifier) = explode('|', $v['title']);
                         }
                         $val = self::input($identifier, 'int');
@@ -992,10 +1028,9 @@ class Forms extends ModelAbstract
                         } else {
                             isset($_SESSION) ? '' : @session_start();
                             $res = Upload::getWebupload();
-                            if ($res['code'] != 200) {
-                                Output::showMsg($res);
+                            if ($res->getCode() == 200) {
+                                $imgurls += (array)$res->getData();
                             }
-                            $imgurls += (array)$res['data'];
                         }
                         $data[$identifier] = $imgurls ? serialize($imgurls) : '';
                         break;
@@ -1010,7 +1045,7 @@ class Forms extends ModelAbstract
                             };
                             $rule = '^' . implode('|^', array_map($func, explode("\n", $cfg['whitePicUrl'])));
                         }
-                        if ($val && $rule && preg_match('/' . $rule . '/', $val)) {
+                        if ($val && $rule && preg_match('/' . $rule . '/', (string)$val)) {
                             $data[$identifier] = $val;
                         } else {
                             $data[$identifier] = self::input($identifier, $v['datatype']);
@@ -1096,7 +1131,7 @@ class Forms extends ModelAbstract
         foreach ($fields as $k => $v) {
             $v['maxlength'] = $maxlength = !empty($v['maxlength']) ? 'maxlength="' . $v['maxlength'] . '"' : '';
             $v['rules'] = !empty($v['rules']) ? unserialize($v['rules']) : array();
-            $v['default'] = !empty($row[$v['identifier']]) ? $row[$v['identifier']] : html_entity_decode($v['default']);
+            $v['default'] = !empty($row[$v['identifier']]) ? $row[$v['identifier']] : html_entity_decode((string)$v['default']);
 
             //Validform规则设置
             $v['checkrule'] = (empty($v['checkrule']) && $v['required'] == 1) ? '*' : $v['checkrule'];
@@ -1141,13 +1176,13 @@ class Forms extends ModelAbstract
                         $v['field'] = self::$output->withData($v)->withTemplate($template)->analysisTemplate(true);
                     } else {
                         $v['default'] = stripslashes($v['default']);
-                        $config = ['identity' => aval($options, 'ueditorType')];
+                        $config = ['identity' => aval($options, 'ueditorType', 'small')];
                         $res = Ueditor::ueditor($v['identifier'], $v['default'], $config)->getData();
                         $v['field'] = $res['ueditor'];
                     }
                     break;
                 case 'stepselect':
-                    if (strpos($v['title'], '|')) {
+                    if (strpos((string)$v['title'], '|')) {
                         list($v['title'], $v['identifier']) = explode('|', $v['title']);
                     }
                     static $loadonce = 0;
@@ -1219,7 +1254,7 @@ class Forms extends ModelAbstract
     public static function listFields(int $fid, $limit = 15, $fieldName = 'inlistcp'): OutputInterface
     {
         if (empty($fid)) {
-            return self::$output->withCode(21002);
+            return self::$output->withCode(27010);
         }
         $listFields = self::fieldList(['formid' => $fid, 'available' => 1, $fieldName => 1], '*', $limit);
         return self::$output->withCode(200)->withData(['listFields' => $listFields]);
@@ -1233,7 +1268,7 @@ class Forms extends ModelAbstract
     public static function searchFields(int $fid): OutputInterface
     {
         if (empty($fid)) {
-            return self::$output->withCode(21002);
+            return self::$output->withCode(27010);
         }
         $searchFields = self::fieldList(['formid' => $fid, 'available' => 1, 'search' => 1]);
         if (!empty($searchFields)) {
@@ -1260,7 +1295,7 @@ class Forms extends ModelAbstract
     public static function orderFields(int $fid): OutputInterface
     {
         if (empty($fid)) {
-            return self::$output->withCode(21002);
+            return self::$output->withCode(27010);
         }
         $where = ['formid' => $fid, 'available' => 1, 'orderby' => 1];
         $data = [];

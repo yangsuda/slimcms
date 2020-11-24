@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace App\Control\main;
 
+use App\Core\Forms;
 use Slim\Psr7\Stream;
 use Slim\Psr7\UploadedFile;
 use SlimCMS\Abstracts\ControlAbstract;
@@ -16,6 +17,18 @@ use SlimCMS\Helper\Http;
 
 class MainControl extends ControlAbstract
 {
+    /**
+     * 联动菜单数据
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public function enumsData()
+    {
+        $egroup = self::input('egroup');
+        $res = Forms::enumsData($egroup);
+        return self::response($res);
+    }
+
     public function test()
     {
         $row = self::$request->getRequest()->getQueryParams();

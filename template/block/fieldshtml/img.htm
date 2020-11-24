@@ -4,14 +4,6 @@
 <script src="$cfg[resourceUrl]global_wap/js/image_upload.js"></script>
 <!--{/if}-->
 
-<!--{if $data[default]}-->
-<div class="am-cf am-margin-vertical $data[css]"><a href="{echo copyImage($data[default])}" target="_blank">
-    <img src="{echo copyImage($data[default], 100, 100)}" style="height:80px;" class="am-img-thumbnail" /></a>
-    <div class="btn-delImg" style="position:absolute;top:2.3rem;left:0.2rem;" data-identifier="$data[identifier]" data-id="$data[row][id]" data-fid="$data[fid]">
-        <span class="text-danger fa-2x ml-3 mt-6 fas fa-times"></span>
-    </div>
-</div>
-<!--{/if}-->
 <div class="block_upimgs">
     <ul class="am-gallery" data-am-widget="gallery">
         <li class="box_addimgs" id="li_btnupimg_$data[identifier]" {echo $data[default]?'style="display:none;"':''}>
@@ -26,17 +18,22 @@
     </ul>
 </div>
 <script>
+
     var identifier = "$data[identifier]";
     function handleFiles_{$data[identifier]}() {
         var canvas, context, img, imgX = 0, imgY = 0, imgScale = 1;
         var filesControl = $('#file_'+identifier).prop('files');
-
         img = new Image();
+        <!--{if $data[default]}-->
+        img.src = '$data[default]';
+        <!--{/if}-->
         var tmpcanvas = canvas = document.getElementById("canvas_" + identifier);
         var tmpcontex = context = canvas.getContext("2d");
         window.URL = window.URL || window.webkitURL;
         if (window.URL) {
-            img.src = window.URL.createObjectURL(filesControl[0]);
+            if(filesControl[0]){
+                img.src = window.URL.createObjectURL(filesControl[0]);
+            }
             img.onload = function(e) {
                 draw(tmpcontex,img,tmpcanvas,1,800);
                 $('#'+identifier).val(tmpcanvas.toDataURL("image/jpeg"));
@@ -46,6 +43,9 @@
             }
         }
     }
+    <!--{if $data[default]}-->
+    handleFiles_{$data[identifier]}();
+    <!--{/if}-->
     function delpic_img_{$data[identifier]}() {
         $('#li_btnupimg_'+identifier).show();
         $("#li_canvas_"+identifier).hide();
@@ -56,6 +56,7 @@
 <style type="text/css">
     .am-form-file input[type="file"] {position: absolute;left: 0;z-index: 1;opacity: 0;cursor: pointer;}
 </style>
+
 <div class="am-form-file">
     <button type="button" class="btn btn-secondary btn-sm"><i class="fa-1x fas fa-cloud-upload-alt"></i> 本地上传</button>
     <input type="file" name="$data[identifier]" onChange="$('#{$data[identifier]}_html').html(this.value);$('#{$data[identifier]}_hidden').val(this.value);" />

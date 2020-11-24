@@ -51,7 +51,7 @@ class Upload extends ModelAbstract
      * @param array $post
      * @return OutputInterface
      */
-    public static function upload(array $post): OutputInterface
+    public static function upload($post): OutputInterface
     {
         if (is_string($post)) {
             $result = self::h5($post);
@@ -133,7 +133,7 @@ class Upload extends ModelAbstract
         $filename = $imgdir . str_replace('.', '', uniqid(Ipdata::getip(), true)) . '.' . $ext;
         $uploadPost = [];
         $uploadPost['attachment'] = new UploadedFile($post['files']['tmp_name'], $post['files']['name'], $post['files']['type']);
-        $upload = self::$request->getRequest()->withUploadedFiles($post)->getUploadedFiles();
+        $upload = self::$request->getRequest()->withUploadedFiles($uploadPost)->getUploadedFiles();
         $upload['attachment']->moveTo($filename);
         //加水印或缩小图片
         if ($post['type'] == 'image') {
@@ -208,7 +208,7 @@ class Upload extends ModelAbstract
 
         $file = $result->getData();
         $img120 = Image::copyImage($file['fileurl'], 120, 120);
-        $imagevariable = file_get_contents($img120);
+        $imagevariable = file_get_contents(CSPUBLIC . str_replace(self::$config['basehost'], '', $img120));
 
         //保存信息到 session
         if (!isset($_SESSION['file_info'])) {
@@ -230,7 +230,7 @@ class Upload extends ModelAbstract
      */
     public static function getWebupload(): OutputInterface
     {
-        $imgurls = array();
+        $imgurls = [];
         isset($_SESSION) ? '' : @session_start();
         if (!empty($_SESSION['bigfile_info'])) {
             if (count($_SESSION['bigfile_info']) > 10) {
@@ -253,7 +253,7 @@ class Upload extends ModelAbstract
             }
         }
         $_SESSION['bigfile_info'] = [];
-        return self::$output->withCode(200)->withData(['imgurls' => $imgurls]);
+        return self::$output->withCode(200)->withData($imgurls);
     }
 
     /**
@@ -301,9 +301,8 @@ class Upload extends ModelAbstract
             $url = preg_replace('#(.*)(\.(' . $ext . ')){1}#isU', '\\1', $url);
         }
         $url = str_replace("'", '', $url);
-        $where = array();
+        $where = [];
         $where[] = self::t()->field('url', $url . '%', 'like');
-        $list = self::t('uploads')->withWhere($where)->fetchList();
-        return self::$output->withCode(200)->withData(['list' => $list]);
+        return self::t('uploads')->withWhere($where)->fetchList();
     }
 }

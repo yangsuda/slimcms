@@ -1,8 +1,10 @@
-<input class="form-control $data[css]" type="text" readonly id="$data[identifier]" name="$data[identifier]" value="$data[default]">
+<input class="form-control $data[css]" type="text" {echo $cfg[clienttype]<1?'readonly':''} id="$data[identifier]" name="$data[identifier]"
+       value="$data[default]">
+<!--{if $cfg[clienttype] < 1}-->
 <!--{if $data[isLoadMultidate]==1}-->
 <script src="$cfg[resourceUrl]plugins/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
 <script src="$cfg[resourceUrl]plugins/bootstrap-datepicker/bootstrap-datepicker.zh-CN.min.js" charset="UTF-8"></script>
-<link href="$cfg[resourceUrl]plugins/bootstrap-datepicker/bootstrap-datepicker3.min.css" rel="stylesheet">';
+<link href="$cfg[resourceUrl]plugins/bootstrap-datepicker/bootstrap-datepicker3.min.css" rel="stylesheet">
 <script>
     $.fn.mdatepicker = $.fn.datepicker.noConflict();
 </script>
@@ -15,3 +17,4 @@
         multidateSeparator: ','
     })
 </script>
+<!--{/if}-->

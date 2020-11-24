@@ -13,7 +13,7 @@ class AdmingroupTable extends Table
      * @param $data
      * @return array
      */
-    public function getFormHtmlBefore(&$condition, &$data): int
+    public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {
         $data['forms'] = self::t('forms')->fetchList();
         $data['permissions'] = self::t('adminpermission')->fetchList();

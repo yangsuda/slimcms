@@ -196,13 +196,13 @@ class LoginModel extends ModelAbstract
             $postinfo = substr($postinfo, 0, 5000);
             $data = [
                 'adminid' => aval($user, 'id'),
-                'adminname' => aval($user, 'realname'),
+                'adminname' => aval($user, 'userid'),
                 'method' => $method,
                 'query' => $query,
                 'ip' => Ipdata::getip(),
                 'createtime' => TIMESTAMP,
                 'postinfo' => $postinfo,
-                'p' => self::input('p')
+                'route' => self::input('p')
             ];
             self::t('adminlog')->insert($data);
         }

@@ -16,14 +16,14 @@ class Ueditor extends ModelAbstract
 
     private static $uconfig = [];
 
-    public static function config()
+    public static function config(): OutputInterface
     {
         if (!self::$uconfig) {
             $data = file_get_contents(CSPUBLIC . 'ueditor/config.json');
             $data = preg_replace("/\/\*[\s\S]+?\*\//", "", $data);
             self::$uconfig = json_decode($data, true);
         }
-        return self::$uconfig;
+        return self::$output->withCode(200)->withData(self::$uconfig);
     }
 
     /**
@@ -35,7 +35,7 @@ class Ueditor extends ModelAbstract
      */
     public static function upload(string $fieldName, string $type = 'image', bool $water = false): OutputInterface
     {
-        $uconfig = self::config();
+        $uconfig = self::config()->getData();
         if ($fieldName == 'scrawlFieldName') {
             $uploadData = 'data:image\jpeg;base64,' . $_POST[$uconfig[$fieldName]];
         } else {
@@ -44,17 +44,18 @@ class Ueditor extends ModelAbstract
 
         $res = Upload::upload($uploadData);
         $result = [];
-        if ($res['code'] != 200 && $res['code'] != 23001) {
-            $result['state'] = $res['msg'];
+        if ($res->getCode() != 200 && $res->getCode() != 23001) {
+            $result['state'] = $res->getMsg();
         } else {
+            $data = $res->getData();
             $result['state'] = 'SUCCESS';
-            $result['url'] = self::$config['basehost'] . $res['data'];
-            $result['title'] = basename($res['data']);
+            $result['url'] = self::$config['basehost'] . $data['fileurl'];
+            $result['title'] = basename($data['fileurl']);
             $result['original'] = '';
-            $result['type'] = pathinfo($res['data'], PATHINFO_EXTENSION);
-            $result['size'] = filesize(CSPUBLIC . $res['data']);
+            $result['type'] = pathinfo($data['fileurl'], PATHINFO_EXTENSION);
+            $result['size'] = filesize(CSPUBLIC . $data['fileurl']);
         }
-        self::$output->withCode(200)->withData($result);
+        return self::$output->withCode(200)->withData($result);
     }
 
     /**
@@ -62,7 +63,7 @@ class Ueditor extends ModelAbstract
      */
     public static function listData(int $size = 20, int $start = 0): OutputInterface
     {
-        $uconfig = self::config();
+        $uconfig = self::config()->getData();
         $listSize = $uconfig['fileManagerListSize'];
         /* 获取参数 */
         $size = $size ?: $listSize;
@@ -85,7 +86,7 @@ class Ueditor extends ModelAbstract
         //}
 
         $data = ["state" => "SUCCESS", "list" => $list, "start" => $start, "total" => count($files)];
-        self::$output->withCode(200)->withData($data);
+        return self::$output->withCode(200)->withData($data);
     }
 
     /**
@@ -142,13 +143,15 @@ class Ueditor extends ModelAbstract
             'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'removeformat', 'formatmatch', '|',
             'selectall', 'cleardoc', 'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 
             'touppercase', 'tolowercase', '|','drafts']]";
+        } elseif ($identity == 'admin') {
+
         }
         if (empty($config['initialFrameHeight'])) {
             $ue[] = 'initialFrameHeight:350';
         }
         $ue[] = 'catchRemoteImageEnable:false';
         foreach ($config as $k => $v) {
-            $ue[] = $k . ':' . $v;
+            $ue[] = $k . ':\'' . $v . '\'';
         }
         if (empty($config['serverUrl'])) {
             $ue[] = 'serverUrl:"' . self::$config['basehost'] . self::$config['entryFileName'] . '?p=ueditor"';
@@ -159,7 +162,7 @@ class Ueditor extends ModelAbstract
         $data['content'] = $content;
         $data['has_load'] = $has_load;
         $data['ue'] = implode(',', $ue);
-        $result = self::$output->withData($v)->withTemplate('block/fieldshtml/ueditor')->analysisTemplate(true);
+        $result = self::$output->withData($data)->withTemplate('block/fieldshtml/ueditor')->analysisTemplate(true);
         if (empty($has_load)) {
             $has_load = true;
         }

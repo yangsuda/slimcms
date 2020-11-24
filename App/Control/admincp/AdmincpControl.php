@@ -13,6 +13,7 @@ use SlimCMS\Core\Crypt;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Core\Request;
 use SlimCMS\Core\Response;
+use SlimCMS\Interfaces\OutputInterface;
 
 class AdmincpControl extends ControlAbstract
 {
@@ -31,15 +32,14 @@ class AdmincpControl extends ControlAbstract
                 }
                 self::$admin = $res->getData()['admin'];
                 self::$admin['adminAuth'] = $adminAuth;
-                self::$output = $res->withData(['leftMenu' => $this->leftMenu()]);
             }
         }
         if (empty(self::$admin['id'])) {
-            header('location:' . self::url('?p=login&referer=' . urlencode(self::currentUrl())));
+            header('location:' . self::url('?p=login&referer=' . urlencode(self::url())));
             exit();
         }
         //检查权限许可
-        $arr = ['forms/dataList', 'forms/dataSave', 'forms/dataCheck', 'forms/dataDel', 'forms/dataExport'];
+        $arr = ['main/index', 'forms/dataList', 'forms/dataSave', 'forms/dataCheck', 'forms/dataDel', 'forms/dataExport'];
         $p = self::input('p');
         !in_array($p, $arr) && $this->checkAllow($p);
         LoginModel::logSave(self::$admin);
@@ -53,10 +53,20 @@ class AdmincpControl extends ControlAbstract
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function view(OutputInterface $output = null, string $template = '')
+    {
+        $output = $output ?? self::$output;
+        $output = $output->withData(['admin' => self::$admin, 'leftMenu' => $this->leftMenu()]);
+        return parent::view($output, $template);
+    }
+
     private function leftMenu()
     {
         $purviews = explode(',', aval(self::$admin, '_groupid/purviews'));
-        $param = ['fid' => 1, 'ischeck' => 1, 'pagesize' => 200, 'inlistField'=>'inlistcp', 'cacheTime' => 600, 'order' => 'weight', 'noinput' => 1];
+        $param = ['fid' => 1, 'ischeck' => 1, 'pagesize' => 200, 'inlistField' => 'inlistcp', 'cacheTime' => 600, 'order' => 'weight', 'noinput' => 1];
         $res = Forms::dataList($param)->getData();
         $arr = [];
         $weight = [];

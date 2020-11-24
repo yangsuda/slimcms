@@ -40,7 +40,9 @@ class DefaultControl extends ControlAbstract
                 $result = Ueditor::listdata($size, $start);
                 break;
         }
-        echo json_encode($result->getData());
+        if(!empty($result)){
+            echo json_encode($result->getData());
+        }
         exit;
     }
 }

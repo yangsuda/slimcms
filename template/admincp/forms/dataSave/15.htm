@@ -19,17 +19,17 @@
                             <div class="card-body m-4">
                                 <form name="form1" action="{url &}" enctype="multipart/form-data" method="post" class="validform">
                                     <input type="hidden" name="formhash" value="$data[formhash]" />
-                                    <!--{if aval($data,'id')}-->
+                                    <!--{if aval($data,'data/id')}-->
                                     <div class="form-group row">
                                         <label class="col-sm-2 col-form-label">ID：</label>
                                         <div class="col-sm-6">
-                                            $data[id]
+                                            $data[data][id]
                                         </div>
                                         <div class="col-sm-4 text-muted">
                                         </div>
                                     </div>
                                     <!--{/if}-->
-                                    <!--{loop $fieldshtml $v}-->
+                                    <!--{loop $data[fieldshtml] $v}-->
                                     <!--{if $v[forbidedit]=='1'}-->
                                     <!--{eval !isset($allowedit) && $allowedit=1;}-->
                                     <!--{/if}-->
@@ -41,24 +41,24 @@
                                         <div class="col-sm-10">
                                             <div class="row">
                                                 <div class="col-sm-12 form-inline">
-                                                    <!--{loop $data[permissions] $k1 $v1}-->
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' id="purviews$k1" type='checkbox' class='custom-control-input' value='$v1[purview]' {if in_array($v1[purview],$data[_purviews])} checked {/if}><label for="purviews$k1" class="custom-control-label">$v1[name]<font color='#070'>($v1[purview])</font></label></span>
+                                                    <!--{loop $data[data][permissions] $k1 $v1}-->
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' id="purviews$k1" type='checkbox' class='custom-control-input' value='$v1[purview]' {if !empty($data[_purviews]) && in_array($v1[purview],$data[_purviews])} checked {/if}><label for="purviews$k1" class="custom-control-label">$v1[name]<font color='#070'>($v1[purview])</font></label></span>
                                                     <!--{/loop}-->
                                                 </div>
                                             </div>
                                             <hr>
-                                            <!--{loop $data[forms] $k1 $v1}-->
+                                            <!--{loop $data[data][forms] $k1 $v1}-->
                                             <div class="row">
                                                 <div class="col-sm-3">
                                                     <label class="am-checkbox-inline"><span class="custom-control custom-checkbox"><input type='checkbox' class='custom-control-input purviews' id="data$v1[id]"><label for="data$v1[id]" class="custom-control-label"><font color='#070'>($v1[id])</font>$v1[name]:</label></span></label>
                                                 </div>
                                                 <div class="col-sm-9 form-inline">
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataList$v1[id]" value='dataList$v1[id]' {if in_array('dataList'.$v1[id],$data[_purviews])} checked {/if}><label for="dataList$v1[id]" class="custom-control-label">列表</label></span>
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataView$v1[id]" value='dataView$v1[id]' {if in_array('dataView'.$v1[id],$data[_purviews])} checked {/if}><label for="dataView$v1[id]" class="custom-control-label">展示</label></span>
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataSave$v1[id]" value='dataSave$v1[id]' {if in_array('dataSave'.$v1[id],$data[_purviews])} checked {/if}><label for="dataSave$v1[id]" class="custom-control-label">添加修改</label></span>
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataCheck$v1[id]" value='dataCheck$v1[id]' {if in_array('dataCheck'.$v1[id],$data[_purviews])} checked {/if}><label for="dataCheck$v1[id]" class="custom-control-label">审核</label></span>
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataDel$v1[id]" value='dataDel$v1[id]' {if in_array('dataDel'.$v1[id],$data[_purviews])} checked {/if}><label for="dataDel$v1[id]" class="custom-control-label">删除</label></span>
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataExport$v1[id]" value='dataExport$v1[id]' {if in_array('dataExport'.$v1[id],$data[_purviews])} checked {/if}><label for="dataExport$v1[id]" class="custom-control-label">导出</label></span>
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataList$v1[id]" value='dataList$v1[id]' {if !empty($data[_purviews]) && in_array('dataList'.$v1[id],$data[_purviews])} checked {/if}><label for="dataList$v1[id]" class="custom-control-label">列表</label></span>
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataView$v1[id]" value='dataView$v1[id]' {if !empty($data[_purviews]) && in_array('dataView'.$v1[id],$data[_purviews])} checked {/if}><label for="dataView$v1[id]" class="custom-control-label">展示</label></span>
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataSave$v1[id]" value='dataSave$v1[id]' {if !empty($data[_purviews]) && in_array('dataSave'.$v1[id],$data[_purviews])} checked {/if}><label for="dataSave$v1[id]" class="custom-control-label">添加修改</label></span>
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataCheck$v1[id]" value='dataCheck$v1[id]' {if !empty($data[_purviews]) && in_array('dataCheck'.$v1[id],$data[_purviews])} checked {/if}><label for="dataCheck$v1[id]" class="custom-control-label">审核</label></span>
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataDel$v1[id]" value='dataDel$v1[id]' {if !empty($data[_purviews]) && in_array('dataDel'.$v1[id],$data[_purviews])} checked {/if}><label for="dataDel$v1[id]" class="custom-control-label">删除</label></span>
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="dataExport$v1[id]" value='dataExport$v1[id]' {if !empty($data[_purviews]) && in_array('dataExport'.$v1[id],$data[_purviews])} checked {/if}><label for="dataExport$v1[id]" class="custom-control-label">导出</label></span>
                                                 </div>
                                             </div>
                                             <!--{/loop}-->

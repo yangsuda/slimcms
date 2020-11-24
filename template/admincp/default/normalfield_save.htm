@@ -4,15 +4,15 @@
         <!--{if $v[units]}-->
         <div data-colorpicker-id="4" class="input-group mb-3">
             <!--{/if}-->
-            <!--{if aval($data,'id') && $v[forbidedit]==2}-->
-            <input type="hidden" name="$v[identifier]" id="$v[identifier]" value="$data[$v[identifier]]" />
+            <!--{if aval($data,'data/id') && $v[forbidedit]==2}-->
+            <input type="hidden" name="$v[identifier]" id="$v[identifier]" value="$data[data][$v[identifier]]" />
             <!--{if $v[datatype]=='img'}-->
-            <img src="$data['_'.$v[identifier]]" width="100">
+            <img src="$data[data]['_'.$v[identifier]]" width="100">
             <!--{else}-->
-            <!--{if $v[forbidedit]=='2' && $v[datatype]=='serialize' && !empty($data['_'.$v[identifier]])}-->
-            {echo nl2br(str_replace(["array (\n", "),\n", ")"], '', var_export($data['_'.$v[identifier]], true)))}
+            <!--{if $v[forbidedit]=='2' && $v[datatype]=='serialize' && !empty($data[data]['_'.$v[identifier]])}-->
+            {echo nl2br(str_replace(["array (\n", "),\n", ")"], '', var_export($data[data]['_'.$v[identifier]], true)))}
             <!--{else}-->
-            $data['_'.$v[identifier]]
+            $data[data]['_'.$v[identifier]]
             <!--{/if}-->
             <!--{/if}-->
             <!--{else}-->

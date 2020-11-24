@@ -29,7 +29,7 @@ class AdminTable extends Table
      * @param $data
      * @return array
      */
-    public function getFormHtmlBefore(&$condition, &$data): int
+    public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             $data['groups'] = self::t('admingroup')->fetchList();

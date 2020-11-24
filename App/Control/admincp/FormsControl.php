@@ -48,14 +48,36 @@ class FormsControl extends AdmincpControl
 
     /**
      * 表单添加修改页
-     * @return array|\cs090\core\数据|string
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws \SlimCMS\Error\TextException
      */
     public function dataSave()
     {
         $fid = (int)self::input('fid', 'int');
-        $id = self::input('id', 'int');
+        $id = (int)self::input('id', 'int');
         $this->checkAllow('dataSave' . $fid);
-        $res = Forms::dataFormHtml($fid, $id);
+        $formhash = self::input('formhash');
+        if($formhash){
+            //如启用验证码，对验证码验证
+            if(self::$config['ccode'] == 'Y'){
+                $ccode = (string)self::input('ccode');
+                $img = new \Securimage();
+                if (!$img->check($ccode)) {
+                    $output = self::$output->withCode(24023);
+                    return $this->directTo($output);
+                }
+            }
+            $res = Forms::submitCheck($formhash);
+            if($res->getCode()!=200){
+                return $this->directTo($res);
+            }
+            $referer = self::input('referer', 'url');
+            $referer = $referer ?: self::url('&p=forms/dataList&id=');
+            $res = Forms::dataSave($fid,$id)->withReferer($referer);
+            return $this->directTo($res);
+        }
+        $options = ['cacheTime' => 300, 'ueditorType' => 'admin'];
+        $res = Forms::dataFormHtml($fid, $id, $options);
         if ($res->getCode() != 200) {
             return self::response($res);
         }
@@ -64,20 +86,7 @@ class FormsControl extends AdmincpControl
         if (is_file(CSTEMPLATE . CURSCRIPT . '/' . trim($p, '/') . '/' . $fid . '.htm')) {
             $template = trim($p, '/') . '/' . $fid;
         }
-        return $this->output($res, $template);
-    }
-
-    /**
-     * 数据添加修改操作
-     * @return array
-     */
-    public function dataSaveSubmit()
-    {
-        $did = self::input('did', 'int');
-        $id = self::input('id', 'int');
-        $referer = self::input('referer', 'url');
-        $this->checkAllow('dataSave' . $did);
-        return DiyformsModel::dataSave($did, $id, '', $referer);
+        return $this->view($res, $template);
     }
 
     /**
@@ -86,11 +95,12 @@ class FormsControl extends AdmincpControl
      */
     public function dataCheck()
     {
-        $did = self::input('did', 'int');
-        $ids = self::input('ids');
-        $ischeck = self::input('ischeck', 'int');
-        $this->checkAllow('dataCheck' . $did);
-        return DiyformsModel::dataCheck($did, $ids, $ischeck);
+        $fid = (int)self::input('fid', 'int');
+        $ids = (array)self::input('ids');
+        $ischeck = (int)self::input('ischeck', 'int');
+        $this->checkAllow('dataCheck' . $fid);
+        $res = Forms::dataCheck($fid, $ids, $ischeck);
+        return self::response($res);
     }
 
     /**
@@ -99,10 +109,12 @@ class FormsControl extends AdmincpControl
      */
     public function dataDel()
     {
-        $did = self::input('did', 'int');
-        $ids = self::input('ids');
-        $this->checkAllow('dataDel' . $did);
-        return DiyformsModel::dataDel($did, $ids);
+        $fid = (int)self::input('fid', 'int');
+        $ids = (array)self::input('ids');
+        $this->checkAllow('dataDel' . $fid);
+        $referer = self::url('&p=forms/dataList&ids=');
+        $res = Forms::dataDel($fid, $ids)->withReferer($referer);
+        return self::directTo($res);
     }
 
     /**
@@ -110,9 +122,9 @@ class FormsControl extends AdmincpControl
      */
     public function dataExport()
     {
-        $param = self::input(['did' => 'int', 'page' => 'int', 'pagesize' => 'int']);
-        $this->checkAllow('dataExport' . $param['did']);
-        $res = DiyformsModel::dataExport($param);
+        $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int']);
+        $this->checkAllow('dataExport' . $param['fid']);
+        $res = Forms::dataExport($param);
         $res = Output::exportData($res['data']);
         if ($res['code'] != 200) {
             return $res;

@@ -161,7 +161,7 @@ class Request extends MessageAbstract
             if ($v == 'htmltext') {
                 $data[$k] = (string)$this->addslashes($val);
             } elseif ($v == 'string') {
-                $data[$k] = (string)$this->htmlspecialchars($val);
+                $data[$k] = $this->htmlspecialchars($val);
             } elseif ($v == 'float') {
                 $data[$k] = (float)$val;
             } elseif ($v == 'price') {
@@ -178,7 +178,7 @@ class Request extends MessageAbstract
                 if ($res->getCode() != 200 && $res->getCode() != 23001) {
                     return $this->output($res);
                 }
-                $data[$k] = $res['data'] ?: '';
+                $data[$k] = $res->getData()['fileurl'] ?: '';
             } elseif (preg_match('/^int/i', $v)) {
                 $data[$k] = (int)$val;
                 if (strpos($v, ',')) {
@@ -222,13 +222,20 @@ class Request extends MessageAbstract
                 $data[$k] = preg_replace('/[^\w\/]/i', '', $val);
             } elseif ($v == 'date') {
                 $data[$k] = preg_replace('/[^\d\-: ]/i', '', $val);
+            } elseif ($v == 'media') {
+                $uploadData = ['files' => $_FILES[$k], 'type' => $v];
+                $res = Upload::upload($uploadData);
+                if ($res->getCode() != 200 && $res->getCode() != 23001) {
+                    return $this->output($res);
+                }
+                $data[$k] = $res->getData()['fileurl'] ?: '';
             } elseif ($v == 'media' || $v == 'addon') {
                 $uploadData = ['files' => $_FILES[$k], 'type' => $v];
                 $res = Upload::upload($uploadData);
                 if ($res->getCode() != 200 && $res->getCode() != 23001) {
                     return $this->output($res);
                 }
-                $data[$k] = $res['data'] ?: '';
+                $data[$k] = $res->getData()['fileurl'] ?: '';
             }
         }
         return $data;

@@ -11,7 +11,7 @@
         <!--{loop $data[imgs] $ik $iv}-->
         <li id="li_{$data[identifier]}_$i">
             <div id="cover_$i" class="cover"></div>
-            <input name="{$data[identifier]}_$i" id="{$data[identifier]}_$i" type="hidden" class="html5img" value=""/>
+            <input name="{$data[identifier]}_$i" id="{$data[identifier]}_$i" type="hidden" class="html5img" value=" "/>
             <div class="pic"><a><i></i><img src="{echo copyImage($iv[img], 80, 80)}" data-rel="{echo copyImage($iv[img])}" source_link="$iv[img]"/><canvas id="canvas_{$data[identifier]}_$i"></canvas></a></div>
             <a href="javascript:;" class="del_img" data-field="$data[identifier]" data-index="$i" data-img="$iv[img]" title="删除">—</a></li>
         {eval $i++;}
@@ -25,17 +25,6 @@
         </li>
         <!--{/for}-->
     </ul>
-</div>
-
-<div class="am-modal am-modal-alert" tabindex="-1" id="block-alert">
-    <div class="am-modal-dialog">
-        <div class="am-modal-hd">操作提示</div>
-        <div class="am-modal-bd">
-        </div>
-        <div class="am-modal-footer">
-            <span class="am-modal-btn">确定</span>
-        </div>
-    </div>
 </div>
 
 <script src="$cfg[resourceUrl]global/js/exif.js" ></script>
@@ -68,8 +57,7 @@
                         canvas = document.getElementById("canvas_" + id);
                         if (canvas == null) {
                             if(over == 0){
-                                $('#block-alert .am-modal-bd').html("最多上传10张");
-                                $('#block-alert').modal();
+                                alertMsg("最多上传10张");
                             }
                             over = 1;
                             return;
@@ -96,8 +84,7 @@
         });
         canvas = document.getElementById("canvas_" + id);
         if (canvas == null) {
-            $('#block-alert .am-modal-bd').html("最多上传10张");
-            $('#block-alert').modal();
+            alertMsg("最多上传10张");
             return;
         }
         context = canvas.getContext("2d");
@@ -159,7 +146,7 @@
     </div>
 </div>
 
-<div class="mod_list_photo" data-id='$data[row][id]' data-forrmid="$data[fid]" data-identifier='{$data[identifier]'>
+<div class="mod_list_photo" data-id='$data[row][id]' data-fid="$data[fid]" data-identifier='$data[identifier]'>
 <ul>
     <!--{if $data[imgs]}-->
     <!--{loop $data[imgs] $ik $iv}-->

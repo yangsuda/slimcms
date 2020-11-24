@@ -54,7 +54,6 @@ class Image extends ModelAbstract
             self::$cfg['photo_typenames'][] = "image/wbmp";
             self::$cfg['photo_support'] .= "WBMP ";
         }
-        self::$cfg = array_merge(self::$cfg, self::$config);
     }
 
     /**
@@ -66,10 +65,10 @@ class Image extends ModelAbstract
      */
     public static function copyImage($pic, $width = 1000, $height = 1000, $nopic = 'resources/global/images/nopic/nopic.jpg')
     {
-        $attachmentHost = !empty(self::$cfg['attachmentHost']) ? self::$cfg['attachmentHost'] : self::$cfg['basehost'];
+        $attachmentHost = !empty(self::$config['attachmentHost']) ? self::$config['attachmentHost'] : self::$config['basehost'];
         $attachmentHost = rtrim($attachmentHost, '/') . '/';
-        if (preg_match('/' . self::$cfg['domain'] . '/i', $pic)) {
-            $pic = str_replace(rtrim(self::$cfg['basehost'], '/'), '', $pic);
+        if (preg_match('/' . self::$config['domain'] . '/i', $pic)) {
+            $pic = str_replace(rtrim(self::$config['basehost'], '/'), '', $pic);
         }
         if (preg_match("/^(https?:\/\/)/i", $pic)) {
             return $pic;
@@ -213,9 +212,9 @@ class Image extends ModelAbstract
      */
     public static function imageResize($file, $width = '', $height = '')
     {
-        $width = $width ?: self::$cfg['imgWidth'];
-        $height = $height ?: self::$cfg['imgHeight'];
-        if (self::$cfg['imgFull'] == 'Y') {
+        $width = $width ?: self::$config['imgWidth'];
+        $height = $height ?: self::$config['imgHeight'];
+        if (self::$config['imgFull'] == 'Y') {
             self::resizeNew($file, $width, $height);
         } else {
             self::resize($file, $width, $height);
@@ -284,12 +283,13 @@ class Image extends ModelAbstract
                 $ni = imagecreate($ftoW, $ftoH);
                 imagecopyresized($ni, $im, 0, 0, 0, 0, $ftoW, $ftoH, $srcW, $srcH);
             }
+
             switch ($srcInfo[2]) {
                 case 1:
                     imagegif($ni, $toFile);
                     break;
                 case 2:
-                    $jpgQuality = aval(self::$cfg, 'cfg/jpgQuality', 95);
+                    $jpgQuality = aval(self::$config, 'jpgQuality', 95);
                     imagejpeg($ni, $toFile, $jpgQuality);
                     break;
                 case 3:
@@ -301,7 +301,7 @@ class Image extends ModelAbstract
                 default:
                     return FALSE;
             }
-            imagedestroy($ni);
+            $ni && imagedestroy($ni);
         }
         imagedestroy($im);
         return TRUE;
@@ -444,7 +444,7 @@ class Image extends ModelAbstract
 
         $new_img = ImageCreateTrueColor($target_width, $target_height);
 
-        $bgcolor = self::$cfg['imgBgcolor'] == 0 ? ImageColorAllocate($new_img, 0xff, 0xff, 0xff) : 0;
+        $bgcolor = self::$config['imgBgcolor'] == 0 ? ImageColorAllocate($new_img, 0xff, 0xff, 0xff) : 0;
 
         if (!@imagefilledrectangle($new_img, 0, 0, $target_width - 1, $target_height - 1, $bgcolor)) {
             return FALSE;
