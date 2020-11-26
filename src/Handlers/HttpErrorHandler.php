@@ -43,7 +43,7 @@ class HttpErrorHandler extends ErrorHandler
     {
 
         $exception = $this->exception;
-        $func = function ($encodedOutput){
+        $func = function ($encodedOutput) {
             $response = $this->responseFactory->createResponse();
             if ($this->contentType !== null && array_key_exists($this->contentType, $this->errorRenderers)) {
                 $response = $response->withHeader('Content-type', $this->contentType);
@@ -57,14 +57,9 @@ class HttpErrorHandler extends ErrorHandler
             $encodedOutput = json_encode($exception->getResult(), JSON_PRETTY_PRINT);
             return $func($encodedOutput);
         }
-        if ($exception instanceof HttpInternalServerErrorException) {
-            $data = [];
-            $data['code'] = $exception->getCode();
-            $data['msg'] = $exception->getMessage();
-            $encodedOutput = json_encode($data, JSON_PRETTY_PRINT);
-            return $func($encodedOutput);
+        if (CORE_DEBUG === true) {
+            return parent::respond();
         }
-        return parent::respond();
     }
 
     /**
@@ -74,7 +69,7 @@ class HttpErrorHandler extends ErrorHandler
     {
         if ($this->exception instanceof TextException) {
             $this->logger = $this->logger->withName($this->exception->getLoggerName());
-            $error = $this->exception->getResult()->getMsg().' '.$error;
+            $error = $this->exception->getResult()->getMsg() . ' ' . $error;
             $this->logger->alert($error);
         } else {
             $this->logger->error($error);
