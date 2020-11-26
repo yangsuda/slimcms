@@ -36,32 +36,7 @@ return function (ContainerBuilder $containerBuilder) {
     @date_default_timezone_set('Etc/GMT-8');
 
     //全局变量设置
-    $cfg = require_once CSDATA . 'ConfigCache.php';
-    $cfg['settings'] = [];
-    if (is_file(CSROOT . 'config/settings.php')) {
-        $settings = require_once CSROOT . 'config/settings.php';
-        $cfg = array_merge($cfg, $settings);
-    }
-
-    $cfg['cfg']['referer'] = aval($_SERVER, 'HTTP_REFERER');
-    $cfg['cfg']['clienttype'] = 0;
-
-    //防止最后不加/导致ueditor等加载出错
-    $cfg['cfg']['basehost'] = rtrim($cfg['cfg']['basehost'], '/') . '/';
-
-    $agent = $_SERVER['HTTP_USER_AGENT'];
-    if (!empty($cfg['referer']) && strpos($cfg['referer'], 'servicewechat.com')) {
-        $cfg['cfg']['clienttype'] = 2;//微信小程序
-    } elseif (preg_match('/MicroMessenger/i', $agent)) {
-        $cfg['cfg']['clienttype'] = 3;//微信WAP
-    } elseif (preg_match('/NetFront|iPhone|MIDP-2.0|Opera Mini|UCWEB|Android|Windows CE/i', $agent)) {
-        $cfg['cfg']['clienttype'] = 1;//WAP
-    }
-
-    if (strpos(aval($_SERVER, 'HTTP_ACCEPT_ENCODING'), 'gzip') === false || !function_exists('ob_gzhandler')) {
-        $cfg['settings']['output']['gzip'] = false;
-    }
-    $containerBuilder->addDefinitions($cfg);
+    $containerBuilder->addDefinitions(getConfig());
 
     $containerBuilder->addDefinitions([
         LoggerInterface::class => DI\factory(function (ContainerInterface $c) {

@@ -8,22 +8,8 @@ declare(strict_types=1);
 
 namespace SlimCMS\Helper;
 
-use SlimCMS\Error\TextException;
-
 class Crypt
 {
-
-    private static function settings()
-    {
-        static $settings = [];
-        if(empty($settings)){
-            if(!is_file(CSROOT . 'config/settings.php')){
-                throw new TextException(21060, '', 'settings');
-            }
-            $settings = require CSROOT . 'config/settings.php';
-        }
-        return $settings['settings'];
-    }
     /**
      * 加密
      * @param $str
@@ -37,8 +23,9 @@ class Crypt
         if (is_array($str)) {
             $str = serialize($str);
         }
-        $settings = self::settings();
-        $str = openssl_encrypt($str, 'des', $settings['keys']['prikey'], 0, $settings['keys']['pubkey']);
+        $config = getConfig();
+        $keys = &$config['settings']['keys'];
+        $str = openssl_encrypt($str, 'des', $keys['prikey'], 0, $keys['pubkey']);
         $str = str_replace('+', '.', $str);
         return $str;
     }
@@ -48,15 +35,16 @@ class Crypt
      * @param $str
      * @return mixed|string
      */
-    public static function decrypt(string $str): string
+    public static function decrypt($str): string
     {
         if (empty($str)) {
             return '';
         }
         $str = str_replace('.', '+', $str);
         $str = urldecode(str_replace('%25', '%', urlencode($str)));
-        $settings = self::settings();
-        $data = openssl_decrypt($str, 'des', $settings['keys']['prikey'], 0, $settings['keys']['pubkey']);
+        $config = getConfig();
+        $keys = &$config['settings']['keys'];
+        $data = openssl_decrypt($str, 'des', $keys['prikey'], 0, $keys['pubkey']);
         $result = '';
         if (!empty($data) && preg_match("/^[a]:[0-9]+:{(.*)}$/", $data)) {
             $result = unserialize($data);
@@ -74,7 +62,8 @@ class Crypt
      */
     public static function pwd($pwd): string
     {
-        $settings = self::settings();
+        $config = getConfig();
+        $settings = &$config['settings'];
         return substr(md5($pwd . $settings['security']['authkey']), 5, 20);
     }
 }
