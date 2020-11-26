@@ -35,7 +35,7 @@ class Crypt
      * @param $str
      * @return mixed|string
      */
-    public static function decrypt($str): string
+    public static function decrypt(string $str)
     {
         if (empty($str)) {
             return '';
