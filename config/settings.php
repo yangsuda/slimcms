@@ -2,11 +2,6 @@
 
 return [
     'settings' => [
-        'logger' => [
-            'name' => 'slimCMS',
-            'path' => CSDATA . 'logs/' . date('Y-m-d') . '.log',
-            'level' => 100,
-        ],
         'db' =>
             [
                 'dbhost' => '127.0.0.1',

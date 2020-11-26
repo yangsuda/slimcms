@@ -36,9 +36,12 @@ return function (ContainerBuilder $containerBuilder) {
     @date_default_timezone_set('Etc/GMT-8');
 
     //全局变量设置
-    $settings = require_once CSROOT . 'config/settings.php';
     $cfg = require_once CSDATA . 'ConfigCache.php';
-    $cfg += $settings;
+    $cfg['settings'] = [];
+    if (is_file(CSROOT . 'config/settings.php')) {
+        $settings = require_once CSROOT . 'config/settings.php';
+        $cfg = array_merge($cfg, $settings);
+    }
 
     $cfg['cfg']['referer'] = aval($_SERVER, 'HTTP_REFERER');
     $cfg['cfg']['clienttype'] = 0;
@@ -69,13 +72,13 @@ return function (ContainerBuilder $containerBuilder) {
             //创建一个格式化器
             $formatter = new LineFormatter($output, $dateFormat);
 
-            $loggerSettings = $c->get('settings')['logger'];
-            $logger = new Logger($loggerSettings['name']);
+            $path = CSDATA . 'logs/' . date('Y-m-d') . '.log';
+            $logger = new Logger('slimCMS');
 
             $processor = new UidProcessor();
             $logger->pushProcessor($processor);
 
-            $handler = new StreamHandler($loggerSettings['path'], $loggerSettings['level']);
+            $handler = new StreamHandler($path, 100);
             $handler->setFormatter($formatter);
             $logger->pushHandler($handler);
 
