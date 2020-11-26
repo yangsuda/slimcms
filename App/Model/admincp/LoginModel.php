@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace App\Model\admincp;
 
 use SlimCMS\Abstracts\ModelAbstract;
-use SlimCMS\Core\Crypt;
+use SlimCMS\Helper\Crypt;
 use SlimCMS\Helper\Ipdata;
 use SlimCMS\Interfaces\OutputInterface;
 

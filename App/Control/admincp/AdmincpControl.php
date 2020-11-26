@@ -9,7 +9,7 @@ namespace App\Control\admincp;
 
 use App\Core\Forms;
 use App\Model\admincp\LoginModel;
-use SlimCMS\Core\Crypt;
+use SlimCMS\Helper\Crypt;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Core\Request;
 use SlimCMS\Core\Response;
