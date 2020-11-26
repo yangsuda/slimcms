@@ -38,9 +38,8 @@ class Request extends MessageAbstract
         if (isset($post[$k])) {
             return $this->wordsFilter($post[$k]);
         }
-        $get = $this->request->getQueryParams();
-        if (isset($get[$k])) {
-            return $this->wordsFilter($get[$k]);
+        if (isset($_GET[$k])) {
+            return $this->wordsFilter($_GET[$k]);
         }
         return NULL;
     }
@@ -57,7 +56,7 @@ class Request extends MessageAbstract
                 $word[$k] = $this->wordsFilter($v);
             }
         } else {
-            $word = trim($word);
+            $word = trim((string)$word);
             foreach (explode('|', $this->cfg['notallowstr']) as $key => $val) {
                 if (empty($val)) {
                     continue;
