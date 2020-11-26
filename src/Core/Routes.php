@@ -35,7 +35,7 @@ class   Routes implements RouteInterface
             $path = str_replace('/', '\\', dirname($p));
             $path = trim($path, '\.');
             $controlname = $path ? basename($path) : basename($p);
-            $path = empty($path) || $path == $controlname ? '' : $path . '\\';
+            $path = empty($path) || $path == $controlname ? '' : dirname($path) . '\\';
             $controlname = ucfirst($controlname);
             $controlpath = '\App\Control\\' . CURSCRIPT . '\\' . $path;
             $classname = $controlpath . $controlname . 'Control';
