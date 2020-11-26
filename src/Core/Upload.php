@@ -273,7 +273,7 @@ class Upload extends ModelAbstract
                 $ids[] = $v['id'];
                 $upfile = strpos($url, CSPUBLIC) === false ? CSPUBLIC . ltrim($v['url'], '/') : $v['url'];
                 $upfile = realpath($upfile);
-                if (@is_file($upfile) && strpos($url, 'nopic') === false) {
+                if ($upfile && @is_file($upfile) && strpos($url, 'nopic') === false) {
                     @unlink($upfile);
                 }
             }
