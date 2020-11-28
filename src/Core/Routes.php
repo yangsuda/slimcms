@@ -10,7 +10,7 @@ use SlimCMS\Interfaces\RouteInterface;
 use App\Core\Request;
 use App\Core\Response;
 
-class   Routes implements RouteInterface
+class Routes implements RouteInterface
 {
     /**
      * {@inheritdoc}
