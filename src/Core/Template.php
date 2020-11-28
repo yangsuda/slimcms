@@ -14,10 +14,10 @@ use SlimCMS\Interfaces\TemplateInterface;
 
 class Template implements TemplateInterface
 {
-    private static $cacheFile = '';
-    private static $replacecode = ['search' => [], 'replace' => []];
+    protected static $cacheFile = '';
+    protected static $replacecode = ['search' => [], 'replace' => []];
 
-    private static function parseTemplate($tplfile, $cachefile)
+    protected static function parseTemplate($tplfile, $cachefile)
     {
         if ($fp = @fopen(CSROOT . $tplfile, 'r')) {
             $template = @fread($fp, filesize(CSROOT . $tplfile));
@@ -38,36 +38,36 @@ class Template implements TemplateInterface
         fclose($fp);
     }
 
-    private static function formatTemplate($template)
+    protected static function formatTemplate($template)
     {
         $var_regexp = "((\\\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(\-\>)?[a-zA-Z0-9_\x7f-\xff]*)(\[[a-zA-Z0-9_\-\.\"\'\[\]\$\x7f-\xff]+\])*)";
         $const_regexp = "([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)";
 
         $template = preg_replace("/([\n\r]+)\t+/s", "\\1", $template);
         $template = preg_replace("/\<\!\-\-\{(.+?)\}\-\-\>/s", "{\\1}", $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{eval\s+(.+?)\s*\}[\n\r\t]*/is", [__CLASS__, 'evalTag'], $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{list\s+(.+?)\s*\}[\n\r\t]*/is", [__CLASS__, 'listTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{eval\s+(.+?)\s*\}[\n\r\t]*/is", [get_called_class(), 'evalTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{list\s+(.+?)\s*\}[\n\r\t]*/is", [get_called_class(), 'listTag'], $template);
         $template = preg_replace("/\{\/list\}/i", "<?php }} ?>", $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{data\s+(.+?)\s*\}[\n\r\t]*/is", [__CLASS__, 'dataTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{data\s+(.+?)\s*\}[\n\r\t]*/is", [get_called_class(), 'dataTag'], $template);
         $template = preg_replace("/\{(\\\$[a-zA-Z0-9_\-\>\[\]\'\"\$\.\x7f-\xff]+)\}/s", "<?=\\1?>", $template);
-        $template = preg_replace_callback("/$var_regexp/s", [__CLASS__, 'addquote'], $template);
-        $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", [__CLASS__, 'addquote'], $template);
+        $template = preg_replace_callback("/$var_regexp/s", [get_called_class(), 'addquote'], $template);
+        $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", [get_called_class(), 'addquote'], $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{template\s+(.+?)\}[\n\r\t]*/is", [__CLASS__, 'loadTemplateTag'], $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/is", [__CLASS__, 'echoTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{template\s+(.+?)\}[\n\r\t]*/is", [get_called_class(), 'loadTemplateTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/is", [get_called_class(), 'echoTag'], $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{url\s+(.+?)\}[\n\r\t]*/is", [__CLASS__, 'urlTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{url\s+(.+?)\}[\n\r\t]*/is", [get_called_class(), 'urlTag'], $template);
 
-        $template = preg_replace_callback("/([\n\r\t]*)\{if\s+(.+?)\}([\n\r\t]*)/is", [__CLASS__, 'ifTag'], $template);
-        $template = preg_replace_callback("/([\n\r\t]*)\{elseif\s+(.+?)\}([\n\r\t]*)/is", [__CLASS__, 'elseifTag'], $template);
+        $template = preg_replace_callback("/([\n\r\t]*)\{if\s+(.+?)\}([\n\r\t]*)/is", [get_called_class(), 'ifTag'], $template);
+        $template = preg_replace_callback("/([\n\r\t]*)\{elseif\s+(.+?)\}([\n\r\t]*)/is", [get_called_class(), 'elseifTag'], $template);
         $template = preg_replace("/\{else\}/i", "<? } else { ?>", $template);
         $template = preg_replace("/\{\/if\}/i", "<? } ?>", $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{loop\s+(\S+)\s+(\S+)\}[\n\r\t]*/is", [__CLASS__, 'loopTag'], $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{loop\s+(\S+)\s+(\S+)\s+(\S+)\}[\n\r\t]*/is", [__CLASS__, 'loopTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{loop\s+(\S+)\s+(\S+)\}[\n\r\t]*/is", [get_called_class(), 'loopTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{loop\s+(\S+)\s+(\S+)\s+(\S+)\}[\n\r\t]*/is", [get_called_class(), 'loopTag'], $template);
         $template = preg_replace("/\{\/loop\}/i", "<? } ?>", $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{for\s+(\S+)\s+(\S+)\s+(\S+)\}[\n\r\t]*/is", [__CLASS__, 'forTag'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{for\s+(\S+)\s+(\S+)\s+(\S+)\}[\n\r\t]*/is", [get_called_class(), 'forTag'], $template);
         $template = preg_replace("/\{\/for\}/i", "<? } ?>", $template);
 
         $template = preg_replace("/\{$const_regexp\}/s", "<?=\\1?>", $template);
@@ -76,13 +76,13 @@ class Template implements TemplateInterface
         }
         $template = preg_replace("/ \?\>[\n\r]*\<\? /s", " ", $template);
 
-        $template = preg_replace_callback("/\"(http)?[\w\.\/:]+\?[^\"]+?&[^\"]+?\"/", [__CLASS__, 'transamp'], $template);
+        $template = preg_replace_callback("/\"(http)?[\w\.\/:]+\?[^\"]+?&[^\"]+?\"/", [get_called_class(), 'transamp'], $template);
         $template = preg_replace("/\<\?(\s{1})/is", "<?php\\1", $template);
         $template = preg_replace("/\<\?\=(.+?)\?\>/is", "<?php echo \\1??'';?>", $template);
         return $template;
     }
 
-    private static function evalTag($matches)
+    protected static function evalTag($matches)
     {
         $php = $matches[1];
         $php = str_replace('\"', '"', $php);
@@ -92,13 +92,13 @@ class Template implements TemplateInterface
         return $search;
     }
 
-    private static function getPHPTemplate($content)
+    protected static function getPHPTemplate($content)
     {
         $pos = strpos($content, "\n");
         return $pos !== false ? substr($content, $pos + 1) : $content;
     }
 
-    private static function transamp($matches)
+    protected static function transamp($matches)
     {
         $str = $matches[0];
         $str = str_replace('&amp;amp;', '&amp;', $str);
@@ -106,20 +106,20 @@ class Template implements TemplateInterface
         return $str;
     }
 
-    private static function addquote($matches)
+    protected static function addquote($matches)
     {
         $var = '<?=' . $matches[1] . '?>';
         return str_replace("\\\"", "\"", preg_replace("/\[([a-zA-Z0-9_\-\.\x7f-\xff]+)\]/s", "['\\1']", $var));
     }
 
-    private static function loadTemplateTag($matches)
+    protected static function loadTemplateTag($matches)
     {
         $param = str_replace(['<?=', '?>'], ["'.", ".'"], $matches[1]);
         $expr = '<?php include SlimCMS\Core\Template::loadTemplate(\'' . $param . '\'); ?>';
         return self::stripvtags($expr);
     }
 
-    private static function dataTag($matches)
+    protected static function dataTag($matches)
     {
         $tagcode = $matches[1];
         $row = [];
@@ -145,37 +145,37 @@ class Template implements TemplateInterface
         return $search;
     }
 
-    private static function echoTag($matches)
+    protected static function echoTag($matches)
     {
         $expr = '<?php echo ' . $matches[1] . '??\'\'; ?>';
         return self::stripvtags($expr);
     }
 
-    private static function urlTag($matches)
+    protected static function urlTag($matches)
     {
         $param = str_replace(['<?=', '?>'], ['".', '."'], $matches[1]);
         if (strpos($param, ' ')) {
             list($url, $name) = explode(' ', $param);
-            $expr = '<?php echo \App\Core\Forms::url("' . $url . '","' . $name . '"); ?>';
+            $expr = '<?php echo \SlimCMS\Core\Forms::url("' . $url . '","' . $name . '"); ?>';
         } else {
-            $expr = '<?php echo \App\Core\Forms::url("' . $param . '"); ?>';
+            $expr = '<?php echo \SlimCMS\Core\Forms::url("' . $param . '"); ?>';
         }
         return self::stripvtags($expr);
     }
 
-    private static function ifTag($matches)
+    protected static function ifTag($matches)
     {
         $expr = $matches[1] . '<?php if(' . $matches[2] . ') { ?>' . $matches[3];
         return self::stripvtags($expr);
     }
 
-    private static function elseifTag($matches)
+    protected static function elseifTag($matches)
     {
         $expr = $matches[1] . '<?php } elseif(' . $matches[2] . ') { ?>' . $matches[3];
         return self::stripvtags($expr);
     }
 
-    private static function loopTag($matches)
+    protected static function loopTag($matches)
     {
         if (!empty($matches[3])) {
             $expr = '<?php if(!empty(' . $matches[1] . ') && is_array(' . $matches[1] . ')) foreach(' . $matches[1] . ' as ' . $matches[2] . ' => ' . $matches[3] . ') { ?>';
@@ -185,7 +185,7 @@ class Template implements TemplateInterface
         return self::stripvtags($expr);
     }
 
-    private static function forTag($matches)
+    protected static function forTag($matches)
     {
         $expr = '<?php for($' . $matches[1] . '=' . $matches[2] . ';$' . $matches[1] . '<' . $matches[3] . ';$' . $matches[1] . '++) { ?>';
         return self::stripvtags($expr);
@@ -195,10 +195,10 @@ class Template implements TemplateInterface
      * $$v[xxx]类似的标签解析成${$v[xxx]}(php7下解释成$$v下的[xxx]) zhucy 2017.2.20
      * @param unknown_type $code
      */
-    private static function parsePHP($code)
+    protected static function parsePHP($code)
     {
         if (is_array($code)) {
-            return array_map([__CLASS__, 'parsePHP'], $code);
+            return array_map([get_called_class(), 'parsePHP'], $code);
         }
         if (preg_match('/\$\$([_\w\d\[\]\'\']+)/', $code)) {
             $code = preg_replace('/\$\$([_\w\d\[\]\'\']+)/', '${$\\1}', $code);
@@ -206,7 +206,7 @@ class Template implements TemplateInterface
         return $code;
     }
 
-    private static function stripvtags($expr, $statement = '')
+    protected static function stripvtags($expr, $statement = '')
     {
         $expr = str_replace("\\\"", "\"", preg_replace("/\<\?\=(\\\$.+?)\?\>/s", "\\1", $expr));
         $expr = self::parsePHP($expr);
@@ -214,7 +214,7 @@ class Template implements TemplateInterface
         return $expr . $statement;
     }
 
-    private static function listTag($matches)
+    protected static function listTag($matches)
     {
         $tagcode = $matches[1];
         $row = [];
@@ -284,7 +284,7 @@ class Template implements TemplateInterface
         }
     }
 
-    private static function checkTplRefresh($maintpl, $cachefile)
+    protected static function checkTplRefresh($maintpl, $cachefile)
     {
         $ftime = is_file(CSDATA . $cachefile) ? filemtime(CSDATA . $cachefile) : '';
         if (empty($ftime) || @filemtime(CSROOT . $maintpl) > $ftime) {
