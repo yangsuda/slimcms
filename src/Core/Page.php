@@ -71,9 +71,22 @@ class Page extends ModelAbstract
             }
             $multipage .= ($to < $pages ? '<li class="paginate_button page-item"><a href="' . self::url($mpurl . 'page=' . $pages) . $a_name . '" page="' . $pages . '" class="page-link">... ' . $realpages . '</a></li>' : '') .
                 ($curpage < $pages ? '<li class="paginate_button page-item next"><a href="' . self::url($mpurl . 'page=' . ($curpage + 1)) . $a_name . '" page="' . ($curpage + 1) . '" class="page-link">下一页</a></li><li class="paginate_button page-item next"><a href="' . self::url($mpurl . 'page=' . $pages) . $a_name . '" page="' . $pages . '" class="page-link">末页</a></li>' : '') .
-                ($autogoto && $pages > $page && $curpage>4 ? ' <li class="paginate_button page-item previous"><input style="border-radius:0rem;" placeholder="快速跳转" type="text" name="custompage" size="7" class="form-control fa-1x p-1" id="custompage" onkeydown="if(event.keyCode==13) {var page=this.value;window.location=\'' . $mpurl . 'page=\'+page+\'' . '\'; doane(event);}" /></li>' : '');
+                ($autogoto && $pages > $page && $curpage>4 ? ' <li class="paginate_button page-item previous"><input style="border-radius:0rem;" placeholder="快速跳转" type="text" name="custompage" size="7" class="form-control fa-1x p-1" id="custompage" onkeydown="if(event.keyCode==13) {var page=this.value;window.location=\'' . self::url($mpurl . 'page=\'+page+\'') . '\';}" /></li>' : '');
 
-            $multipage = $multipage ? $multipage . ($shownum ? '<li class="paginate_button page-item previous disabled"><a  class="page-link">共' . $pages . '页 | 共' . $num . '条</a></li>' : '') : '';
+            $multipage = $multipage ? $multipage . ($shownum ? '<li class="paginate_button page-item previous disabled"><a  class="page-link">共' . $pages . '页 | 共' . $num . '条</a></li>
+<script>
+$(function() {
+  $(\'.pagesizeset\').click(function() {
+    $(this).parents(\'li\').hide();
+    $(\'.pagesizebox\').show();
+  })
+})
+</script>
+<li class="page-item pagesizebox" style="display: none;">
+<input style="border-radius:0rem;" placeholder="每页显示条数" type="text" name="pagesize" size="12" class="form-control fa-1x p-1" id="pagesize" onkeydown="if(event.keyCode==13) {var pagesize=this.value;window.location=\'' . self::url($mpurl . 'pagesize=\'+pagesize+\'') . '\';}" />
+</li>
+<li class="page-item"><a class="page-link"><i class="fa-1x fas fa-cog pagesizeset"></i></a></li>
+' : '') : '';
             $multipage = $multipage ? '<ul class="pagination">' . $multipage . '</ul>' : '';
         }
         return $multipage;
