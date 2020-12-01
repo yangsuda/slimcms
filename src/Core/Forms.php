@@ -656,7 +656,11 @@ class Forms extends ModelAbstract
                 if (empty($v['rules']) && $val && preg_match('/,/', (string)$val)) {
                     $where[] = self::t()->field($v['identifier'], $val, 'between');
                 } elseif ($v['datatype'] == 'checkbox') {
-                    !empty($val) && $where[] = self::t()->field($v['identifier'], $val, 'find');
+                    if (!empty($val)) {
+                        foreach (explode(',', $val) as $val1) {
+                            $where[] = self::t()->field($v['identifier'], $val1, 'find');
+                        }
+                    }
                 } elseif ($v['datatype'] == 'text') {
                     if (!empty($val)) {
                         if (aval($v, 'precisesearch') == 1) {
