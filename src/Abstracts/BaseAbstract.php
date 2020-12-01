@@ -11,6 +11,7 @@ use App\Core\Redis;
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
 use SlimCMS\Core\Table;
+use SlimCMS\Error\TextException;
 use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\OutputInterface;
 
@@ -124,27 +125,51 @@ abstract class BaseAbstract
         if (strpos($url, '?') !== false) {
             list($path, $url) = explode('?', $url);
         }
-        if (empty($path)) {
-            $path = ltrim($uri->getPath(), '/');
+        if (empty(self::$config['rewriteUrl'])) {
+            if (empty($path)) {
+                $path = ltrim($uri->getPath(), '/');
+            }
+            parse_str($url, $output);
+            foreach ($output as $k => $v) {
+                if ($v === '') {
+                    unset($output[$k]);
+                }
+            }
+
+            $url = http_build_query($output);
+            $url = (preg_match('/^http/', $path) ? $path : rtrim(self::$config['basehost'], '/') . '/' . $path) . '?' . $url;
+            return str_replace('%27', '\'', $url);
         }
+
+        $server = self::$request->getRequest()->getServerParams();
+        $fileName = pathinfo($server['SCRIPT_FILENAME'], PATHINFO_FILENAME);
+
+        if (empty($path)) {
+            $path = ltrim(dirname($uri->getPath()), '/');
+        }
+        $path = str_replace(self::$config['basehost'], '', $path);
         parse_str($url, $output);
+        $data = Str::QAnalysis(pathinfo($path, PATHINFO_FILENAME));
+        $data['p'] = str_replace($fileName, '', dirname($path));
+        $output = array_merge($data, $output);
+
+        if (!empty($output['q'])) {
+            $data = Str::QAnalysis($output['q']);
+            $data && $output = array_merge($data, $output);
+            unset($output['q']);
+        }
         foreach ($output as $k => $v) {
             if ($v === '') {
                 unset($output[$k]);
             }
         }
-
-        $url = http_build_query($output);
-
-        if (empty(self::$config['rewriteUrl'])) {
-            $url = (preg_match('/^http/', $path) ? $path : rtrim(self::$config['basehost'], '/') . '/' . $path) . '?' . $url;
-            return str_replace('%27', '\'', $url);
+        if (empty($output['p'])) {
+            throw new TextException(21057);
         }
-
-        $entre = CURSCRIPT == 'index' ? '' : CURSCRIPT . '/';
-        $url = rtrim(self::$config['basehost'], '/') . '/' . $entre . trim($output['p'], '/') . '/';
+        $entre = pathinfo(self::$config['entryFileName'], PATHINFO_FILENAME) != $fileName ? $fileName : '';
+        $url = rtrim(self::$config['basehost'], '/') . '/' . $entre . '/' . trim($output['p'], '/') . '/';
         $jsoncallback = !empty($output['jsoncallback']);
-        unset($output['p'], $output['q'], $output['jsoncallback']);
+        unset($output['p'], $output['jsoncallback']);
         if (!empty($output)) {
             $arr = [];
             foreach ($output as $k => $v) {
