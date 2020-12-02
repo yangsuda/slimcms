@@ -51,7 +51,6 @@ class LoginModel extends ModelAbstract
         $row['_groupid'] = self::t('admingroup')->withWhere($row['groupid'])->fetch();
         $row['purviews'] = $row['_groupid']['purviews'];
         self::t('admin')->withWhere($row['id'])->update(['loginip' => $ip, 'logintime' => TIMESTAMP]);
-        self::$request->getCookie()->set('adminauth', Crypt::encrypt($row['id']));
         $referer = $referer ?: self::url('?p=main/index');
         return self::$output->withCode(200, 24070)->withData($row)->withReferer($referer);
     }

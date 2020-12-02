@@ -23,7 +23,8 @@ class AdmincpControl extends ControlAbstract
     {
         parent::__construct($request, $response);
         if (empty(self::$admin)) {
-            $adminAuth = (string)self::$request->getCookie()->get('adminauth');
+            isset($_SESSION) ? '' : session_start();
+            $adminAuth = (string)aval($_SESSION, 'adminAuth');
             $auth = Crypt::decrypt($adminAuth);
             if (is_numeric($auth)) {
                 $res = LoginModel::loginInfo((int)$auth);

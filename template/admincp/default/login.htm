@@ -103,6 +103,9 @@
                 if (res.code != 200) {
                     $('#vdimgck').prop('src', '{url ?p=login/captcha}#' + Math.random());
                     $('.msg').addClass('Validform_wrong').html(res.msg);
+                    $.getJSON(basehost+'p=main/formHash',function (result) {
+                        $('input[name=formhash]').val(result.data.formHash)
+                    });
                 } else {
                     location = res.referer;
                 }

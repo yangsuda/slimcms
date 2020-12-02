@@ -13,7 +13,9 @@ use Slim\Psr7\UploadedFile;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Ueditor;
+use SlimCMS\Helper\Crypt;
 use SlimCMS\Helper\Http;
+use SlimCMS\Helper\Str;
 
 class MainControl extends ControlAbstract
 {
@@ -29,10 +31,22 @@ class MainControl extends ControlAbstract
         return self::response($res);
     }
 
+    /**
+     * 获取FORMHASH
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    public function formHash()
+    {
+        $data = [];
+        $data['formHash'] = self::$request->getFormHash();
+        $output = self::$output->withData($data);
+        return self::response($output);
+    }
+
     public function test()
     {
-        $row = self::$request->getRequest()->getQueryParams();
-        var_dump($row);
+        $row = self::input('aa');
+        var_dump(mb_strlen($row));
         exit;
         /*$post = [];
 
