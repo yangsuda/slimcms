@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="$cfg[resourceUrl]plugins/amaze.datetimepicker/css/amazeui.datetimepicker.css" />
 <script src="$cfg[resourceUrl]plugins/amaze.datetimepicker/js/amazeui.datetimepicker.min.utf8.js"></script>
 <div class="card-header">
-    <form name='form3' action='{url &page=}' method='post' class="form-inline">
+    <form name='form3' action='{url &page=&ids=}' method='post' class="form-inline">
         <!--{loop $data[searchFields] $k $v}-->
         <!--{if in_array($v[datatype],array('select','radio','checkbox')) || $v[rules]}-->
         <div class="form-group mr-3 mb-1">
