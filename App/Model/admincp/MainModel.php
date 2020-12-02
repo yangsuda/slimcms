@@ -27,7 +27,7 @@ class MainModel extends ModelAbstract
         $content = unserialize($row['content']);
         $table = self::t('forms')->withWhere($row['formid'])->fetch('table');
         self::t($table)->insert($content);
-        self::t('archivedata')->delete($id);
+        self::t('archivedata')->withWhere($id)->delete();
         return self::$output->withCode(200, 211031);
     }
 
