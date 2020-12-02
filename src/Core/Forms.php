@@ -36,7 +36,13 @@ class Forms extends ModelAbstract
         }
         $parse = parse_url(self::$config['basehost']);
         $host = $parse['host'];
-        if ($server['REQUEST_METHOD'] == 'POST' && $formhash == self::$request->getFormHash() && empty($server['HTTP_X_FLASH_VERSION']) && $host == $referer) {
+        isset($_SESSION) ? '' : session_start();
+
+        if ($server['REQUEST_METHOD'] == 'POST' &&
+            $formhash == aval($_SESSION, 'formHash') &&
+            empty($server['HTTP_X_FLASH_VERSION']) &&
+            $host == $referer) {
+            unset($_SESSION['formHash']);
             return self::$output->withCode(200);
         }
         return self::$output->withCode(24024);
