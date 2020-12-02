@@ -12,6 +12,7 @@ use slimCMS\Core\Request;
 use slimCMS\Core\Response;
 use SlimCMS\Core\Table;
 use SlimCMS\Error\TextException;
+use SlimCMS\Helper\Crypt;
 use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\OutputInterface;
 
@@ -128,6 +129,10 @@ abstract class BaseAbstract
         if (empty(self::$config['rewriteUrl'])) {
             if (empty($path)) {
                 $path = ltrim($uri->getPath(), '/');
+                if (preg_match('/\.html$/', $path)) {
+                    $server = self::$request->getRequest()->getServerParams();
+                    $path = basename($server['SCRIPT_FILENAME']);
+                }
             }
             parse_str($url, $output);
             foreach ($output as $k => $v) {
@@ -135,8 +140,17 @@ abstract class BaseAbstract
                     unset($output[$k]);
                 }
             }
-
-            $url = http_build_query($output);
+            //URL加密
+            if (!empty(self::$config['urlEncrypt'])) {
+                if (!empty($output['q'])) {
+                    $data = Crypt::decrypt($output['q']);
+                    unset($output['q']);
+                    $output = array_merge($data, $output);
+                }
+                $url = 'q=' . Crypt::encrypt($output);
+            } else {
+                $url = http_build_query($output);
+            }
             $url = (preg_match('/^http/', $path) ? $path : rtrim(self::$config['basehost'], '/') . '/' . $path) . '?' . $url;
             return str_replace('%27', '\'', $url);
         }

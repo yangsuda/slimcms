@@ -11,10 +11,10 @@ class Template extends \SlimCMS\Core\Template
 {
     protected static function urlTag($matches)
     {
+        $config = getConfig();
         $param = str_replace(['<?=', '?>'], ['".', '."'], $matches[1]);
-        if (strpos($param, ' ')) {
-            list($url, $name) = explode(' ', $param);echo 's';exit;
-            $expr = '<?php echo \App\Core\Forms::url("' . $url . '","' . $name . '"); ?>';
+        if (!empty($config['cfg']['urlEncrypt']) && strpos($param, '\'+')) {
+            $expr = '<?php echo "' . $param . '"; ?>';
         } else {
             $expr = '<?php echo \App\Core\Forms::url("' . $param . '"); ?>';
         }

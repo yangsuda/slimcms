@@ -153,10 +153,10 @@ class Template implements TemplateInterface
 
     protected static function urlTag($matches)
     {
+        $config = getConfig();
         $param = str_replace(['<?=', '?>'], ['".', '."'], $matches[1]);
-        if (strpos($param, ' ')) {
-            list($url, $name) = explode(' ', $param);
-            $expr = '<?php echo \SlimCMS\Core\Forms::url("' . $url . '","' . $name . '"); ?>';
+        if (!empty($config['cfg']['urlEncrypt']) && strpos($param, '\'+')) {
+            $expr = '<?php echo "' . $param . '"; ?>';
         } else {
             $expr = '<?php echo \SlimCMS\Core\Forms::url("' . $param . '"); ?>';
         }
