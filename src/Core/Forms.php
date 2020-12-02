@@ -100,6 +100,7 @@ class Forms extends ModelAbstract
         if (empty($fid) || empty($ids)) {
             return self::$output->withCode(21002);
         }
+        $ids = array_map('intval', $ids);
         $form = self::t('forms')->withWhere($fid)->fetch();
         if (empty($form)) {
             return self::$output->withCode(22006);
@@ -135,6 +136,7 @@ class Forms extends ModelAbstract
         if (empty($fid) || empty($ids)) {
             return self::$output->withCode(21002);
         }
+        $ids = array_map('intval', $ids);
         $form = self::t('forms')->withWhere($fid)->fetch();
         if (empty($form)) {
             return self::$output->withCode(22006);

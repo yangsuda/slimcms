@@ -57,9 +57,9 @@ class FormsControl extends AdmincpControl
         $id = (int)self::input('id', 'int');
         $this->checkAllow('dataSave' . $fid);
         $formhash = self::input('formhash');
-        if($formhash){
+        if ($formhash) {
             //如启用验证码，对验证码验证
-            if(self::$config['ccode'] == 'Y'){
+            if (self::$config['ccode'] == 'Y') {
                 $ccode = (string)self::input('ccode');
                 $img = new \Securimage();
                 if (!$img->check($ccode)) {
@@ -68,12 +68,12 @@ class FormsControl extends AdmincpControl
                 }
             }
             $res = Forms::submitCheck($formhash);
-            if($res->getCode()!=200){
+            if ($res->getCode() != 200) {
                 return $this->directTo($res);
             }
             $referer = self::input('referer', 'url');
             $referer = $referer ?: self::url('&p=forms/dataList&id=');
-            $res = Forms::dataSave($fid,$id)->withReferer($referer);
+            $res = Forms::dataSave($fid, $id)->withReferer($referer);
             return $this->directTo($res);
         }
         $options = ['cacheTime' => 300, 'ueditorType' => 'admin'];
@@ -96,11 +96,12 @@ class FormsControl extends AdmincpControl
     public function dataCheck()
     {
         $fid = (int)self::input('fid', 'int');
-        $ids = (array)self::input('ids');
+        $ids = self::input('ids');
+        $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : '');
         $ischeck = (int)self::input('ischeck', 'int');
         $this->checkAllow('dataCheck' . $fid);
         $res = Forms::dataCheck($fid, $ids, $ischeck);
-        return self::response($res);
+        return self::directTo($res);
     }
 
     /**
@@ -110,7 +111,8 @@ class FormsControl extends AdmincpControl
     public function dataDel()
     {
         $fid = (int)self::input('fid', 'int');
-        $ids = (array)self::input('ids');
+        $ids = self::input('ids');
+        $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : '');
         $this->checkAllow('dataDel' . $fid);
         $referer = self::url('&p=forms/dataList&ids=');
         $res = Forms::dataDel($fid, $ids)->withReferer($referer);
