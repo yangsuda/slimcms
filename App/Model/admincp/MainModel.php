@@ -20,7 +20,7 @@ class MainModel extends ModelAbstract
         if (empty($id)) {
             return self::$output->withCode(21002);
         }
-        $row = Table::t('archivedata')->fetch($id);
+        $row = self::t('archivedata')->withWhere($id)->fetch();
         if (empty($row)) {
             return self::$output->withCode(21001);
         }
