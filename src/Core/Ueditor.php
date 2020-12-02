@@ -77,7 +77,7 @@ class Ueditor extends ModelAbstract
 
         /* 获取指定范围的列表 */
         $len = count($files);
-        for ($i = min($end, $len) - 1, $list = array(); $i < $len && $i >= 0 && $i >= $start; $i--) {
+        for ($i = min($end, $len) - 1, $list = []; $i < $len && $i >= 0 && $i >= $start; $i--) {
             $list[] = $files[$i];
         }
         //倒序
@@ -96,7 +96,7 @@ class Ueditor extends ModelAbstract
     {
         $where = [];
         $where['isfirst'] = 1;
-        $list = self::t('uploads')->withWhere($where)->withLimit(1000)->fetchList('url,title,mediatype');
+        $list = self::t('uploads')->withWhere($where)->withLimit(1000)->fetchList('url,mediatype');
         $files = [];
         foreach ($list as $v) {
             $url = ltrim($v['url'], '/');
