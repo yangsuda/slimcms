@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace SlimCMS\Abstracts;
 
+use SlimCMS\Helper\Crypt;
 use SlimCMS\Interfaces\OutputInterface;
 
 abstract class ControlAbstract extends BaseAbstract
@@ -26,14 +27,20 @@ abstract class ControlAbstract extends BaseAbstract
         }
         $data = [];
         $data['formhash'] = self::$request->getFormHash();
-        $data['errorCode'] = self::$request->cookie()->get('errorCode');
-        $data['errorMsg'] = self::$request->cookie()->get('errorMsg');
+        $errorCode = (string)self::$request->cookie()->get('errorCode');
+        if ($errorCode) {
+            $data['errorCode'] = Crypt::decrypt($errorCode);
+            $errorMsg = (string)self::$request->cookie()->get('errorMsg');
+            $data['errorMsg'] = Crypt::decrypt($errorMsg);
+        }
         $data['currentUrl'] = self::url();
         $output = $output->withTemplate((string)$template)->withData($data);
 
         //删除操作时临时生成的cookie提示信息
-        self::$request->getCookie()->set('errorCode');
-        self::$request->getCookie()->set('errorMsg');
+        if ($errorCode) {
+            self::$request->getCookie()->set('errorCode');
+            self::$request->getCookie()->set('errorMsg');
+        }
         return self::$response->view($output);
     }
 
