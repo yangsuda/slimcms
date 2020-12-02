@@ -2,11 +2,19 @@
     $(function () {
         $('.sorting_desc').click(function () {
             var order = $(this).data('order');
+            <!--{if $cfg[urlEncrypt]}-->
+            location='{url ?p=forms/dataList&fid=$data[fid]&order='+order+'&by=asc}';
+            <!--{else}-->
             location='{url &order='+order+'&by=asc}';
+            <!--{/if}-->
         })
         $('.sorting_asc').click(function () {
             var order = $(this).data('order');
+            <!--{if $cfg[urlEncrypt]}-->
+            location='{url ?p=forms/dataList&fid=$data[fid]&order='+order+'&by=desc}';
+            <!--{else}-->
             location='{url &order='+order+'&by=desc}';
+            <!--{/if}-->
         })
     })
 </script>
@@ -42,7 +50,12 @@
             return;
         }
         confirmMsg('你确定要删除这些信息吗?',function () {
+            <!--{if $cfg[urlEncrypt]}-->
+            location = '{url ?p=forms/dataDel&fid=$data[fid]&ids='+nid+'}';
+            <!--{else}-->
             location = '{url &p=forms/dataDel&ids='+nid+'}';
+            <!--{/if}-->
+
         })
     }
 
