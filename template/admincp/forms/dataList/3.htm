@@ -107,10 +107,11 @@
                                                         <!--{if $data[form][cpcheck]==1}-->
                                                         <th width="60">审核状态</th>
                                                         <!--{/if}-->
-                                                        <th width="45">操作</th>
+                                                        <th width="80">操作</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
+                                                    <!--{eval $css = [1=>'text-secondary',2=>'text-warning',3=>'text-primary',4=>'text-danger'];}-->
                                                     <!--{loop $data[list] $v}-->
                                                     <tr align='center' bgcolor="#FFFFFF">
                                                         <!--{if $data[form][cpdel]==1}-->
@@ -124,6 +125,8 @@
                                                         <td><a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="{echo copyImage($v[$f_v['identifier']],60,60)}" width="60" /></a></td>
                                                         <!--{elseif $f_v[datatype] == 'imgs'}-->
                                                         <td class="text-dark">{echo count($v['_'.$f_v['identifier']])}</td>
+                                                        <!--{elseif $f_v[identifier] == 'status'}-->
+                                                        <td class="$css[$v[status]]">{eval $val = aval($v,'_'.$f_v['identifier']);}{echo is_array($val)?aval($v,$f_v['identifier']):aval($v,'_'.$f_v['identifier'])}</td>
                                                         <!--{else}-->
                                                         <td class="text-dark">{eval $val = aval($v,'_'.$f_v['identifier']);}{echo is_array($val)?aval($v,$f_v['identifier']):aval($v,'_'.$f_v['identifier'])}</td>
                                                         <!--{/if}-->

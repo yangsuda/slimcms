@@ -39,7 +39,7 @@ class MainControl extends AdmincpControl
     public function fileVerify()
     {
         $res = MainModel::fileVerify()->withReferer(self::url('?p=forms/dataList&fid=3'));
-        return self::response($res);
+        return $this->directTo($res);
     }
 
     /**
@@ -50,7 +50,7 @@ class MainControl extends AdmincpControl
     {
         $file = (string)self::input('file');
         $res = MainModel::updateVerifyKey($file)->withReferer(self::url('?p=forms/dataList&fid=3'));
-        return self::response($res);
+        return $this->directTo($res);
     }
 
     /**

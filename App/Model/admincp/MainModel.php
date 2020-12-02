@@ -7,6 +7,7 @@ namespace App\Model\admincp;
 use App\Core\Upload;
 use SlimCMS\Abstracts\ModelAbstract;
 use SlimCMS\Interfaces\OutputInterface;
+use SlimCMS\Helper\Ipdata;
 
 class MainModel extends ModelAbstract
 {
@@ -47,7 +48,7 @@ class MainModel extends ModelAbstract
                 self::t('fileverify')->withWhere($v['id'])->update(['status' => 4]);
             }
         }
-        return self::$output->withCode(200, 21017);
+        return self::$output->withCode(200);
     }
 
     /**
@@ -65,7 +66,7 @@ class MainModel extends ModelAbstract
                 if (is_dir($directory . $resource . '/')) {
                     self::getFiles($directory . $resource . '/');
                 } else {
-                    $file = $directory . '/' . $resource;
+                    $file = $directory . $resource;
                     $srcverifykey = md5_file($file);
                     $filename = str_replace(CSROOT, '', $file);
                     $row = self::t('fileverify')->withWhere(['filename' => $filename])->fetch();
@@ -103,7 +104,7 @@ class MainModel extends ModelAbstract
             $data = ['srcverifykey' => $row['curverifykey'], 'status' => 1];
             self::t('fileverify')->withWhere($row['id'])->update($data);
         }
-        return self::$output->withCode(200, 21017);
+        return self::$output->withCode(200);
     }
 
     /**
