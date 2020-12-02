@@ -107,7 +107,7 @@
             });
         })
         <!--{if !empty($data[errorMsg])}-->
-        resultMsg('$data[errorMsg]', $data[errorCode]);
+        resultMsg('$data[errorMsg]', $data[errorCode],{echo mb_strlen($data[errorMsg])>6?3000:2000});
         <!--{/if}-->
     })
 </script>
