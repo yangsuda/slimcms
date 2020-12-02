@@ -298,7 +298,7 @@ class Upload extends ModelAbstract
         if (strpos($url, '_')) {
             $url = preg_replace('#(.*)(_)?(\d+)?(x)?(\d+)?(\.(' . self::$config['imgtype'] . ')){1}#isU', '\\1', $url);
         } else {
-            $url = preg_replace('#(.*)(\.(' . $ext . ')){1}#isU', '\\1', $url);
+            $url = pathinfo($url, PATHINFO_DIRNAME) . '/' . pathinfo($url, PATHINFO_FILENAME);
         }
         $url = str_replace("'", '', $url);
         $where = [];
