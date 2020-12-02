@@ -101,7 +101,7 @@ class FormsControl extends AdmincpControl
         $ischeck = (int)self::input('ischeck', 'int');
         $this->checkAllow('dataCheck' . $fid);
         $res = Forms::dataCheck($fid, $ids, $ischeck);
-        return self::directTo($res);
+        return self::response($res);
     }
 
     /**
@@ -116,7 +116,7 @@ class FormsControl extends AdmincpControl
         $this->checkAllow('dataDel' . $fid);
         $referer = self::url('&p=forms/dataList&ids=');
         $res = Forms::dataDel($fid, $ids)->withReferer($referer);
-        return self::directTo($res);
+        return $this->directTo($res);
     }
 
     /**

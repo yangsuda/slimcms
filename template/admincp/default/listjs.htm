@@ -39,7 +39,15 @@
             return ;
         }
         confirmMsg('你确定要审核这些信息吗?',function () {
-            location = '{url ?p=forms/dataCheck&ischeck=1&fid=$data[fid]&ids='+nid+'}';
+            $.getJSON('{url ?p=forms/dataCheck&ischeck=1&fid=$data[fid]&ids='+nid+'}',function (res) {
+                $('#confirmMsg').modal('hide');
+                resultMsg(res.msg, res.code);
+                if(res.code==200){
+                    setTimeout(function () {
+                        location = res.referer;
+                    }, 2000);
+                }
+            })
         })
     }
 
