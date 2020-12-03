@@ -37,7 +37,8 @@ class Forms_fieldsTable extends Table
             if (empty($data['identifier']) || empty($data['formid']) || empty($data['datatype'])) {
                 return 21003;
             }
-            if (self::t('forms_fields')->withWhere(['formid' => $data['formid'], 'identifier' => $data['identifier']])->count()) {
+            $where = ['formid' => $data['formid'], 'identifier' => $data['identifier']];
+            if (self::t('forms_fields')->withWhere($where)->count()) {
                 return 27011;
             }
         }
@@ -53,7 +54,10 @@ class Forms_fieldsTable extends Table
     {
         if (!empty($row['identifier']) && !empty($row['formid'])) {
             $form = self::t('forms')->withWhere($row['formid'])->fetch();
-            if (in_array($row['identifier'], ['id', 'ischeck', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache', 'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group'])) {
+            $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
+                'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
+                'main'];
+            if (in_array($row['identifier'], $arr)) {
                 return 21059;
             }
             self::t($form['table'])->fieldUpdate($row);
@@ -83,7 +87,10 @@ class Forms_fieldsTable extends Table
     public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {
         if (empty($data['displayorder']) && !empty($data['formid'])) {
-            $list = self::t('forms_fields')->withWhere(['formid' => $data['formid']])->withLimit(1)->fetchList('displayorder');
+            $list = self::t('forms_fields')
+                ->withWhere(['formid' => $data['formid']])
+                ->withLimit(1)
+                ->fetchList('displayorder');
             if (!empty($list[0]['displayorder'])) {
                 $data['displayorder'] = $list[0]['displayorder'] - 1;
             }
