@@ -254,6 +254,7 @@ class Template implements TemplateInterface
             $file = preg_replace('/^\/template\//', '', $file);
         }
         if ($force === false) {
+            $file = trim($file, '/');
             $tpldir = '/template/' . CURSCRIPT . '/';
 
             $tplfile = $tpldir . $file . '.htm';
