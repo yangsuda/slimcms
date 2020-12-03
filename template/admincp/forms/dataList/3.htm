@@ -147,7 +147,7 @@
                                                         </td>
                                                     </tr>
                                                     <!--{/loop}-->
-                                                    <!--{if $data[form][cpdel]==1}-->
+                                                    <!--{if $data[form][cpcheck]==1||$data[form][cpdel]==1}-->
                                                     <tr>
                                                         <td height="36" colspan="{echo count($data[listFields])+($data[form][cpcheck]==1?5:4)}">
                                                             <span onClick="$('input[type=checkbox]').prop('checked', true);" style="line-height:1" class="btn btn-dark btn-sm">全选</span>
@@ -155,8 +155,9 @@
                                                             <!--{if $data[form][cpcheck]==1}-->
                                                             <span onClick="AuditSel();" style="line-height:1" class="btn btn-dark btn-sm">审核</span>
                                                             <!--{/if}-->
+                                                            <!--{if $data[form][cpdel]==1}-->
                                                             <span onClick="DelSel()" style="line-height:1" class="btn btn-dark btn-sm">删除</span>
-
+                                                            <!--{/if}-->
                                                         </td>
                                                     </tr>
                                                     <!--{/if}-->

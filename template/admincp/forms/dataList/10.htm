@@ -13,7 +13,7 @@
                 <div class="row">
                     <div class="col-xl-12">
                         <div class="breadcrumb-holder">
-                            <h5 class="float-left" style="line-height: 2.2rem"><!--{if isset($reid[reid])}--><a href="{url &reid=$reid[reid]&egroup=$reid[egroup]}">上级分类</a> \ <!--{/if}-->$data[form][name]</h5>
+                            <h5 class="float-left" style="line-height: 2.2rem"><!--{if isset($data[reid][reid])}--><a href="{url &evalue=$data[reid][reid]&egroup=$data[reid][egroup]}">上级分类</a> \ <!--{/if}-->$data[form][name]</h5>
                             <ol class="breadcrumb float-right">
                                 <!--{if $data[form][cpadd]==1}-->
                                 <li class="breadcrumb-item"><a role="button" class="btn btn-primary btn-sm" href="{url &p=forms/dataSave&id=}">增加新数据</a></li>
@@ -87,7 +87,7 @@
                                                         </td>
                                                     </tr>
                                                     <!--{/loop}-->
-                                                    <!--{if $data[form][cpdel]==1}-->
+                                                    <!--{if $data[form][cpcheck]==1||$data[form][cpdel]==1}-->
                                                     <tr>
                                                         <td height="36" colspan="{echo count($data[listFields])+($data[form][cpcheck]==1?5:4)}">
                                                             <span onClick="$('input[type=checkbox]').prop('checked', true);" style="line-height:1" class="btn btn-dark btn-sm">全选</span>
@@ -95,8 +95,9 @@
                                                             <!--{if $data[form][cpcheck]==1}-->
                                                             <span onClick="AuditSel();" style="line-height:1" class="btn btn-dark btn-sm">审核</span>
                                                             <!--{/if}-->
+                                                            <!--{if $data[form][cpdel]==1}-->
                                                             <span onClick="DelSel()" style="line-height:1" class="btn btn-dark btn-sm">删除</span>
-
+                                                            <!--{/if}-->
                                                         </td>
                                                     </tr>
                                                     <!--{/if}-->
