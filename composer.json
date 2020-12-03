@@ -1,8 +1,8 @@
 {
     "name": "slim/slim-skeleton",
-    "description": "A SlimCMS Framework application for rapid development",
+    "description": "A SlimCMS Framework application",
     "keywords": [
-        "microframework",
+        "slimCMS",
         "rest",
         "router",
         "psr7"
@@ -11,14 +11,9 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Josh Lockhart",
-            "email": "info@joshlockhart.com",
-            "homepage": "http://www.joshlockhart.com/"
-        },
-        {
-            "name": "Pierre Berube",
-            "email": "pierre@lgse.com",
-            "homepage": "http://www.lgse.com/"
+            "name": "zhucy",
+            "email": "919579@qq.com",
+            "homepage": "http://www.cs090.com/"
         }
     ],
     "require": {
@@ -28,7 +23,8 @@
         "php-di/php-di": "^6.1",
         "slim/psr7": "^1.1",
         "slim/slim": "^4.5",
-        "dapphp/securimage": "3.6.7"
+        "dapphp/securimage": "3.6.7",
+        "phpoffice/phpspreadsheet": "^1.10"
     },
     "config": {
         "process-timeout": 0,
