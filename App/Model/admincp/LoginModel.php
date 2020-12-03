@@ -36,7 +36,7 @@ class LoginModel extends ModelAbstract
             return self::$output->withCode(21001);
         }
         if ($row['status'] == 2) {
-            return self::$output->withCode(21048);
+            return self::$output->withCode(21061);
         }
         $where = ['userid' => $userid, self::t()->field('createtime', (TIMESTAMP - 3600), '>')];
         if (self::t('adminloginlog')->withWhere($where)->count() >= 3) {
@@ -72,6 +72,9 @@ class LoginModel extends ModelAbstract
             $row = self::t('admin')->withWhere($adminid)->fetch();
             if (empty($row)) {
                 return self::$output->withCode(21001)->withReferer(self::url('?p=login'));
+            }
+            if ($row['status'] == 2) {
+                return self::$output->withCode(21061);
             }
             $row['_groupid'] = self::t('admingroup')->withWhere($row['groupid'])->fetch();
             self::$redis->set($cachekey, $row, 60);
