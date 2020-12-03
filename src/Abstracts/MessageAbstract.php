@@ -99,6 +99,15 @@ abstract class MessageAbstract
         return $this->request;
     }
 
+    /**
+     * 返回响应对象
+     * @return ResponseInterface
+     */
+    public function getResponse(): ResponseInterface
+    {
+        return $this->response;
+    }
+
     public function getOutput(): OutputInterface
     {
         return $this->output;

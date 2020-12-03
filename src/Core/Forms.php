@@ -332,9 +332,13 @@ class Forms extends ModelAbstract
             }
 
             if (empty($param['fields'])) {
-                $inlistField = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
+                $where = ['formid' => $param['fid'], 'available' => 1];
+                if (isset($param['inlistField'])) {
+                    $inlistField = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
+                    $where[$inlistField] = 1;
+                }
                 $fields = self::t('forms_fields')
-                    ->withWhere(['formid' => $param['fid'], 'available' => 1, $inlistField => 1])
+                    ->withWhere($where)
                     ->onefieldList('identifier', 60);
                 $fields[] = 'createtime';
                 $fields[] = 'ischeck';
@@ -801,15 +805,20 @@ class Forms extends ModelAbstract
         }
 
         $row = [];
+        if (isset($param['inlistField'])) {
+            $row['inlistField'] = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
+        }
         $row['fid'] = $param['fid'];
         $row['page'] = aval($param, 'page', 1);
         $row['by'] = 'desc';
         $row['pagesize'] = aval($param, 'pagesize', 1000);
         $row['fields'] = '*';
         $result = self::dataList($row);
-        $inlistField = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
-        $condition = ['formid' => $param['fid'], 'available' => 1, $inlistField => 1];
 
+        $condition = ['formid' => $param['fid'], 'available' => 1];
+        if (!empty($row['inlistField'])) {
+            $condition[$row['inlistField']] = 1;
+        }
         if (is_callable([self::t($form['table']), 'dataExportBefore'])) {
             $rs = self::t($form['table'])->dataExportBefore($condition, $result);
             if ($rs != 200) {
@@ -817,20 +826,20 @@ class Forms extends ModelAbstract
             }
         }
 
-        $res = self::fieldList($condition);//处理展示字段
+        $fieldList = self::fieldList($condition);//处理展示字段
         $heads = [];
         $heads['id'] = ['title' => '序号', 'datatype' => ''];
         if ($form['cpcheck'] == 1) {
             $heads['ischeck'] = ['title' => '审核状态', 'datatype' => ''];
         }
-        foreach ($res['data'] as $v) {
+        foreach ($fieldList as $v) {
             if (in_array($v['datatype'], array('img', 'imgs'))) {
                 continue;
             }
             $heads[$v['identifier']] = $v;
         }
         $heads['createtime'] = ['title' => '创建时间', 'datatype' => 'date'];
-        $result = $result->withData($heads);
+        $result = $result->withData(['heads' => $heads]);
 
         if (is_callable([self::t($form['table']), 'dataExportAfter'])) {
             $rs = self::t($form['table'])->dataExportAfter($result);
@@ -838,7 +847,7 @@ class Forms extends ModelAbstract
                 return self::$output->withCode($rs);
             }
         }
-        return self::$output->withCode(200)->withData($result);
+        return $result;
     }
 
     /**
