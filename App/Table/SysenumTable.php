@@ -17,9 +17,9 @@ class SysenumTable extends Table
     {
         $where = [];
         if (defined('MANAGE') && MANAGE == 1) {
-            if (!empty($param['get']['evalue'])) {
+            if (isset($param['get']['evalue'])) {
                 $where['reid'] = $param['get']['evalue'];
-                $where['egroup'] = self::input('egroup');
+                $where['egroup'] = $param['get']['egroup'];
                 $where[] = self::t()->field('evalue', 0, '>');
             } else {
                 $where['evalue'] = 0;
@@ -41,8 +41,8 @@ class SysenumTable extends Table
     public function dataListAfter(&$list, $param)
     {
         if (defined('MANAGE') && MANAGE == 1) {
-            /*$evalue = self::input('evalue', 'int');
-            $list['reid'] = self::t('sysenum')->withWhere($evalue)->fetch();*/
+            $evalue = aval($param, 'get/evalue');
+            $evalue && $list['reid'] = self::t('sysenum')->withWhere($evalue)->fetch();
         }
         return 200;
     }
@@ -62,12 +62,12 @@ class SysenumTable extends Table
             } else {
                 $where['evalue'] = 0;
             }
-            $_reid = self::t('sysenum')->withWhere($where)->fetch();
+            $_reid = self::t('sysenum')->withWhere($where)->withOrderby('id', 'asc')->fetch();
             if ($_reid && $_reid['id'] != $data['id']) {
                 $val = [];
                 $val['evalue'] = $data['id'];
                 $val['reid'] = $_reid['evalue'] ?: 0;
-                Table::t('sysenum')->update($data['id'], $val);
+                self::t('sysenum')->withWhere($data['id'])->update($val);
             }
         }
         return 200;
