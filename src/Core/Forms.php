@@ -805,9 +805,6 @@ class Forms extends ModelAbstract
         }
 
         $row = [];
-        if (isset($param['inlistField'])) {
-            $row['inlistField'] = aval($param, 'inlistField') == 'inlistcp' ? 'inlistcp' : 'inlist';
-        }
         $row['fid'] = $param['fid'];
         $row['page'] = aval($param, 'page', 1);
         $row['by'] = 'desc';
@@ -815,10 +812,7 @@ class Forms extends ModelAbstract
         $row['fields'] = '*';
         $result = self::dataList($row);
 
-        $condition = ['formid' => $param['fid'], 'available' => 1];
-        if (!empty($row['inlistField'])) {
-            $condition[$row['inlistField']] = 1;
-        }
+        $condition = ['formid' => $param['fid'], 'available' => 1, 'isexport' => 1];
         if (is_callable([self::t($form['table']), 'dataExportBefore'])) {
             $rs = self::t($form['table'])->dataExportBefore($condition, $result);
             if ($rs != 200) {
@@ -833,9 +827,6 @@ class Forms extends ModelAbstract
             $heads['ischeck'] = ['title' => '审核状态', 'datatype' => ''];
         }
         foreach ($fieldList as $v) {
-            if (in_array($v['datatype'], array('img', 'imgs'))) {
-                continue;
-            }
             $heads[$v['identifier']] = $v;
         }
         $heads['createtime'] = ['title' => '创建时间', 'datatype' => 'date'];
@@ -871,7 +862,7 @@ class Forms extends ModelAbstract
             $v[$identifier . '_units'] = $val['units'];
             switch ($val['datatype']) {
                 case 'htmltext':
-                    $v[$identifier] = stripslashes($v[$identifier]);
+                    $v['_' . $identifier] = stripslashes($v[$identifier]);
                     break;
                 case 'price':
                     $v['_' . $identifier] = $v[$identifier] ? round($v[$identifier], 2) : '';
@@ -927,6 +918,10 @@ class Forms extends ModelAbstract
                         }
                     }
                     $v['_' . $identifier] = !empty($v[$identifier]) ? $img : [];
+                    break;
+                case 'media':
+                case 'addon':
+                    $v['_' . $identifier] = $v[$identifier] ? trim(self::$config['basehost'], '/') . $v[$identifier] : '';
                     break;
                 case 'serialize':
                     $v['_' . $identifier] = unserialize($v[$identifier]);

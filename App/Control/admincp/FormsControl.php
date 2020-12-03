@@ -206,7 +206,17 @@ class FormsControl extends AdmincpControl
             foreach ($data['list'] as $info) {
                 $item .= "<tr>\n";
                 foreach ($heads as $k1 => $v1) {
-                    $item .= "<td style='vnd.ms-excel.numberformat:@'>" . (!empty($info['_' . $k1]) ? $info['_' . $k1] : aval($info, $k1)) . "</td>";
+                    if (!empty($info['_' . $k1])) {
+                        if (is_array($info['_' . $k1])) {
+                            $val = json_encode($info['_' . $k1]);
+                        } else {
+                            $val = $info['_' . $k1];
+                        }
+                    } else {
+                        $val = aval($info, $k1);
+                    }
+
+                    $item .= "<td style='vnd.ms-excel.numberformat:@'>" . $val . "</td>";
                 }
                 $item .= "</tr>";
             }
