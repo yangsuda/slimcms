@@ -98,7 +98,7 @@ class Table
         return $this->db;
     }
 
-    protected static function t(string $name): Table
+    protected static function t(string $name = ''): Table
     {
         return Forms::t($name);
     }
