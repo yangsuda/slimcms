@@ -41,16 +41,23 @@ class AdmincpControl extends ControlAbstract
         }
         //检查权限许可
         $arr = ['main/index', 'forms/dataList', 'forms/dataSave', 'forms/dataCheck', 'forms/dataDel', 'forms/dataExport'];
-        $p = self::input('p');
+        $p = trim(self::input('p'), '/');
         !in_array($p, $arr) && $this->checkAllow($p);
         LoginModel::logSave(self::$admin);
     }
 
+    /**
+     * 权限检测
+     * @param $auth
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
     protected function checkAllow($auth)
     {
         $res = LoginModel::checkAllow(self::$admin, $auth);
         if ($res->getCode() != 200) {
-            return $this->directTo($res);
+            $this->directTo($res);
+            header('location:' . $res->getReferer());
+            exit;
         }
     }
 
