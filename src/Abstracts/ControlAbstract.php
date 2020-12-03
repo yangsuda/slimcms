@@ -34,6 +34,7 @@ abstract class ControlAbstract extends BaseAbstract
             $data['errorMsg'] = Crypt::decrypt($errorMsg);
         }
         $data['currentUrl'] = self::url();
+        $data['p'] = $p;
         $output = $output->withTemplate((string)$template)->withData($data);
 
         //删除操作时临时生成的cookie提示信息
