@@ -71,8 +71,7 @@ class Output implements OutputInterface
      */
     private function promptMsg($code, $para = []): string
     {
-        $prompt = require CSROOT . 'config/prompt.php';
-        $prompt += require dirname(dirname(__FILE__)) . '/Config/prompt.php';
+        $prompt = $this->prompts();
         $str = $prompt[$code];
         if ($para) {
             if (is_array($para)) {
@@ -85,6 +84,19 @@ class Output implements OutputInterface
             }
         }
         return $str;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function prompts(): array
+    {
+        static $prompt = [];
+        if (empty($prompt)) {
+            $prompt = require CSROOT . 'config/prompt.php';
+            $prompt += require dirname(dirname(__FILE__)) . '/Config/prompt.php';
+        }
+        return $prompt;
     }
 
     /**

@@ -1399,4 +1399,20 @@ class Forms extends ModelAbstract
         $data['orderFields'] = self::t('forms_fields')->withWhere($where)->onefieldList('id');
         return self::$output->withCode(200)->withData($data);
     }
+
+    /**
+     * 所有可用的字段
+     * @param int $fid
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function allValidFields(int $fid): OutputInterface
+    {
+        if (empty($fid)) {
+            return self::$output->withCode(27010);
+        }
+        $allValidFields = self::fieldList(['formid' => $fid, 'available' => 1]);
+        return self::$output->withCode(200)->withData(['allValidFields' => $allValidFields]);
+
+    }
 }

@@ -21,6 +21,12 @@ interface OutputInterface extends JsonSerializable
     public function __get($name);
 
     /**
+     * 提示信息
+     * @return array
+     */
+    public function prompts(): array;
+
+    /**
      * 返回提示文字
      * @return string
      */

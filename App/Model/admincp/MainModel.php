@@ -6,6 +6,7 @@ namespace App\Model\admincp;
 
 use App\Core\Upload;
 use SlimCMS\Abstracts\ModelAbstract;
+use App\Core\Forms;
 use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Helper\Ipdata;
 
@@ -125,5 +126,42 @@ class MainModel extends ModelAbstract
         Upload::uploadDel($row[$param['identifier']]);
         self::t($tableName)->withWhere($param['id'])->update([$param['identifier'] => '']);
         return self::$output->withCode(200);
+    }
+
+    /**
+     * 接口文档
+     */
+    public static function apiIntro(): OutputInterface
+    {
+        $param = [];
+        $param['fid'] = 8;
+        $param['pagesize'] = 1000;
+        $res = Forms::dataList($param)->withData(['prompts' => self::$output->prompts()]);
+
+        $count = self::t('apiintro')->count();
+        $where = [self::t()->field('openapi', '', '<>')];
+        $ids = self::t('forms')->withWhere($where)->onefieldList('id');
+        if (empty($ids) && empty($count)) {
+            return self::$output->withCode(21001);
+        }
+
+        $param = [];
+        $param['fid'] = 1;
+        $param['where'] = ['id' => $ids];
+        $param['pagesize'] = 500;
+        $result = Forms::dataList($param);
+        $data = $result->getData();
+        foreach ($data['list'] as &$v) {
+            $id = (int)$v['id'];
+            $result1 = Forms::listFields($id, 500, 'inlist');//处理展示字段
+            $v['listFields'] = $result1->getData()['listFields'];
+            $result1 = Forms::searchFields($id);//搜索条件显示
+            $v['searchFields'] = $result1->getData()['searchFields'];
+            $result1 = Forms::orderFields($id);//排序字段
+            $v['orderFields'] = $result1->getData()['orderFields'];
+            $result1 = Forms::allValidFields($id);//所有字段
+            $v['allFields'] = $result1->getData()['allValidFields'];
+        }
+        return $res->withData(['forms' => $data['list']]);
     }
 }

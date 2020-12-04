@@ -63,4 +63,17 @@ class MainControl extends AdmincpControl
         $res = MainModel::delImg($param);
         return self::response($res);
     }
+
+    /**
+     * 接口文档
+     */
+    public function apiIntro()
+    {
+        $res = MainModel::apiIntro();
+        $template = '';
+        if ($res->getCode() != 200) {
+            $template = 'prompt';
+        }
+        return $this->view($res, $template);
+    }
 }
