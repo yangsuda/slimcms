@@ -54,20 +54,22 @@ class SysenumTable extends Table
      */
     public function dataSaveAfter($data, $row = [])
     {
-        if ($data['mngtype'] == 'add') {
-            $where = [];
-            $where['egroup'] = $data['egroup'];
-            if (!empty($data['evalue'])) {
-                $where['id'] = $data['evalue'];
-            } else {
-                $where['evalue'] = 0;
-            }
-            $_reid = self::t('sysenum')->withWhere($where)->withOrderby('id', 'asc')->fetch();
-            if ($_reid && $_reid['id'] != $data['id']) {
-                $val = [];
-                $val['evalue'] = $data['id'];
-                $val['reid'] = $_reid['evalue'] ?: 0;
-                self::t('sysenum')->withWhere($data['id'])->update($val);
+        if (defined('MANAGE') && MANAGE == 1) {
+            if ($data['mngtype'] == 'add') {
+                $where = [];
+                $where['egroup'] = $data['egroup'];
+                if (!empty($data['evalue'])) {
+                    $where['id'] = $data['evalue'];
+                } else {
+                    $where['evalue'] = 0;
+                }
+                $_reid = self::t('sysenum')->withWhere($where)->withOrderby('id', 'asc')->fetch();
+                if ($_reid && $_reid['id'] != $data['id']) {
+                    $val = [];
+                    $val['evalue'] = $data['id'];
+                    $val['reid'] = $_reid['evalue'] ?: 0;
+                    self::t('sysenum')->withWhere($data['id'])->update($val);
+                }
             }
         }
         return 200;
