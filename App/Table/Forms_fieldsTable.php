@@ -43,6 +43,13 @@ class Forms_fieldsTable extends Table
                     return 27011;
                 }
             }
+            if ($data['datatype'] == 'stepselect') {
+                if (empty($data['egroup'])) {
+                    return 27012;
+                }
+            } else {
+                unset($data['egroup']);
+            }
         }
         return 200;
     }
@@ -102,6 +109,7 @@ class Forms_fieldsTable extends Table
                     $data['displayorder'] = $list[0]['displayorder'] - 1;
                 }
             }
+            $data['enums'] = self::t('sysenum')->withWhere(['evalue' => 0])->fetchList();
         }
         return 200;
     }

@@ -889,11 +889,8 @@ class Forms extends ModelAbstract
                     }
                     break;
                 case 'stepselect':
-                    if (strpos((string)$val['title'], '|')) {
-                        list($val['title'], $identifier) = explode('|', $val['title']);
-                    }
                     $v['_' . $identifier] = aval($v, $identifier) ? self::t('sysenum')
-                        ->withWhere(['egroup' => $identifier, 'evalue' => $v[$identifier]])
+                        ->withWhere(['egroup' => $val['egroup'], 'evalue' => $v[$identifier]])
                         ->fetch('ename') : '';
                     break;
                 case 'select':
@@ -991,10 +988,7 @@ class Forms extends ModelAbstract
                         }
                         break;
                     case 'stepselect':
-                        if (strpos((string)$v['title'], '|')) {
-                            list($v['title'], $identifier) = explode('|', $v['title']);
-                        }
-                        $val = self::input($identifier, 'int');
+                        $val = self::input($v['egroup'], 'int');
                         if (isset($val)) {
                             $data[$identifier] = $val;
                         }
@@ -1198,9 +1192,6 @@ class Forms extends ModelAbstract
                     }
                     break;
                 case 'stepselect':
-                    if (strpos((string)$v['title'], '|')) {
-                        list($v['title'], $v['identifier']) = explode('|', $v['title']);
-                    }
                     static $loadonce = 0;
                     $loadonce++;
                     $v['loadonce'] = $loadonce;
@@ -1290,7 +1281,7 @@ class Forms extends ModelAbstract
         if (!empty($searchFields)) {
             foreach ($searchFields as &$v) {
                 if ($v['datatype'] == 'stepselect') {
-                    $v['default'] = self::input($v['identifier'], 'int');
+                    $v['default'] = self::input($v['egroup'], 'int');
                     static $loadonce = 0;
                     $loadonce++;
                     $v['loadonce'] = $loadonce;
