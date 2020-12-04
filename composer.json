@@ -23,18 +23,17 @@
         "php-di/php-di": "^6.1",
         "slim/psr7": "^1.1",
         "slim/slim": "^4.5",
-        "dapphp/securimage": "3.6.7",
-        "phpoffice/phpspreadsheet": "^1.10"
+        "dapphp/securimage": "3.6.7"
     },
     "config": {
         "process-timeout": 0,
         "sort-packages": true
     },
     "autoload": {
-        "psr-4": {
-            "SlimCMS\\": "src/",
-            "App\\": "app/"
-        },
+        "classmap": [
+            "app",
+            "src"
+        ],
         "files": [
             "src/function/Core.php"
         ]
