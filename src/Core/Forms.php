@@ -892,9 +892,9 @@ class Forms extends ModelAbstract
                     if (strpos((string)$val['title'], '|')) {
                         list($val['title'], $identifier) = explode('|', $val['title']);
                     }
-                    $v['_' . $identifier] = self::t('sysenum')
+                    $v['_' . $identifier] = aval($v, $identifier) ? self::t('sysenum')
                         ->withWhere(['egroup' => $identifier, 'evalue' => $v[$identifier]])
-                        ->fetch('ename');
+                        ->fetch('ename') : '';
                     break;
                 case 'select':
                 case 'radio':

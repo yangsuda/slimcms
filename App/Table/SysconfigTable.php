@@ -15,25 +15,27 @@ class SysconfigTable extends Table
      */
     public function dataSaveAfter($data, $row = []): int
     {
-        $cfg = CSDATA . '/configCache.php';
-        if (!is_writeable($cfg)) {
-            return 21020;
-        }
-        $str = "<?php\r\nreturn ";
-        $row = self::t('sysconfig')->fetchList();
-        $arr = [];
-        foreach ($row as $v) {
-            $value = str_replace("'", '', $v['value']);
-            if ($v['type'] == 'number') {
-                $value = (int)$v['value'];
-            } elseif ($v['type'] == 'serialize') {
-                $value = Str::serializeData($v['value']);
+        if (defined('MANAGE') && MANAGE == 1) {
+            $cfg = CSDATA . '/configCache.php';
+            if (!is_writeable($cfg)) {
+                return 21020;
             }
-            $arr[$v['varname']] = $value;
+            $str = "<?php\r\nreturn ";
+            $row = self::t('sysconfig')->fetchList();
+            $arr = [];
+            foreach ($row as $v) {
+                $value = str_replace("'", '', $v['value']);
+                if ($v['type'] == 'number') {
+                    $value = (int)$v['value'];
+                } elseif ($v['type'] == 'serialize') {
+                    $value = Str::serializeData($v['value']);
+                }
+                $arr[$v['varname']] = $value;
+            }
+            $arr = ['cfg' => $arr];
+            $str .= var_export($arr, true) . ';';
+            file_put_contents($cfg, $str);
         }
-        $arr = ['cfg' => $arr];
-        $str .= var_export($arr, true) . ';';
-        file_put_contents($cfg, $str);
         return 200;
     }
 }

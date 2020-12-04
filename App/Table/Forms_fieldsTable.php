@@ -30,16 +30,18 @@ class Forms_fieldsTable extends Table
      */
     public function dataSaveBefore(&$data, $row = ''): int
     {
-        if (!empty($data['rules'])) {
-            $data['rules'] = Str::serializeData($data['rules']);
-        }
-        if (!$row) {
-            if (empty($data['identifier']) || empty($data['formid']) || empty($data['datatype'])) {
-                return 21003;
+        if (defined('MANAGE') && MANAGE == 1) {
+            if (!empty($data['rules'])) {
+                $data['rules'] = Str::serializeData($data['rules']);
             }
-            $where = ['formid' => $data['formid'], 'identifier' => $data['identifier']];
-            if (self::t('forms_fields')->withWhere($where)->count()) {
-                return 27011;
+            if (!$row) {
+                if (empty($data['identifier']) || empty($data['formid']) || empty($data['datatype'])) {
+                    return 21003;
+                }
+                $where = ['formid' => $data['formid'], 'identifier' => $data['identifier']];
+                if (self::t('forms_fields')->withWhere($where)->count()) {
+                    return 27011;
+                }
             }
         }
         return 200;
@@ -52,15 +54,17 @@ class Forms_fieldsTable extends Table
      */
     public function dataSaveAfter($data, $row = []): int
     {
-        if (!empty($row['identifier']) && !empty($row['formid'])) {
-            $form = self::t('forms')->withWhere($row['formid'])->fetch();
-            $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
-                'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
-                'main'];
-            if (in_array($row['identifier'], $arr)) {
-                return 21059;
+        if (defined('MANAGE') && MANAGE == 1) {
+            if (!empty($row['identifier']) && !empty($row['formid'])) {
+                $form = self::t('forms')->withWhere($row['formid'])->fetch();
+                $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
+                    'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
+                    'main'];
+                if (in_array($row['identifier'], $arr)) {
+                    return 21059;
+                }
+                self::t($form['table'])->fieldUpdate($row);
             }
-            self::t($form['table'])->fieldUpdate($row);
         }
         return 200;
     }
@@ -72,9 +76,11 @@ class Forms_fieldsTable extends Table
      */
     public function dataDelAfter($data): int
     {
-        if (!empty($data['identifier']) && !empty($data['formid'])) {
-            $form = self::t('forms')->withWhere($data['formid'])->fetch();
-            self::t($form['table'])->fieldDelete($data['identifier']);
+        if (defined('MANAGE') && MANAGE == 1) {
+            if (!empty($data['identifier']) && !empty($data['formid'])) {
+                $form = self::t('forms')->withWhere($data['formid'])->fetch();
+                self::t($form['table'])->fieldDelete($data['identifier']);
+            }
         }
         return 200;
     }
@@ -86,13 +92,15 @@ class Forms_fieldsTable extends Table
      */
     public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {
-        if (empty($data['displayorder']) && !empty($data['formid'])) {
-            $list = self::t('forms_fields')
-                ->withWhere(['formid' => $data['formid']])
-                ->withLimit(1)
-                ->fetchList('displayorder');
-            if (!empty($list[0]['displayorder'])) {
-                $data['displayorder'] = $list[0]['displayorder'] - 1;
+        if (defined('MANAGE') && MANAGE == 1) {
+            if (empty($data['displayorder']) && !empty($data['formid'])) {
+                $list = self::t('forms_fields')
+                    ->withWhere(['formid' => $data['formid']])
+                    ->withLimit(1)
+                    ->fetchList('displayorder');
+                if (!empty($list[0]['displayorder'])) {
+                    $data['displayorder'] = $list[0]['displayorder'] - 1;
+                }
             }
         }
         return 200;

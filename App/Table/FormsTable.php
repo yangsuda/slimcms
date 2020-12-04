@@ -15,18 +15,20 @@ class FormsTable extends Table
      */
     public function dataSaveBefore(&$data, $row = ''): int
     {
-        if (empty($data['name'])) {
-            return 21003;
-        }
-        if (aval($row, 'id')) {
-            unset($data['table']);
-        } else {
-            if (empty($data['table'])) {
+        if (defined('MANAGE') && MANAGE == 1) {
+            if (empty($data['name'])) {
                 return 21003;
             }
+            if (aval($row, 'id')) {
+                unset($data['table']);
+            } else {
+                if (empty($data['table'])) {
+                    return 21003;
+                }
+            }
+            $table = (string)aval($data, 'table');
+            Forms::createTable($table);
         }
-        $table = (string)aval($data, 'table');
-        Forms::createTable($table);
         return 200;
     }
 
@@ -37,8 +39,10 @@ class FormsTable extends Table
      */
     public function dataDelAfter($data): int
     {
-        if (!empty($data['id'])) {
-            self::t('forms_fields')->withWhere(['formid' => $data['id']])->delete();
+        if (defined('MANAGE') && MANAGE == 1) {
+            if (!empty($data['id'])) {
+                self::t('forms_fields')->withWhere(['formid' => $data['id']])->delete();
+            }
         }
         return 200;
     }

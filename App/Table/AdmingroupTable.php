@@ -15,9 +15,11 @@ class AdmingroupTable extends Table
      */
     public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {
-        $data['forms'] = self::t('forms')->fetchList();
-        $data['permissions'] = self::t('adminpermission')->fetchList();
-        $data['_purviews'] = !empty($data['purviews']) ? explode(',', $data['purviews']) : [];
+        if (defined('MANAGE') && MANAGE == 1) {
+            $data['forms'] = self::t('forms')->fetchList();
+            $data['permissions'] = self::t('adminpermission')->fetchList();
+            $data['_purviews'] = !empty($data['purviews']) ? explode(',', $data['purviews']) : [];
+        }
         return 200;
     }
 
@@ -29,8 +31,10 @@ class AdmingroupTable extends Table
      */
     public function dataSaveBefore(&$data, $row = ''): int
     {
-        if (!empty($data['purviews'])) {
-            $data['purviews'] = implode(',', $data['purviews']);
+        if (defined('MANAGE') && MANAGE == 1) {
+            if (!empty($data['purviews'])) {
+                $data['purviews'] = implode(',', $data['purviews']);
+            }
         }
         return 200;
     }
