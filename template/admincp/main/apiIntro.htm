@@ -316,7 +316,7 @@ id:信息ID(编辑时传此值){echo "\n"}
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataDel
-*did:$v[id]
+*did:$v[id]{echo "\n"}
 *ids:信息ID(多个用","隔开)
                         </pre>
                         <p>返回</p>
@@ -361,19 +361,19 @@ id:信息ID(编辑时传此值){echo "\n"}
 *did:$v[id]{echo "\n"}
 page:翻页数
 pagesize:一页显示数，默认1000{echo "\n"}
-                            <!--{loop $v[searchFields] $k1 $v1}-->
-                            <!--{if in_array($v1[datatype],array('date','datetime'))}-->
+<!--{loop $v[searchFields] $k1 $v1}-->
+<!--{if in_array($v1[datatype],array('date','datetime'))}-->
 {$v1[identifier]}_s:$v1[title](起始)(格式：{echo date('Y-m-d',TIMESTAMP)})
 {$v1[identifier]}_e:$v1[title](截止)(格式：{echo date('Y-m-d',TIMESTAMP)})
-                            <!--{else}-->
+<!--{else}-->
 {$v1[identifier]}:$v1[title]
-                            <!--{/if}-->
-                            <!--{if !empty($v1[rules])}-->
+<!--{/if}-->
+<!--{if !empty($v1[rules])}-->
 (<!--{loop unserialize($v1[rules]) $k2 $v2}-->
 {$k2}:$v2,<!--{/loop}-->)
-                            <!--{/if}-->
+<!--{/if}-->
 {echo "\n"}
-                            <!--{/loop}-->
+<!--{/loop}-->
                         </pre>
                         <p>返回</p>
                         <pre>
