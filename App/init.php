@@ -19,6 +19,7 @@ define('CSTEMPLATE', CSROOT . 'template/');
 define('CSVENDOR', CSROOT . 'vendor/');
 define('CORE_DEBUG', true); //生产环境下设置false
 define('TIMESTAMP', time());
+define('MICROTIME', microtime(true));
 define('VERSION', '2.0');
 
 require_once CSROOT . 'vendor/autoload.php';
