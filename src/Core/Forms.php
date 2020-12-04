@@ -11,6 +11,7 @@ namespace SlimCMS\Core;
 use App\Core\Upload;
 use App\Core\Ueditor;
 use SlimCMS\Abstracts\ModelAbstract;
+use SlimCMS\Helper\File;
 use SlimCMS\Helper\Ipdata;
 use SlimCMS\Helper\Str;
 use SlimCMS\Helper\Time;
@@ -811,6 +812,12 @@ class Forms extends ModelAbstract
         $row['pagesize'] = aval($param, 'pagesize', 1000);
         $row['fields'] = '*';
         $result = self::dataList($row);
+        $data = $result->getData();
+        foreach ($data['list'] as $k => $v) {
+            $v['style'] = 'vnd.ms-excel.numberformat:@;height:30px;';
+            $data['list'][$k] = $v;
+        }
+        $result = $result->withData($data);
 
         $condition = ['formid' => $param['fid'], 'available' => 1, 'isexport' => 1];
         if (is_callable([self::t($form['table']), 'dataExportBefore'])) {
@@ -821,16 +828,18 @@ class Forms extends ModelAbstract
         }
 
         $fieldList = self::fieldList($condition);//处理展示字段
+        $style = 'height:30px;font-weight:bold;background-color:#f6f6f6;text-align:center;';
         $heads = [];
-        $heads['id'] = ['title' => '序号', 'datatype' => ''];
+        $heads['id'] = ['title' => '序号', 'datatype' => 'int', 'style' => $style];
         if ($form['cpcheck'] == 1) {
-            $heads['ischeck'] = ['title' => '审核状态', 'datatype' => ''];
+            $heads['ischeck'] = ['title' => '审核状态', 'datatype' => 'radio', 'style' => $style];
         }
         foreach ($fieldList as $v) {
+            $v['style'] = $style;
             $heads[$v['identifier']] = $v;
         }
-        $heads['createtime'] = ['title' => '创建时间', 'datatype' => 'date'];
-        $result = $result->withData(['heads' => $heads]);
+        $heads['createtime'] = ['title' => '创建时间', 'datatype' => 'date', 'style' => $style];
+        $result = $result->withData(['heads' => $heads, 'form' => $form]);
 
         if (is_callable([self::t($form['table']), 'dataExportAfter'])) {
             $rs = self::t($form['table'])->dataExportAfter($result);
@@ -838,7 +847,88 @@ class Forms extends ModelAbstract
                 return self::$output->withCode($rs);
             }
         }
-        return $result;
+        return call_user_func_array([get_called_class(), 'exportData'], [$result]);
+    }
+
+    /**
+     * 数据导出
+     * @param $param
+     */
+    protected static function exportData(OutputInterface $output): OutputInterface
+    {
+        $data = $output->getData();
+        $filename = md5(serialize($data['heads'])) . '.xls';
+        $dirname = 'tmpExport/';
+        $tmpPath = CSDATA . $dirname;
+        File::mkdir($tmpPath);
+        $filepath = $tmpPath . $filename;
+        $heads = &$data['heads'];
+
+        $start = ($data['page'] - 1) * $data['pagesize'];
+        $end = min($start + $data['pagesize'], $data['count']);
+        $text = '总数' . $data['count'] . '条,数据处理中第' . $start . '--' . $end . '条,请稍后......';
+        if ($data['page'] == 1) {
+            //清除旧文件
+            is_file($filepath) && unlink($filepath);
+
+            $title = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+				<head>
+			   <meta http-equiv="expires" content="Mon, 06 Jan 1999 00:00:01 GMT">
+			   <meta http-equiv=Content-Type content="text/html; charset=utf-8">
+			   <!--[if gte mso 9]><xml>
+			   <x:ExcelWorkbook>
+			   <x:ExcelWorksheets>
+				 <x:ExcelWorksheet>
+				 <x:Name>' . $data['form']['name'] . '</x:Name>
+				 <x:WorksheetOptions>
+				   <x:DisplayGridlines/>
+				 </x:WorksheetOptions>
+				 </x:ExcelWorksheet>
+			   </x:ExcelWorksheets>
+			   </x:ExcelWorkbook>
+			   </xml><![endif]-->
+			  </head>';
+            $title .= '<table border="1" cellspacing="0" cellpadding="0"><tr>';
+            foreach ($heads as $v) {
+                $title .= '<td style="' . aval($v, 'style') . '">' . $v['title'] . '</td>';
+            }
+            $title .= "</tr>\n";
+            file_put_contents($filepath, $title, FILE_APPEND);
+        }
+        if (!empty($data['list'])) {
+            $item = '';
+            foreach ($data['list'] as $info) {
+                $item .= "<tr>\n";
+                foreach ($heads as $k1 => $v1) {
+                    if (!empty($info['_' . $k1])) {
+                        if (is_array($info['_' . $k1])) {
+                            $val = json_encode($info['_' . $k1]);
+                        } else {
+                            $val = $info['_' . $k1];
+                        }
+                    } else {
+                        $val = aval($info, $k1);
+                        if (empty($val) && in_array($v1['datatype'], ['date', 'datetime'])) {
+                            $val = '';
+                        }
+                    }
+
+                    $item .= "<td style='" . aval($info, 'style') . "'>" . $val . "</td>";
+                }
+                $item .= "</tr>";
+            }
+        }
+        $down = '';
+        if ($data['page'] + 1 >= $data['maxpages']) {
+            $down = '&down=1';
+        }
+        if ($data['page'] >= $data['maxpages']) {
+            $item .= '</table>';
+        }
+        file_put_contents($filepath, $item, FILE_APPEND);
+        $data['page']++;
+        $url = self::url('&page=' . $data['page'] . $down);
+        return self::$output->withData(['file' => $filepath, 'text' => $text])->withReferer($url);
     }
 
     /**
