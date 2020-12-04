@@ -74,6 +74,8 @@ class MainControl extends AdmincpControl
         if ($res->getCode() != 200) {
             $template = 'prompt';
         }
+        $fileName = substr(md5(self::$setting['security']['authkey']), -8);
+        $res = $res->withData(['fileName' => $fileName]);
         return $this->view($res, $template);
     }
 }
