@@ -9,6 +9,7 @@ namespace App\Control\admincp;
 
 use App\Core\Forms;
 use App\Model\admincp\LoginModel;
+use SlimCMS\Error\TextException;
 use SlimCMS\Helper\Crypt;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Core\Request;
@@ -41,7 +42,11 @@ class AdmincpControl extends ControlAbstract
         }
         //检查权限许可
         $arr = ['main/index', 'forms/dataList', 'forms/dataSave', 'forms/dataCheck', 'forms/dataDel', 'forms/dataExport'];
-        $p = trim(self::input('p'), '/');
+        $p = (string)self::input('p');
+        if(empty($p)){
+            throw new TextException(21062);
+        }
+        $p = trim($p, '/');
         !in_array($p, $arr) && $this->checkAllow($p);
         LoginModel::logSave(self::$admin);
     }
