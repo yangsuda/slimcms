@@ -12,12 +12,12 @@
         <i class="fa-2x mr-2 mt-2 far fa-times-circle bigfonts text-danger fa-3x"></i>
         <!--{/if}-->
         <p class="card-text text-dark mt-2 fa-1x">{$msg}($code)</p>
-        <!--{if $referer}-->
+        <!--{if !empty($referer)}-->
         <a href="$referer" class="text-info">如果你的浏览器没反应，请点击这里...</a>
         <!--{/if}-->
     </div>
 </div>
-<!--{if $referer}-->
+<!--{if !empty($referer)}-->
 <script>setTimeout("location='$referer';",3000);</script>
 <!--{/if}-->
 </body>
