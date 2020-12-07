@@ -36,10 +36,10 @@ class Request extends MessageAbstract
     {
         $post = $this->request->getParsedBody();
         if (isset($post[$k])) {
-            return $this->wordsFilter($post[$k]);
+            return $this->wordsFilter($post[$k], $k);
         }
         if (isset($_GET[$k])) {
-            return $this->wordsFilter($_GET[$k]);
+            return $this->wordsFilter($_GET[$k], $k);
         }
         return NULL;
     }
@@ -49,7 +49,7 @@ class Request extends MessageAbstract
      * @param $word
      * @return array|mixed|string
      */
-    protected function wordsFilter($word)
+    protected function wordsFilter($word, $field = '')
     {
         if (is_array($word)) {
             foreach ($word as $k => $v) {
@@ -62,7 +62,10 @@ class Request extends MessageAbstract
                     continue;
                 }
                 if (preg_match("/$val/i", $word)) {
-                    throw new TextException(21051, ['title' => $val]);
+                    //过滤掉后台参数设置
+                    if((!defined('MANAGE') || (defined('MANAGE') && MANAGE != '1') || $field != 'value')){
+                        throw new TextException(21051, ['title' => $val]);
+                    }
                 }
             }
             foreach (explode('|', $this->cfg['replacestr']) as $key => $val) {
