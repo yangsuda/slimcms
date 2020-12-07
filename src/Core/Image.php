@@ -214,7 +214,7 @@ class Image extends ModelAbstract
     {
         $width = $width ?: self::$config['imgWidth'];
         $height = $height ?: self::$config['imgHeight'];
-        if (self::$config['imgFull'] == 'Y') {
+        if (self::$config['imgFull'] == '1') {
             self::resizeNew($file, $width, $height);
         } else {
             self::resize($file, $width, $height);

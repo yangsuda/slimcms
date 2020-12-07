@@ -188,7 +188,7 @@ class LoginModel extends ModelAbstract
      */
     public static function logSave(array $user): OutputInterface
     {
-        if (self::$config['adminLog'] == 'Y') {
+        if (self::$config['adminLog'] == '1') {
             $query = self::$request->getRequest()->getUri()->getQuery();
             $server = self::$request->getRequest()->getServerParams();
             $method = aval($server, 'REQUEST_METHOD');

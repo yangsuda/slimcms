@@ -157,7 +157,7 @@ class Forms extends ModelAbstract
             $form['isarchive'] == 1 && self::dataSave(7, '', ['formid' => $fid, 'aid' => $v['id'], 'content' => serialize($v)]);//归档记录
 
             //判断删除文章附件变量是否开启；
-            if (self::$config['isDelAttachment'] == 'Y') {
+            if (self::$config['isDelAttachment'] == '1') {
                 //判断属性；
                 $fields = self::fieldList(['formid' => $fid, 'available' => 1, 'datatype' => ['htmltext', 'imgs', 'img', 'media', 'addon']]);
                 if ($fields) {

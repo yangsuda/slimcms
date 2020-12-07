@@ -61,7 +61,7 @@ class FormsControl extends AdmincpControl
         $formhash = self::input('formhash');
         if ($formhash) {
             //如启用验证码，对验证码验证
-            if (self::$config['ccode'] == 'Y') {
+            if (self::$config['ccode'] == '1') {
                 $ccode = (string)self::input('ccode');
                 $img = new \Securimage();
                 if (!$img->check($ccode)) {
