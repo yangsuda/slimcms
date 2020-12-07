@@ -385,6 +385,7 @@ class Forms extends ModelAbstract
             $data['by'] = $by;
             $data['currenturl'] = self::url($currenturl);
             $data['get'] = $param['get'];
+            $data['where'] = $where;
 
             if (is_callable([self::t($form['table']), 'dataListAfter'])) {
                 $rs = self::t($form['table'])->dataListAfter($data, $param);
@@ -857,7 +858,7 @@ class Forms extends ModelAbstract
     protected static function exportData(OutputInterface $output): OutputInterface
     {
         $data = $output->getData();
-        $filename = md5(serialize($data['heads'])) . '.xls';
+        $filename = md5(serialize($data['where'])) . '.xls';
         $dirname = 'tmpExport/';
         $tmpPath = CSDATA . $dirname;
         File::mkdir($tmpPath);
@@ -868,8 +869,19 @@ class Forms extends ModelAbstract
         $end = min($start + $data['pagesize'], $data['count']);
         $text = '总数' . $data['count'] . '条,数据处理中第' . $start . '--' . $end . '条,请稍后......';
         if ($data['page'] == 1) {
-            //清除旧文件
+            //清除同名旧文件
             is_file($filepath) && unlink($filepath);
+            //删除1小时前生成的临时文件
+            $handle = opendir($tmpPath);
+            while (false !== ($resource = readdir($handle))) {
+                if (!in_array(strtolower($resource), ['.', '..'])) {
+                    $time = filemtime($tmpPath.$resource);
+                    if($time+3600<TIMESTAMP){
+                        unlink($tmpPath.$resource);
+                    }
+                }
+            }
+            closedir($handle);
 
             $title = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
 				<head>
@@ -921,6 +933,7 @@ class Forms extends ModelAbstract
         $down = '';
         if ($data['page'] + 1 >= $data['maxpages']) {
             $down = '&down=1';
+            $text = '下载完成';
         }
         if ($data['page'] >= $data['maxpages']) {
             $item .= '</table>';
