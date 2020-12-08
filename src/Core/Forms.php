@@ -560,10 +560,10 @@ class Forms extends ModelAbstract
             $val = aval($data, $v['identifier']) ?: self::input($v['identifier']);
             if ($v['datatype'] == 'img' || $v['datatype'] == 'media' || $v['datatype'] == 'addon') {
                 if (empty($row[$v['identifier']]) && empty($_FILES[$v['identifier']]['tmp_name']) && !$val) {
-                    return self::$output->withCode(21008, ['ext_msg' => $msg]);
+                    return self::$output->withCode(21008, ['msg' => $msg]);
                 }
             } elseif (empty($row[$v['identifier']]) && !$val) {
-                return self::$output->withCode(21008, ['ext_msg' => $msg]);
+                return self::$output->withCode(21008, ['msg' => $msg]);
             }
         }
         return self::$output->withCode(200);
