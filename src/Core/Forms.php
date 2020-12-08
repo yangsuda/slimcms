@@ -58,8 +58,11 @@ class Forms extends ModelAbstract
     public static function formView($fid): OutputInterface
     {
         $form = self::t('forms')->withWhere($fid)->fetch();
+        if (empty($form)) {
+            return self::$output->withCode(22006);
+        }
         $data = ['form' => $form, 'fid' => $fid];
-        return self::$output->withData($data);
+        return self::$output->withCode(200)->withData($data);
     }
 
     /**
@@ -875,9 +878,9 @@ class Forms extends ModelAbstract
             $handle = opendir($tmpPath);
             while (false !== ($resource = readdir($handle))) {
                 if (!in_array(strtolower($resource), ['.', '..'])) {
-                    $time = filemtime($tmpPath.$resource);
-                    if($time+3600<TIMESTAMP){
-                        unlink($tmpPath.$resource);
+                    $time = filemtime($tmpPath . $resource);
+                    if ($time + 3600 < TIMESTAMP) {
+                        unlink($tmpPath . $resource);
                     }
                 }
             }

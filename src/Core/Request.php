@@ -224,13 +224,6 @@ class Request extends MessageAbstract
                 $data[$k] = preg_replace('/[^\w\/]/i', '', $val);
             } elseif ($v == 'date') {
                 $data[$k] = preg_replace('/[^\d\-: ]/i', '', $val);
-            } elseif ($v == 'media') {
-                $uploadData = ['files' => $_FILES[$k], 'type' => $v];
-                $res = Upload::upload($uploadData);
-                if ($res->getCode() != 200 && $res->getCode() != 23001) {
-                    return $this->output($res);
-                }
-                $data[$k] = $res->getData()['fileurl'] ?: '';
             } elseif ($v == 'media' || $v == 'addon') {
                 $uploadData = ['files' => $_FILES[$k], 'type' => $v];
                 $res = Upload::upload($uploadData);

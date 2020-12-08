@@ -277,7 +277,7 @@ id:信息ID(编辑时传此值){echo "\n"}
 *p：api/dataSave
 *fid:$v[id]{echo "\n"}
 *ids:信息ID(多个用","隔开)
-*ifcheck:审核状态(2不审核，1审核){echo "\n"}
+*ischeck:审核状态(2不审核，1审核){echo "\n"}
                         </pre>
                         <p>返回</p>
                         <pre>
@@ -425,9 +425,7 @@ id:信息ID（编辑时传此值）
       "code": 200,
       "data": {{echo "\n"}
          form:{ 表单 }
-         fields:[字段数据]
-         fieldshtml:[字段HTML]
-         data:{ 编辑数据 }{echo "\n"}
+         fieldshtml:[字段HTML]{echo "\n"}
        },
       "msg": 操作成功
 }
