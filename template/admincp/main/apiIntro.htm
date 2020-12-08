@@ -34,7 +34,7 @@
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataList
-*did:$v[id]{echo "\n"}
+*fid:$v[id]{echo "\n"}
 page:翻页数
 pagesize:一页显示数，默认30{echo "\n"}
 {echo $v[cpcheck]==1?"ifcheck:2未审核，1已审核\n":''}
@@ -42,6 +42,8 @@ pagesize:一页显示数，默认30{echo "\n"}
 <!--{if in_array($v1[datatype],['date','datetime'])}-->
 {$v1[identifier]}_s:$v1[title](起始)(格式：{echo date('Y-m-d',TIMESTAMP)})
 {$v1[identifier]}_e:$v1[title](截止)(格式：{echo date('Y-m-d',TIMESTAMP)})
+<!--{elseif in_array($v1[datatype],['checkbox'])}-->
+{$v1[identifier]}:$v1[title](多个筛选用“`”隔开，如:1`2)
 <!--{else}-->
 {$v1[identifier]}:$v1[title]
 <!--{/if}-->
@@ -59,7 +61,7 @@ order:排序（<!--{loop $v[orderFields] $k1 $v1}-->{$v1[identifier]}{$v1[title]
 <!--{else}-->
 order:排序（rand()随机显示）
 <!--{/if}-->
-<a href="?p=api/dataList&did=$v[id]&page=1&pagesize=100" target="_blank">访问</a>
+<a href="?p=api/dataList&fid=$v[id]&page=1&pagesize=100" target="_blank">访问</a>
                         </pre>
                         <p>返回</p>
                         <pre>
@@ -113,7 +115,7 @@ order:排序（rand()随机显示）
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataCount
-*did:$v[id]{echo "\n"}
+*fid:$v[id]{echo "\n"}
 <!--{loop $v[searchFields] $k1 $v1}-->
 <!--{if in_array($v1[datatype],array('date','datetime'))}-->
 {$v1[identifier]}_s:$v1[title](起始)(格式：{echo date('Y-m-d',TIMESTAMP)})
@@ -127,7 +129,7 @@ order:排序（rand()随机显示）
 <!--{/if}-->
 {echo "\n"}
 <!--{/loop}-->
-<a href="?p=api/dataCount&did=$v[id]" target="_blank">访问</a>
+<a href="?p=api/dataCount&fid=$v[id]" target="_blank">访问</a>
                         </pre>
                         <p>返回</p>
                         <pre>
@@ -170,10 +172,10 @@ order:排序（rand()随机显示）
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataView
-*did:$v[id]{echo "\n"}
+*fid:$v[id]{echo "\n"}
 *id:信息ID{echo "\n"}
 {echo $v[id]==62?'*openid:openid':''}{echo "\n"}
-<a href="?p=api/dataView&did=$v[id]&id=1" target="_blank">访问</a>
+<a href="?p=api/dataView&fid=$v[id]&id=1" target="_blank">访问</a>
                         </pre>
                         <p>返回</p>
                         <pre>
@@ -221,7 +223,7 @@ order:排序（rand()随机显示）
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataSave
-*did:$v[id]{echo "\n"}
+*fid:$v[id]{echo "\n"}
 id:信息ID(编辑时传此值){echo "\n"}
 <!--{loop $v[allFields] $k1 $v1}-->
 <!--{if $v1[infront]==1}-->
@@ -273,7 +275,7 @@ id:信息ID(编辑时传此值){echo "\n"}
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataSave
-*did:$v[id]{echo "\n"}
+*fid:$v[id]{echo "\n"}
 *ids:信息ID(多个用","隔开)
 *ifcheck:审核状态(2不审核，1审核){echo "\n"}
                         </pre>
@@ -316,7 +318,7 @@ id:信息ID(编辑时传此值){echo "\n"}
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataDel
-*did:$v[id]{echo "\n"}
+*fid:$v[id]{echo "\n"}
 *ids:信息ID(多个用","隔开)
                         </pre>
                         <p>返回</p>
@@ -358,7 +360,7 @@ id:信息ID(编辑时传此值){echo "\n"}
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataExport
-*did:$v[id]{echo "\n"}
+*fid:$v[id]{echo "\n"}
 page:翻页数
 pagesize:一页显示数，默认1000{echo "\n"}
 <!--{loop $v[searchFields] $k1 $v1}-->
@@ -414,7 +416,7 @@ pagesize:一页显示数，默认1000{echo "\n"}
                         <p>参数(*为必填项)</p>
                         <pre>
 *p：api/dataForm
-*did:$v[id]{echo "\n"}
+*fid:$v[id]{echo "\n"}
 id:信息ID（编辑时传此值）
                         </pre>
                         <p>返回</p>
