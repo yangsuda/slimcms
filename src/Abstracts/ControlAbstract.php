@@ -57,6 +57,13 @@ abstract class ControlAbstract extends BaseAbstract
         return self::response($output);
     }
 
+    public function json(OutputInterface $output = null)
+    {
+        $output = $output ?? self::$output;
+        $output->json = 1;
+        return self::response($output);
+    }
+
     /**
      * 跨域请求返回数据
      * @param array $result

@@ -29,10 +29,14 @@ class Response extends MessageAbstract
         if ($output->jsonCallback) {
             return $this->jsonCallback($output);
         }
-        $contentType = $this->determineContentType();
-        $contentType = $contentType ?: 'application/json';
-        if ($contentType == 'text/html') {
-            return $this->view($output);
+        if ($output->json) {
+            $contentType = 'application/json';
+        } else {
+            $contentType = $this->determineContentType();
+            $contentType = $contentType ?: 'application/json';
+            if ($contentType == 'text/html') {
+                return $this->view($output);
+            }
         }
         $this->response = $this->response->withHeader('Content-type', $contentType);
         $encodedOutput = json_encode($output, JSON_PRETTY_PRINT);
