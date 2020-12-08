@@ -40,6 +40,8 @@ return function (ContainerBuilder $containerBuilder) {
 
     $containerBuilder->addDefinitions([
         LoggerInterface::class => DI\factory(function (ContainerInterface $c) {
+            $settings = $c->get('settings');
+            $fileName = substr(md5($settings['security']['authkey']), 5, -10);
             //日期格式
             $dateFormat = "Y-m-d H:i:s";
             //输出格式
@@ -47,7 +49,7 @@ return function (ContainerBuilder $containerBuilder) {
             //创建一个格式化器
             $formatter = new LineFormatter($output, $dateFormat);
 
-            $path = CSDATA . 'logs/' . date('Y-m-d') . '.log';
+            $path = CSDATA . 'logs_'.$fileName.'/' . date('Y-m-d') . '.log';
             $logger = new Logger('slimCMS');
 
             $processor = new UidProcessor();
