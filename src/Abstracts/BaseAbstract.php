@@ -8,6 +8,9 @@ declare(strict_types=1);
 namespace SlimCMS\Abstracts;
 
 use App\Core\Redis;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Psr\Log\LoggerInterface;
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
 use SlimCMS\Core\Table;
@@ -200,5 +203,33 @@ abstract class BaseAbstract
             }
         }
         return $url . ($jsoncallback ? '?jsoncallback=?' : '');
+    }
+
+    /**
+     * 日志记录
+     * @param string $msg
+     * @param array $context
+     * @param string $dir
+     * @param string $format
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    protected static function log(string $msg, array $context = [], string $dir = '', string $format = 'Y-m-d')
+    {
+        //日期格式
+        $dateFormat = "Y-m-d H:i:s";
+        //输出格式
+        $output = "[%datetime%]\n%message% %context%\n";
+        //创建一个格式化器
+        $formatter = new LineFormatter($output, $dateFormat);
+
+        $dir .= ($dir ? '_' : '') . substr(md5(self::$setting['security']['authkey']), 5, -10);
+
+        $path = CSDATA . $dir . '/' . date($format) . '.log';
+        $logger = clone self::$container->get(LoggerInterface::class);
+        $handler = new StreamHandler($path, 100);
+        $handler->setFormatter($formatter);
+        $logger->setHandlers([$handler]);
+        $logger->info($msg, $context);
     }
 }
