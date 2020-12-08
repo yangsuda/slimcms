@@ -223,7 +223,7 @@ abstract class BaseAbstract
         //创建一个格式化器
         $formatter = new LineFormatter($output, $dateFormat);
 
-        $dir .= ($dir ? '_' : '') . substr(md5(self::$setting['security']['authkey']), 5, -10);
+        $dir = $dir ?: substr(md5(self::$setting['security']['authkey']), 5, -10);
 
         $path = CSDATA . $dir . '/' . date($format) . '.log';
         $logger = clone self::$container->get(LoggerInterface::class);
