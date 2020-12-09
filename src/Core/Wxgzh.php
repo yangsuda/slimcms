@@ -77,14 +77,14 @@ class Wxgzh extends ModelAbstract
             return self::$output->withCode(21003);
         }
         $scope = aval($data, 'scope') == 'base' ? 'base' : 'userinfo';
-        header("Location:https://open.weixin.qq.com/connect/oauth2/authorize?appid=" . $data['appid'] .
+        $referer = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" . $data['appid'] .
             "&redirect_uri=" . urlencode(aval($data, 'redirect')) . "&response_type=code&scope=snsapi_" . $scope .
-            "&state=#wechat_redirect");
-        exit;
+            "&state=#wechat_redirect";
+        return self::$output->withReferer($referer);
     }
 
     /**
-     * 获取信息用户信息
+     * 获取公众号用户信息
      * @param OutputInterface $output
      * @return OutputInterface
      */
@@ -166,12 +166,12 @@ class Wxgzh extends ModelAbstract
         if (empty($data['appid']) || empty($data['appsecret']) || empty($data['url'])) {
             return self::$output->withCode(21003);
         }
-        $ticket = self::jsapiTicket();
+        $ticket = self::jsapiTicket($output);
         if (empty($ticket)) {
             return self::$output->withCode(23003);
         }
         $data = [];
-        $data['appid'] = self::$appid;
+        $data['appid'] = $data['appid'];
         $data['ticket'] = $ticket;
         $data['noncestr'] = md5(TIMESTAMP);
         $data['timestamp'] = TIMESTAMP;

@@ -11,6 +11,7 @@ use SlimCMS\Abstracts\ControlAbstract;
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
 use App\Core\Wxxcx;
+use SlimCMS\Core\Wxgzh;
 use SlimCMS\Interfaces\OutputInterface;
 
 class ApiControl extends ControlAbstract
@@ -326,6 +327,65 @@ class ApiControl extends ControlAbstract
         }
         $pic = self::input('name', 'img');
         $res = self::$output->withCode(200)->withData(['pic' => $pic]);
+        return $this->json($res);
+    }
+
+    /**
+     * 生成小程序二维码
+     */
+    public function qrcode()
+    {
+        $scene = self::input('scene');
+        $width = self::input('width', 'int') ?: 430;
+        $page = self::input('page');
+        $param = ['scene' => $scene, 'width' => $width];
+        if ($page) {
+            $param['page'] = $page;
+        }
+        Wxxcx::getwxacodeunlimit($this->wxData->withData($param));
+        $str = header('Content-type: image/jpeg');
+        exit($str);
+    }
+
+    /**
+     * 发送小程序订阅消息
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    public function sendTemplateMessage()
+    {
+        $param = self::input(['touser' => 'string', 'template_id' => 'string', 'data' => 'string']);
+        $res = Wxxcx::sendTemplateMessage($this->wxData->withData($param));
+        return $this->json($res);
+    }
+
+    /**
+     * 获取公众号CODE
+     */
+    public function getCode()
+    {
+        $param = self::input(['scope' => 'string', 'redirect' => 'url']);
+        $res = Wxgzh::getCode($this->wxData->withData($param));
+        header('location:' . $res->getReferer());
+        exit;
+    }
+
+    public function getUserInfo()
+    {
+        $param = self::input(['code' => 'string']);
+        $res = Wxgzh::getUserInfo($this->wxData->withData($param));
+        return $this->json($res);
+    }
+
+    /**
+     * 生成微信分享签名
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    public function wxJsapiConfig()
+    {
+        $param = self::input(['url' => 'url']);
+        $res = Wxgzh::wxJsapiConfig($this->wxData->withData($param));
         return $this->json($res);
     }
 }
