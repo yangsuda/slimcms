@@ -6,7 +6,7 @@
 ## 安装
 
 ```bash
-composer create-project yangsuda/slimCMS [my-app-name]
+composer create-project yangsuda/slimcms [my-app-name]
 ```
 
 将“[my app name]”替换为新应用程序所需的目录名。您需要：
