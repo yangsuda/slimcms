@@ -17,7 +17,7 @@
         }
     ],
     "require": {
-        "yangsuda/framework": "^2.0"
+        "yangsuda/framework": "2.0.0.x-dev"
     },
     "repositories": {
         "packagist": {
