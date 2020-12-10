@@ -1,5 +1,5 @@
 {
-    "name": "yangsuda/slimCMS",
+    "name": "yangsuda/slimcms",
     "description": "A SlimCMS Core framework",
     "keywords": [
         "slimCMS",
@@ -7,7 +7,7 @@
         "router",
         "psr7"
     ],
-    "homepage": "http://github.com/yangsuda/slimCMS",
+    "homepage": "http://github.com/yangsuda/slimcms",
     "license": "MIT",
     "authors": [
         {
@@ -17,7 +17,7 @@
         }
     ],
     "require": {
-        "yangsuda/framework": "^2.0.0.x-dev"
+        "yangsuda/framework": "^2.0"
     },
     "repositories": {
         "packagist": {
