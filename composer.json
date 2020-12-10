@@ -1,13 +1,13 @@
 {
-    "name": "slim/slim-skeleton",
-    "description": "A SlimCMS Framework application",
+    "name": "yangsuda/slimCMS",
+    "description": "A SlimCMS Core framework",
     "keywords": [
         "slimCMS",
         "rest",
         "router",
         "psr7"
     ],
-    "homepage": "http://github.com/slimphp/Slim-Skeleton",
+    "homepage": "http://github.com/yangsuda/slimCMS",
     "license": "MIT",
     "authors": [
         {
@@ -23,7 +23,14 @@
         "php-di/php-di": "^6.1",
         "slim/psr7": "^1.1",
         "slim/slim": "^4.5",
-        "dapphp/securimage": "3.6.7"
+        "dapphp/securimage": "3.6.7",
+        "yangsuda/framework": "^2.0.0.x-dev"
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        }
     },
     "config": {
         "process-timeout": 0,
@@ -31,11 +38,7 @@
     },
     "autoload": {
         "classmap": [
-            "app",
-            "src"
-        ],
-        "files": [
-            "src/function/Core.php"
+            "app"
         ]
     }
 }
