@@ -1,8 +1,7 @@
 .idea/
 .vscode/
-/coverage/
 /data/
 /vendor/
-/logs/*
-!/logs/README.md
-.phpunit.result.cache
+/public/uploads/
+composer.lock
+readme.txt
