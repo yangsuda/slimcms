@@ -5,3 +5,4 @@
 /public/uploads/
 composer.lock
 readme.txt
+config/settings.php
