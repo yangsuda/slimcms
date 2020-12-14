@@ -39,6 +39,15 @@
                                     <!--{template normalfield_save}-->
                                     <!--{/if}-->
                                     <!--{/loop}-->
+                                    <div class="form-group row ueditorHtml" style="display: none">
+                                        <label class="col-sm-2 col-form-label">值：</label>
+                                        <div class="col-sm-6">
+                                            $data[data][ueditorHtml]
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="col-sm-4 text-muted"></div>
+                                    </div>
+
                                     <!--{if $cfg[ccode] == '1'}-->
                                     <div class="form-group row">
                                         <label class="col-sm-2 col-form-label">验证码：</label>
@@ -72,16 +81,24 @@
 
 </div>
 <!--{template footer}-->
-
+<style type="text/css">
+    .am-form-file input[type="file"] {position: absolute;left: 0;z-index: 1;opacity: 0;cursor: pointer;}
+</style>
 <script>
     $(function () {
         function showValueHtml(type){
             var html = '';
             if(type==1){
                 html = '<input type="text" class="form-control " id="value" name="value" value="{echo aval($data,'data/value')}" >';
+                $('.formgroup-value .col-sm-6').html(html);
+                $('.ueditorHtml').hide();
+                $('.formgroup-value').show();
             }
             else if(type==2){
                 html = '<textarea class="form-control " id="value" name="value" rows="5">{echo aval($data,'data/value')}</textarea>';
+                $('.formgroup-value .col-sm-6').html(html);
+                $('.ueditorHtml').hide();
+                $('.formgroup-value').show();
             }
             else if(type==3){
                 html = '<div class="form-inline"><span class="custom-control custom-radio mr-2">\n' +
@@ -92,8 +109,25 @@
                 '        <input type="radio" class="custom-control-input " id="value1" name="value" value="1" {echo aval($data,'data/value')=='1'?'checked':''}/>\n' +
                 '        <label class="custom-control-label" for="value1">是</label>\n' +
                 '    </span></div>';
+                $('.formgroup-value .col-sm-6').html(html);
+                $('.ueditorHtml').hide();
+                $('.formgroup-value').show();
             }
-            $('#value').parent().html(html);
+            else if(type==4){
+                html = '<div class="am-form-file"> ' +
+                    '<button type="button" class="btn btn-secondary btn-sm"><i class="fa-1x fas fa-cloud-upload-alt"></i> 本地上传</button> ' +
+                    '<input type="file" name="value" onChange="$(\'#value_html\').html(this.value);$(\'#value_hidden\').val(this.value);" /> ' +
+                '<input type="hidden" id="value_hidden" name="value_hidden" value=""  sucmsg=""  /> </div> ' +
+                '<div id="value_html" class="m-1">{echo aval($data,'data/value')}</div>';
+                $('.formgroup-value .col-sm-6').html(html);
+                $('.ueditorHtml').hide();
+                $('.formgroup-value').show();
+            }
+            else if(type==5){
+                $('.ueditorHtml').show();
+                $('.formgroup-value').hide();
+            }
+
         }
         showValueHtml({echo aval($data,'data/type',1)});
         $('#type').change(function () {
