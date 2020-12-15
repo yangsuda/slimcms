@@ -20,11 +20,10 @@ class LoginModel extends ModelAbstract
      * 登陆操作
      * @param string $userid
      * @param string $pwd
-     * @param string $referer
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function loginCheck($userid, $pwd, $referer = ''): OutputInterface
+    public static function loginCheck($userid, $pwd): OutputInterface
     {
         if (empty($userid) || empty($pwd)) {
             return self::$output->withCode(21002);
@@ -51,8 +50,7 @@ class LoginModel extends ModelAbstract
         $row['_groupid'] = self::t('admingroup')->withWhere($row['groupid'])->fetch();
         $row['purviews'] = $row['_groupid']['purviews'];
         self::t('admin')->withWhere($row['id'])->update(['loginip' => $ip, 'logintime' => TIMESTAMP]);
-        $referer = $referer ?: self::url('?p=main/index');
-        return self::$output->withCode(200, 24070)->withData($row)->withReferer($referer);
+        return self::$output->withCode(200, 24070)->withData($row);
     }
 
     /**

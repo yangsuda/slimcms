@@ -31,11 +31,13 @@ class LoginControl extends ControlAbstract
             }
             $userid = self::input('userid');
             $pwd = self::input('pwd');
-            $referer = self::input('referer', 'url');
-            $res = LoginModel::loginCheck($userid, $pwd, $referer);
+            $res = LoginModel::loginCheck($userid, $pwd);
             if ($res->getCode() == 200) {
                 isset($_SESSION) ? '' : session_start();
                 $_SESSION['adminAuth'] = Crypt::encrypt($res->getData()['id']);
+                $referer = self::input('referer', 'url');
+                $referer = $referer ?: self::url('?p=main/index');
+                $res = $res->withReferer($referer);
             }
             return $this->response($res);
         }
