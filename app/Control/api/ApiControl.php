@@ -16,7 +16,7 @@ use SlimCMS\Interfaces\OutputInterface;
 
 class ApiControl extends ControlAbstract
 {
-    private $wxData = '';
+    private $wxData = null;
 
     public function __construct(Request $request, Response $response)
     {
@@ -335,6 +335,10 @@ class ApiControl extends ControlAbstract
      */
     public function qrcode()
     {
+        $res = self::verifyHttpReferer();
+        if ($res->getCode() != 200) {
+            return $this->json($res);
+        }
         $scene = self::input('scene');
         $width = self::input('width', 'int') ?: 430;
         $page = self::input('page');
@@ -355,6 +359,10 @@ class ApiControl extends ControlAbstract
      */
     public function sendTemplateMessage()
     {
+        $res = self::verifyHttpReferer();
+        if ($res->getCode() != 200) {
+            return $this->json($res);
+        }
         $param = self::input(['touser' => 'string', 'template_id' => 'string', 'data' => 'string']);
         $res = Wxxcx::sendTemplateMessage($this->wxData->withData($param));
         return $this->json($res);
@@ -371,6 +379,10 @@ class ApiControl extends ControlAbstract
         exit;
     }
 
+    /**
+     * 获取微信用户信息
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
     public function getUserInfo()
     {
         $param = self::input(['code' => 'string']);
