@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace App\Control\api;
 
 use App\Core\Forms;
+use App\Model\admincp\LoginModel;
 use SlimCMS\Abstracts\ControlAbstract;
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
@@ -28,11 +29,12 @@ class ApiControl extends ControlAbstract
     }
 
     /**
-     * 验证请求来路
+     * 权限检测
      * @return OutputInterface
      */
-    private static function verifyHttpReferer(): OutputInterface
+    private static function purviewCheck(): OutputInterface
     {
+        //验证请求来路
         if (!empty(self::$config['refererWhite'])) {
             $arr = array_map('trim', explode("\n", self::$config['refererWhite']));
             $str = str_replace('/', '\/', implode('|', $arr));
@@ -40,7 +42,27 @@ class ApiControl extends ControlAbstract
                 return self::$output->withCode(21048);
             }
         }
+        //token校验
+        if (!empty(self::$config['tokenCheck'])) {
+            $token = (string)self::input('token');
+            $res = LoginModel::checkToken($token);
+            if ($res->getCode() != 200) {
+                return $res;
+            }
+        }
         return self::$output->withCode(200);
+    }
+
+    /**
+     * 生成token
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public function createToken()
+    {
+        $userid = (string)self::input('userid');
+        $pwd = (string)self::input('pwd');
+        return LoginModel::createToken($userid, $pwd);
     }
 
     /**
@@ -49,7 +71,7 @@ class ApiControl extends ControlAbstract
      */
     public function getOpenid()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -68,7 +90,7 @@ class ApiControl extends ControlAbstract
      */
     public function decryptData()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -88,7 +110,7 @@ class ApiControl extends ControlAbstract
      */
     public function dataList()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -116,7 +138,7 @@ class ApiControl extends ControlAbstract
      */
     public function dataCount()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -141,7 +163,7 @@ class ApiControl extends ControlAbstract
      */
     public function dataView()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -168,7 +190,7 @@ class ApiControl extends ControlAbstract
      */
     public function dataForm()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -195,7 +217,7 @@ class ApiControl extends ControlAbstract
      */
     public function dataSave()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -221,7 +243,7 @@ class ApiControl extends ControlAbstract
      */
     public function dataCheck()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -249,7 +271,7 @@ class ApiControl extends ControlAbstract
      */
     public function dataDel()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -274,7 +296,7 @@ class ApiControl extends ControlAbstract
      */
     public function dataExport()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -321,7 +343,7 @@ class ApiControl extends ControlAbstract
      */
     public function uploadFile()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -335,7 +357,7 @@ class ApiControl extends ControlAbstract
      */
     public function qrcode()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -359,7 +381,7 @@ class ApiControl extends ControlAbstract
      */
     public function sendTemplateMessage()
     {
-        $res = self::verifyHttpReferer();
+        $res = self::purviewCheck();
         if ($res->getCode() != 200) {
             return $this->json($res);
         }

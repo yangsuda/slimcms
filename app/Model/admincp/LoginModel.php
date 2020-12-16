@@ -186,7 +186,7 @@ class LoginModel extends ModelAbstract
      */
     public static function logSave(array $user): OutputInterface
     {
-        if (self::$config['adminLog'] == '1') {
+        if (!empty(self::$config['adminLog'])) {
             $query = self::$request->getRequest()->getUri()->getQuery();
             $server = self::$request->getRequest()->getServerParams();
             $method = aval($server, 'REQUEST_METHOD');
@@ -207,5 +207,52 @@ class LoginModel extends ModelAbstract
             self::t('adminlog')->insert($data);
         }
         return self::$output->withCode(200);
+    }
+
+
+    /**
+     * 生成token
+     * @param string $userid
+     * @param string $pwd
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function createToken(string $userid, string $pwd): OutputInterface
+    {
+        $res = self::loginCheck($userid, $pwd);
+        if ($res->getCode() != 200) {
+            return $res;
+        }
+        $admin = $res->getData();
+        $data = ['id' => $admin['id'], 'time' => TIMESTAMP];
+        $token = Crypt::encrypt($data);
+        return self::$output->withCode(200)->withData(['token' => $token]);
+    }
+
+    /**
+     * token检测
+     * @param string $token
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function checkToken(string $token): OutputInterface
+    {
+        if (empty($token)) {
+            return self::$output->withCode(21002);
+        }
+        $data = Crypt::decrypt($token);
+        if (empty($data['time'])) {
+            return self::$output->withCode(223018);
+        }
+        $tokenTTL = !empty(self::$config['tokenTTL']) ? self::$config['tokenTTL'] : 7200;
+        if ($data['time'] + $tokenTTL < TIMESTAMP) {
+            return self::$output->withCode(223019);
+        }
+        $res = self::loginInfo($data['id']);
+        if ($res->getCode() != 200) {
+            return $res;
+        }
+        self::logSave($res->getData()['admin']);
+        return $res;
     }
 }
