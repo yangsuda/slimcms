@@ -25,6 +25,8 @@ class ApiControl extends ControlAbstract
         if (!empty(self::$config['appid'])) {
             $data = ['appid' => self::$config['appid'], 'appsecret' => self::$config['appsecret']];
             $this->wxData = self::$output->withData($data);
+        } else {
+            $this->wxData = self::$output;
         }
     }
 
@@ -61,7 +63,8 @@ class ApiControl extends ControlAbstract
     public function createToken()
     {
         if (empty(self::$config['tokenCheck'])) {
-            return self::$output->withCode(223020);
+            $res = self::$output->withCode(223020);
+            return $this->json($res);
         }
         $userid = (string)self::input('userid');
         $pwd = (string)self::input('pwd');

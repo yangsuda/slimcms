@@ -226,6 +226,9 @@ class LoginModel extends ModelAbstract
         $admin = $res->getData();
         $data = ['id' => $admin['id'], 'time' => TIMESTAMP];
         $token = Crypt::encrypt($data);
+
+        //更新token
+        self::t('admin')->withWhere($admin['id'])->update(['token' => $token]);
         return self::$output->withCode(200)->withData(['token' => $token]);
     }
 
@@ -248,11 +251,15 @@ class LoginModel extends ModelAbstract
         if ($data['time'] + $tokenTTL < TIMESTAMP) {
             return self::$output->withCode(223019);
         }
-        $res = self::loginInfo($data['id']);
+        $res = self::loginInfo((int)$data['id']);
         if ($res->getCode() != 200) {
             return $res;
         }
-        self::logSave($res->getData()['admin']);
+        $admin = $res->getData()['admin'];
+        if ($token != $admin['token']) {
+            return self::$output->withCode(223021);
+        }
+        self::logSave($admin);
         return $res;
     }
 }
