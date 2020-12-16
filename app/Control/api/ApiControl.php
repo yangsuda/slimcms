@@ -60,9 +60,13 @@ class ApiControl extends ControlAbstract
      */
     public function createToken()
     {
+        if (empty(self::$config['tokenCheck'])) {
+            return self::$output->withCode(223020);
+        }
         $userid = (string)self::input('userid');
         $pwd = (string)self::input('pwd');
-        return LoginModel::createToken($userid, $pwd);
+        $res = LoginModel::createToken($userid, $pwd);
+        return $this->json($res);
     }
 
     /**
