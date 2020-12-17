@@ -3,78 +3,100 @@
 /**
  * 模板列表、表单等标签模型类
  * @author zhucy
- * @date 2020.05.13
  */
 
-namespace app\model\main;
+declare(strict_types=1);
 
-use app\model\admincp\ActivityModel;
-use app\model\diyforms\DiyformsModel;
-use cs090\core\Model;
-use cs090\core\Output;
+namespace App\Model\main;
 
-class TagsModel extends Model
+use App\Core\Forms;
+use SlimCMS\Abstracts\ModelAbstract;
+use SlimCMS\Core\Page;
+use SlimCMS\Error\TextException;
+
+class TagsModel extends ModelAbstract
 {
+
     /**
      * 数据统计
      * @param $param
-     * @return mixed
+     * @return array
+     * @throws TextException
      */
-    public static function dataCount($param)
+    public static function dataCount($param): array
     {
         $param = json_decode($param, true);
-        $param['fid'] = $param['fid'];
         $where = [];
         if (!empty($param['ischeck'])) {
-            $where['ischeck'] = $param['ischeck']==1 ? 1 : 2;
-        } else {
-            $where['ischeck'] = [1, 2];
+            $where['ischeck'] = $param['ischeck'] == 1 ? 1 : 2;
         }
         $param['where'] = $where;
-        $res = DiyformsModel::dataCount($param);
-        if ($res['code'] != 200) {
-            Output::showMsg($res);
+        $res = Forms::dataCount($param);
+        if ($res->getCode() != 200) {
+            throw new TextException($res->getCode(), '', 'tags');
         }
-        return $res['data'];
+        return $res->getData();
     }
 
     /**
      * 数据列表页
-     * @return array|\cs090\core\数据|string
+     * @param $param
+     * @return array
+     * @throws TextException
      */
-    public static function dataList($param)
+    public static function dataList($param): array
     {
         $param = json_decode($param, true);
-        $param['fid'] = $param['fid'];
         $where = [];
         if (!empty($param['ischeck'])) {
-            $where['ischeck'] = $param['ischeck']==1 ? 1 : 2;
-        } else {
-            $where['ischeck'] = [1, 2];
+            $where['ischeck'] = $param['ischeck'] == 1 ? 1 : 2;
         }
         $param['where'] = $where;
-        $res = DiyformsModel::dataList($param);
-        if ($res['code'] != 200) {
-            Output::showMsg($res);
+        $res = Forms::dataList($param);
+        if ($res->getCode() != 200) {
+            throw new TextException($res->getCode(), '', 'tags');
         }
-        $result = DiyformsModel::fieldList(['formid' => $param['fid'], 'available' => 1, 'inlist' => 1]);//处理展示字段
-        $res['data']['listFields'] = $result['data'];
-        return $res['data'];
+        $data = $res->getData();
+        $rangepage = aval($param, 'rangepage', 5);
+        $autogoto = aval($param, 'autogoto');
+        $shownum = aval($param, 'shownum');
+        $data['mult'] = Page::multi($data['count'], $data['pagesize'], $data['page'], $data['currenturl'],
+            $data['maxpages'], $rangepage, $autogoto, $shownum);
+        return $data;
     }
 
     /**
-     * 自定义表单添加修改页
-     * @return array|\cs090\core\数据|string
+     * 表单添加修改页
+     * @param $param
+     * @return array
+     * @throws TextException
      */
-    public static function dataForm($param)
+    public static function dataFormHtml($param): array
     {
         $param = json_decode($param, true);
-        $res = DiyformsModel::diyformView($param['fid']);
-        $result = DiyformsModel::getFormHtml($param['fid'], aval($param, 'id'));
-        if ($result['code'] != 200) {
-            Output::showMsg($result);
+        $fid = (int)aval($param,'fid');
+        $res = Forms::dataFormHtml($fid, aval($param, 'id'));
+        if ($res->getCode() != 200) {
+            throw new TextException($res->getCode(), '', 'tags');
         }
-        $res['data'] += $result['data'];
-        return $res['data'];
+        return $res->getData();
+    }
+
+    /**
+     * 数据详细
+     * @param $param
+     * @return array
+     * @throws TextException
+     */
+    public static function dataView($param): array
+    {
+        $param = json_decode($param, true);
+        $fid = (int)aval($param,'fid');
+        $id = (int)aval($param,'id');
+        $res = Forms::dataView($fid, $id);
+        if ($res->getCode() != 200) {
+            throw new TextException($res->getCode(), '', 'tags');
+        }
+        return $res->getData();
     }
 }
