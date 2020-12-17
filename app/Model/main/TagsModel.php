@@ -26,6 +26,7 @@ class TagsModel extends ModelAbstract
     public static function dataCount($param): array
     {
         $param = json_decode($param, true);
+        $param['fid'] = (int)aval($param, 'fid');
         $where = [];
         if (!empty($param['ischeck'])) {
             $where['ischeck'] = $param['ischeck'] == 1 ? 1 : 2;
@@ -47,6 +48,9 @@ class TagsModel extends ModelAbstract
     public static function dataList($param): array
     {
         $param = json_decode($param, true);
+        $param['fid'] = (int)aval($param, 'fid');
+        $page = (int)self::input('page', 'int');
+        $param['page'] = (int)aval($param, 'page', $page);
         $where = [];
         if (!empty($param['ischeck'])) {
             $where['ischeck'] = $param['ischeck'] == 1 ? 1 : 2;
@@ -66,23 +70,6 @@ class TagsModel extends ModelAbstract
     }
 
     /**
-     * 表单添加修改页
-     * @param $param
-     * @return array
-     * @throws TextException
-     */
-    public static function dataFormHtml($param): array
-    {
-        $param = json_decode($param, true);
-        $fid = (int)aval($param,'fid');
-        $res = Forms::dataFormHtml($fid, aval($param, 'id'));
-        if ($res->getCode() != 200) {
-            throw new TextException($res->getCode(), '', 'tags');
-        }
-        return $res->getData();
-    }
-
-    /**
      * 数据详细
      * @param $param
      * @return array
@@ -91,8 +78,8 @@ class TagsModel extends ModelAbstract
     public static function dataView($param): array
     {
         $param = json_decode($param, true);
-        $fid = (int)aval($param,'fid');
-        $id = (int)aval($param,'id');
+        $fid = (int)aval($param, 'fid');
+        $id = (int)aval($param, 'id');
         $res = Forms::dataView($fid, $id);
         if ($res->getCode() != 200) {
             throw new TextException($res->getCode(), '', 'tags');
