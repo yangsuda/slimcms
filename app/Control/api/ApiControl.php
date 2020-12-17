@@ -309,7 +309,7 @@ class ApiControl extends ControlAbstract
         }
 
         $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int']);
-        $res = Forms::formView($param['fid']);
+        $res = Forms::formView((int)$param['fid']);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
