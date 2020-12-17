@@ -92,7 +92,7 @@
                                                 <table id="form$data[fid]" class="table table-hover display dataTable">
                                                     <thead>
                                                     <tr role="row" align="center">
-                                                        <!--{if $data[form][cpdel]==1}-->
+                                                        <!--{if $data[form][cpcheck]==1||$data[form][cpdel]==1}-->
                                                         <th width="45">选择</th>
                                                         <!--{/if}-->
                                                         <th class="{echo $data[by]=='asc'?'sorting_asc':'sorting_desc'}" data-order="id">
