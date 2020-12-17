@@ -29,7 +29,7 @@ class FormsControl extends AdmincpControl
         $param['inlistField'] = 'inlistcp';
         $res = Forms::dataList($param);
         if ($res->getCode() != 200) {
-            return self::response($res);
+            return self::directTo($res);
         }
         $data = $res->getData();
         $data['mult'] = Page::multi($data['count'], $data['pagesize'], $data['page'], $data['currenturl'], $data['maxpages'], 5, true, true);
@@ -81,7 +81,7 @@ class FormsControl extends AdmincpControl
         $options = ['cacheTime' => 300, 'ueditorType' => 'admin'];
         $res = Forms::dataFormHtml($fid, $id, $options);
         if ($res->getCode() != 200) {
-            return self::response($res);
+            return self::directTo($res);
         }
         $template = '';
         $p = self::input('p');
