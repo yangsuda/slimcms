@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>安装程序</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="http://g.alicdn.com/sj/qnui/1.5.1/css/sui.min.css" rel="stylesheet" type="text/css"/>
+    <script src="http://g.alicdn.com/sj/qnui/1.5.1/js/sui.min.js"></script>
+    <style type="text/css">
+        .sui-steps span {
+            font-size: 14px;
+        }
+
+        .sui-steps .finished {
+            background-color: #489907;
+        }
+
+        .sui-steps .finished .triangle-right {
+            border-color: transparent transparent transparent #489907;
+        }
+
+        .sui-steps .finished .round {
+            color: #489907;
+        }
+
+        .sui-steps .current {
+            background-color: #5bc009;
+        }
+
+        .sui-steps .current .triangle-right {
+            border-color: transparent transparent transparent #5bc009;
+        }
+
+        .sui-steps .current .round {
+            color: #5bc009;
+        }
+
+        .btn-success {
+            background-color: #489907;
+            border: 1px solid #3d8503;
+        }
+
+        .btn-success:hover,
+        .btn-success:focus {
+            background-color: #489907;
+            border: 1px solid #3d8503;
+        }
+
+        .icon-pc-right {
+            color: green;
+        }
+
+        .icon-pc-error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+<div class="main">
+    <div class="sui-steps steps-auto">
+        <div class="wrap">
+            <div class="current">
+                <label><span class="round">2</span><span>环境检测</span></label><i class="triangle-right-bg"></i><i
+                    class="triangle-right"></i>
+            </div>
+        </div>
+        <div class="wrap">
+            <div class="todo">
+                <label><span class="round">3</span><span>参数配置</span></label>
+            </div>
+        </div>
+        <div class="wrap">
+            <div class="todo">
+                <label><span class="round">4</span><span>安装完成</span></label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="pr-title"><h3>服务器信息</h3></div>
+    <table width="960" border="0" align="center" cellpadding="0" cellspacing="0" class="twbox">
+        <tr>
+            <th width="200" align="center"><strong>参数</strong></th>
+            <th width="100"><strong>所需配置</strong></th>
+            <th><strong>当前服务器</strong></th>
+        </tr>
+        <tr>
+            <td><strong>服务器操作系统</strong></td>
+            <td>不限制</td>
+            <td><i class="sui-icon icon-pc-right" style="color: green;"></i> <?php echo PHP_OS; ?></td>
+        </tr>
+        <tr>
+            <td><strong>服务器解译引擎</strong></td>
+            <td>不限制</td>
+            <td><i class="sui-icon icon-pc-right" style="color: green;"></i> <?php echo $_SERVER['SERVER_SOFTWARE']; ?>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>PHP版本</strong></td>
+            <td>>=5.5.0</td>
+            <td>
+                <?php
+                        if (version_compare(PHP_VERSION, '5.5.0') >= 0) {
+                echo '<i class="sui-icon icon-pc-right"></i> '.PHP_VERSION;
+                }else{
+                $isok = false;
+                echo '<i class="sui-icon icon-pc-error"></i> 本系统需PHP5.5.0以上版本,您当前版本为：'.PHP_VERSION;
+                }
+                ?>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>附件上传</strong></td>
+            <td>不限制</td>
+            <td><i class="sui-icon icon-pc-right" style="color: green;"></i> <?php echo $filesize; ?></td>
+        </tr>
+        <tr>
+            <td><strong>GD 库</strong></td>
+            <td>1.0</td>
+            <td><i class="sui-icon icon-pc-right" style="color: green;"></i> <?php echo $gd; ?></td>
+        </tr>
+        <tr>
+            <td><strong>磁盘空间</strong></td>
+            <td>50M</td>
+            <td><i class="sui-icon icon-pc-right" style="color: green;"></i> <?php echo $disksize; ?></td>
+        </tr>
+        <tr>
+            <td><strong>系统安装目录</strong></td>
+            <td>不限制</td>
+            <td><i class="sui-icon icon-pc-right" style="color: green;"></i> <?php echo SLIMCMSROOT; ?></td>
+        </tr>
+    </table>
+    <div class="pr-title"><h3>函数依赖性检查</h3></div>
+    <table width="960" border="0" align="center" cellpadding="0" cellspacing="0" class="twbox">
+        <tr>
+            <th width="200" align="center"><strong>函数名称</strong></th>
+            <th width="110"><strong>检查结果</strong></th>
+            <th><strong>建议</strong></th>
+        </tr>
+        <tr>
+            <td>fsockopen</td>
+            <td align="center">
+                <?php
+                        if (function_exists('fsockopen')) {
+                            echo '<i class="sui-icon icon-pc-right"></i> 支持';
+                }else{
+                $isok = false;
+                echo '<i class="sui-icon icon-pc-error"></i> 不支持';
+                }
+                ?>
+            </td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td>file_get_contents</td>
+            <td align="center">
+                <?php
+                        if (function_exists('file_get_contents')) {
+                            echo '<i class="sui-icon icon-pc-right"></i> 支持';
+                }else{
+                $isok = false;
+                echo '<i class="sui-icon icon-pc-error"></i> 不支持';
+                }
+                ?>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>pack</td>
+            <td align="center">
+                <?php
+                        if (function_exists('pack')) {
+                            echo '<i class="sui-icon icon-pc-right"></i> 支持';
+                }else{
+                $isok = false;
+                echo '<i class="sui-icon icon-pc-error"></i> 不支持';
+                }
+                ?>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>curl_init</td>
+            <td align="center">
+                <?php
+                        if (function_exists('curl_init')) {
+                            echo '<i class="sui-icon icon-pc-right"></i> 支持';
+                }else{
+                $isok = false;
+                echo '<i class="sui-icon icon-pc-error"></i> 不支持';
+                }
+                ?>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>PDO扩展</td>
+            <td align="center">
+                <?php
+                        $pdocheck = true;
+                        if(extension_loaded('pdo')){
+                            echo '<i class="sui-icon icon-pc-right"></i> 支持';
+                }else{
+                $pdocheck = false;
+                echo '<i class="sui-icon icon-pc-error"></i> 不支持';
+                }
+                ?>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+
+    <div class="pr-title"><h3>目录权限检测</h3></div>
+    <div style="padding:2px 8px 0px; line-height:33px; height:23px; overflow:hidden; color:#666;">
+        系统要求必须满足下列所有的目录权限全部可读写的需求才能使用，其它应用目录可安装后在管理后台检测。
+    </div>
+    <table width="960" border="0" align="center" cellpadding="0" cellspacing="0" class="twbox">
+        <tr>
+            <th width="200" align="center"><strong>目录名</strong></th>
+            <th width="212"><strong>所需状态</strong></th>
+            <th><strong>当前状态</strong></th>
+        </tr>
+        <?php
+                    foreach($dirs as $d)
+                    {
+                ?>
+        <tr>
+            <td><?=$d?></td>
+            <td>可写</td>
+            <td>
+                <?php
+                if(writeTest($d)){
+                echo '<i class="sui-icon icon-pc-right"></i> 可写';
+                }else{
+                $isok = false;
+                echo '<i class="sui-icon icon-pc-error"></i> 不可写';
+                }
+                ?>
+            </td>
+        </tr>
+        <?php }?>
+    </table>
+
+    <div class="btn-box" style=" text-align: center;">
+        <a href="?step=1" class="sui-btn btn-xlarge btn-default">上一步</a>
+        <?php
+        if($isok===false||$pdocheck===false){
+           echo '<a class="sui-btn btn-xlarge btn-success" disabled>下一步</a>';
+        }else{
+        echo '<a href="?step=2&check=ok" class="sui-btn btn-xlarge btn-success">下一步</a>';
+        }
+        ?>
+    </div>
+</div>
+
+<div class="foot" style=" text-align: center;">
+    <br/>
+    ©<?=date('Y')?> slimCMS
+    <br/>
+</div>
+</body>
+</html>
