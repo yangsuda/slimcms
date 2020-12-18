@@ -4,7 +4,11 @@
             <h5 class="float-left" style="line-height: 2.2rem">$data[form][name]</h5>
             <ol class="breadcrumb float-right">
                 <!--{if $data[form][cpadd]==1}-->
-                <li class="breadcrumb-item"><a role="button" class="btn btn-primary btn-sm" href="{url &p=forms/dataSave&id=}">增加新数据</a></li>
+                <a role="button" class="btn btn-primary btn-sm" href="{url &p=forms/dataSave&id=}"><i class="fa fa-plus-square"></i> 增加新数据</a>
+                <!--{/if}-->
+                <!--{if $data[form][openweb] && in_array(1,explode(',',$data[form][openweb]))}-->
+                &nbsp;&nbsp;
+                <a role="button" class="btn btn-tumblr btn-sm" href="{url $cfg[entryFileName]?p=forms/dataList&fid=$data[form][id]}" target="_blank"><i class="fa fa-link"></i> 前端预览</a>
                 <!--{/if}-->
             </ol>
             <div class="clearfix"></div>
