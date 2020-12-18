@@ -82,10 +82,5 @@ return [
                         'afullnote' => '0',
                     ],
             ],
-        'keys' =>
-            [
-                'prikey' => '',
-                'pubkey' => '',
-            ],
     ]
 ];
