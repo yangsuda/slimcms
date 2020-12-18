@@ -1,0 +1,28 @@
+<div class="form-group row formgroup-$v[identifier]">
+    <label for="$v[identifier]" class="col-sm-2 col-form-label">$v[title]{echo $v[required]==1?'*':''}：</label>
+    <div class="col-sm-6 {echo $v[datatype]=='radio'||$v[datatype]=='checkbox'?'form-inline':''}">
+        <!--{if $v[units]}-->
+        <div data-colorpicker-id="4" class="input-group mb-3">
+            <!--{/if}-->
+            <!--{if aval($data,'data/id') && $v[forbidedit]==2}-->
+            <input type="hidden" name="$v[identifier]" id="$v[identifier]" value="$data[data][$v[identifier]]" />
+            <!--{if $v[datatype]=='img'}-->
+            <img src="$data[data]['_'.$v[identifier]]" width="100">
+            <!--{else}-->
+            <!--{if $v[forbidedit]=='2' && $v[datatype]=='serialize' && !empty($data[data]['_'.$v[identifier]])}-->
+            {echo nl2br(str_replace(["array (\n", "),\n", ")"], '', var_export($data[data]['_'.$v[identifier]], true)))}
+            <!--{else}-->
+            $data[data]['_'.$v[identifier]]
+            <!--{/if}-->
+            <!--{/if}-->
+            <!--{else}-->
+            $v[field]
+            <!--{/if}-->
+            <!--{if $v[units]}-->
+            <span class="input-group-append"><span tabindex="0" class="input-group-text">$v[units]</span></span>
+        </div>
+        <!--{/if}-->
+        <div class="invalid-feedback"></div>
+    </div>
+    <div class="col-sm-4 text-muted">{echo nl2br($v[intro])}</div>
+</div>

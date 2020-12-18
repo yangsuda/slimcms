@@ -74,7 +74,7 @@
             var that = $(this);
             $.getJSON('{url ?p=forms/dataCheck&ischeck='+ischeck+'&fid=$data[fid]&ids='+id+'}',function (res) {
                 if(res['code']!=200){
-                    alert(res.msg);
+                    alertMsg(res.msg);
                 }else{
                     if(ischeck==1){
                         that.data('ischeck','2').addClass('btn-success').removeClass('btn-danger').text('已审核');

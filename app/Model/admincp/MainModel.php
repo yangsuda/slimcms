@@ -164,4 +164,17 @@ class MainModel extends ModelAbstract
         }
         return $res->withData(['forms' => $data['list']]);
     }
+
+    /**
+     * 获取开放web功能的规则
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function getOpenWebRule()
+    {
+        $where = ['formid' => 1, 'identifier' => 'openweb'];
+        $rules = self::t('forms_fields')->withWhere($where)->fetch('rules');
+        $rules = unserialize($rules);
+        return self::$output->withCode(200)->withData(['rules' => $rules]);
+    }
 }

@@ -3,7 +3,6 @@
 /**
  * 图片处理控制类
  * @author zhucy
- * @date 2019.10.16
  */
 
 declare(strict_types=1);

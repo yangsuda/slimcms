@@ -1,8 +1,5 @@
 <?php
 
-/**
- * 后台控制类
- */
 declare(strict_types=1);
 
 namespace App\Control\main;
@@ -36,5 +33,20 @@ class MainControl extends ControlAbstract
         return self::response($output);
     }
 
-
+    /**
+     * 验证码生成
+     */
+    public function captcha()
+    {
+        $img = new \Securimage();
+        $img->code_length = 4;
+        $img->image_width = 80;
+        $img->image_height = 40;
+        $img->ttf_file = CSDATA . 'fonts/INDUBITA.TTF';
+        $img->text_color = new \Securimage_Color('#009D41');
+        $img->charset = '0123456789';
+        $img->num_lines = 0;
+        $img->noise_level = 1;
+        return $img->show();
+    }
 }

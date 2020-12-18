@@ -1,0 +1,63 @@
+
+<!--{if $data[searchFields]||in_array(8,$data[openweb])}-->
+<link rel="stylesheet" href="$cfg[resourceUrl]plugins/amaze.datetimepicker/css/amazeui.datetimepicker.css" />
+<script src="$cfg[resourceUrl]plugins/amaze.datetimepicker/js/amazeui.datetimepicker.min.utf8.js"></script>
+<div class="card-header">
+    <form name='form3' action='{url &page=&ids=}' method='post' class="form-inline">
+        <!--{loop $data[searchFields] $k $v}-->
+        <!--{if in_array($v[datatype],array('select','radio','checkbox')) || $v[rules]}-->
+        <div class="form-group mr-3 mb-1">
+            <label>$v[title]：</label>
+            <select name="$v[identifier]" class="custom-select">
+                <option value=''>--全部--</option>
+                <!--{loop unserialize($v[rules]) $r_k $r_v}-->
+                <option value='$r_k' {echo aval($data,'get/'.$v[identifier])==$r_k?'selected':''}>$r_v</option>
+                <!--{/loop}-->
+            </select>
+        </div>
+        <!--{elseif in_array($v[datatype],array('date','datetime'))}-->
+        <div class="form-group mr-3 mb-1">
+            <input placeholder="$v[title]" type='text' name='$v[identifier]_s' id='$v[identifier]_s' value="{echo aval($data,'get/'.$v[identifier].'_s')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
+            <script>
+                $(document).ready(function() {$('#$v[identifier]_s').datetimepicker({language: 'zh-CN',autoclose: true,format: 'yyyy-mm-dd{echo $v[datatype]=="date"?"":" hh:ii"}',{echo $v[datatype]=="date"?"startView: 2,minView: 2,":""}});});
+            </script>
+            <label class=" ml-1 mr-1">至</label>
+            <input placeholder="$v[title]" type='text' name='$v[identifier]_e' id='$v[identifier]_e' value="{echo aval($data,'get/'.$v[identifier].'_e')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
+            <script>
+                $(document).ready(function() {$('#$v[identifier]_e').datetimepicker({language: 'zh-CN',autoclose: true,format: 'yyyy-mm-dd{echo $v[datatype]=="date"?"":" hh:ii"}',{echo $v[datatype]=="date"?"startView: 2,minView: 2,":""}});});
+            </script>
+        </div>
+        <!--{elseif in_array($v[datatype],array('multidate'))}-->
+        <!--{elseif in_array($v[datatype],array('stepselect'))}-->
+        <div class="form-group mr-3 mb-1">
+            <label>$v[title]：</label>
+            $v[fieldHtml]
+        </div>
+        <!--{else}-->
+        <div class="form-group mr-3 mb-1">
+            <input placeholder="请输入$v[title]" type='text' name='$v[identifier]' value="{echo aval($data,'get/'.$v[identifier])}" class="form-control" />
+        </div>
+        <!--{/if}-->
+        <!--{/loop}-->
+        <!--{if in_array(7,$data[openweb])}-->
+        <div class="form-group mr-3 mb-1">
+            <label>审核状态：</label>
+            <select name="ischeck" class="custom-select">
+                <option value=''>--全部--</option>
+                <option value='2' {echo aval($data,'get/ischeck')=='2'?'selected':''}>否</option>
+                <option value='1' {echo aval($data,'get/ischeck')=='1'?'selected':''}>是</option>
+            </select>
+        </div>
+        <!--{/if}-->
+        <div class="form-group mb-1">
+            <!--{if $data[searchFields]}-->
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <!--{/if}-->
+            <!--{if in_array(5,$data[openweb])}-->
+             <a class="btn btn-primary ml-1" href='{url $data[currenturl]&p=forms/dataExport&page=}' target='_blank'>导出</a>
+            <!--{/if}-->
+        </div>
+
+    </form>
+</div>
+<!--{/if}-->
