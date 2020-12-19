@@ -114,8 +114,6 @@ require __DIR__ . '/../App/init.php';
 EOT;
     file_put_contents('../'.$filename . '.php', $code) or exit('后台访问地址创建失败，请检查根目录是否可写入！');
 
-
-
     $_config = include '../../config/settings.php';
     $settings = &$_config['settings'];
     $settings['db']['dbhost'] = $dbhost;
@@ -132,6 +130,16 @@ EOT;
 
     $config = "<?php\n\r" . 'return ' . var_export($_config, true) . ';';
     file_put_contents('../../config/settings.php', $config) or exit('配置文件创建失败，请检查../../config/目录是否可写入！');
+
+    //接口入口
+    $filename = substr(md5($settings['security']['authkey']), -8);
+    $code = <<<EOT
+<?php
+declare(strict_types=1);
+define('CURSCRIPT', 'api');
+require __DIR__ . '/../App/init.php';
+EOT;
+    file_put_contents('../'.$filename . '.php', $code);
 
     //创建数据表
     $content = file_get_contents( './installsql.txt');
