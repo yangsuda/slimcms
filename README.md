@@ -13,4 +13,7 @@ composer create-project yangsuda/slimcms [my-app-name]
 
 *将虚拟主机文档根目录指向新应用程序的“public/”目录。
 
+## 初始安装配置
+通过运行“/public/install/”进行安装
+
 *确保“data/”是web可写的。

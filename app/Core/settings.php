@@ -25,16 +25,18 @@ return function (ContainerBuilder $containerBuilder) {
         session_save_path($sessSavePath);
     }
 
-    //Session跨域设置,为方便调试，debug开启不设置
+    $cfg = getConfig();
+
+    //Session跨域设置,为方便调试，debug开启时不设置
     if (CORE_DEBUG === false) {
-        @session_set_cookie_params(0, '/', '.' . $this->cfg['cfg']['domain']);
+        @session_set_cookie_params(0, '/', '.' . $cfg['cfg']['domain']);
     }
 
     //时区设置
     @date_default_timezone_set('Etc/GMT-8');
 
     //全局变量设置
-    $containerBuilder->addDefinitions(getConfig());
+    $containerBuilder->addDefinitions($cfg);
 
     $containerBuilder->addDefinitions([
         LoggerInterface::class => DI\factory(function (ContainerInterface $c) {
