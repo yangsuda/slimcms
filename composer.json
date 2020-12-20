@@ -1,7 +1,7 @@
 {
     "name": "yangsuda/slimcms",
     "type": "project",
-    "description": "A SlimCMS Core framework",
+    "description": "The SlimCMS framework",
     "keywords": [
         "slimCMS",
         "rest",
