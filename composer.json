@@ -35,8 +35,8 @@
         "sort-packages": true
     },
     "autoload": {
-        "classmap": [
-            "app"
-        ]
+        "psr-4": {
+            "App\\": "app/"
+        }
     }
 }
