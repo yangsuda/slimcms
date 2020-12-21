@@ -48,6 +48,12 @@ class LoginControl extends ControlAbstract
         if (is_numeric($auth)) {
             self::directTo(self::$output->withReferer(self::url('?p=main/index')));
         }
+
+        //防止安装完后点登陆，成功后又退回安装页面
+        $referer = self::$output->getReferer();
+        if(preg_match('/(install\/index.php)$/',$referer)){
+            self::$output = self::$output->withReferer('');
+        }
         return $this->view();
     }
 
