@@ -21,9 +21,6 @@
         "php": "^7.2",
         "yangsuda/framework": "2.0.0.x-dev"
     },
-    "require-dev": {
-        "yangsuda/framework": "2.0.0.x-dev"
-    },
     "repositories": {
         "packagist": {
             "type": "composer",
