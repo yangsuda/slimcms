@@ -133,14 +133,14 @@ EOT;
     file_put_contents('../../config/settings.php', $config) or exit('配置文件创建失败，请检查../../config/目录是否可写入！');
 
     //接口入口
-    $filename = substr(md5($settings['security']['authkey']), -8);
+    $apifilename = substr(md5($settings['security']['authkey']), -8);
     $code = <<<EOT
 <?php
 declare(strict_types=1);
 define('CURSCRIPT', 'api');
 require __DIR__ . '/../App/init.php';
 EOT;
-    file_put_contents('../'.$filename . '.php', $code);
+    file_put_contents('../'.$apifilename . '.php', $code);
 
     //创建数据表
     $content = file_get_contents( './installsql.txt');
@@ -154,22 +154,22 @@ EOT;
     $_SERVER["REQUEST_SCHEME"] = !empty($_SERVER["REQUEST_SCHEME"]) ? $_SERVER["REQUEST_SCHEME"] : 'http';
     $basehost = $_SERVER["REQUEST_SCHEME"] . '://' . $_SERVER['HTTP_HOST'] . str_replace('\\', '', dirname(dirname($_SERVER['SCRIPT_NAME']))).'/';
     $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $basehost . '\' where varname=\'basehost\'');
-    $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $basehost . '/resources/\' where varname=\'commondir\'');
+    $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $basehost . 'resources/\' where varname=\'resourceUrl\'');
     $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $_SERVER['HTTP_HOST'] . '\' where varname=\'domain\'');
     $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $basehost . '\' where varname=\'attachmentHost\'');
 
     $cfg = require '../../data/configCache.php';
-    $cfg['basehost'] = $basehost;
-    $cfg['resourceUrl'] = $basehost . 'resources/';
-    $cfg['domain'] = $_SERVER['HTTP_HOST'];
-    $cfg['attachmentHost'] = $basehost;
+    $cfg['cfg']['basehost'] = $basehost;
+    $cfg['cfg']['resourceUrl'] = $basehost . 'resources/';
+    $cfg['cfg']['domain'] = $_SERVER['HTTP_HOST'];
+    $cfg['cfg']['attachmentHost'] = $basehost;
     $config = "<?php\n\r" . 'return ' . var_export($cfg, true) . ';';
     file_put_contents('../../data/configCache.php', $config);
 
     //增加管理员帐号
     $adminuser = input('adminuser');
     $adminpwd = input('adminpwd');
-    $pwd = substr(md5($adminpwd . $_config['security']['authkey']), 5, 20);
+    $pwd = substr(md5($adminpwd . $settings['security']['authkey']), 5, 20);
     $link->query("INSERT INTO `".$dbprefix."admin` VALUES (null, '1', '" . $adminuser . "', '" . $pwd . "', '0', '', '0', '', '0', '', '1', '', '');");
 
     unlink('./index.php');
