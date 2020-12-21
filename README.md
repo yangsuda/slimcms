@@ -17,7 +17,7 @@ composer create-project yangsuda/slimcms [my-app-name] dev-master
 ## 安装配置
 通过运行“public/install/”进行安装
 
-##apache伪静态规则
+## apache伪静态规则
 RewriteEngine On
 
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)/(.*) - [L]
