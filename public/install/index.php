@@ -64,6 +64,7 @@ if ($step == 1) {
     if (input('check') != 'ok') {
         exit("步骤1检测不通过");
     }
+    $_SERVER["REQUEST_SCHEME"] = !empty($_SERVER["REQUEST_SCHEME"]) ? $_SERVER["REQUEST_SCHEME"] : 'http';
     include('./template/step_' . $step . '.htm');
     exit();
 } elseif ($step == 3) {
