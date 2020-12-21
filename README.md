@@ -17,6 +17,43 @@ composer create-project yangsuda/slimcms [my-app-name] dev-master
 ## 安装配置
 通过运行“public/install/”进行安装
 
+## 路由规则
+
+控制层：app/Control，Control中的文件夹名称由入口文件中CURSCRIPT常量决定，如默认前端入口对应是main文件夹
+
+URL通过?p=CLASS/METHOD方式访问控制层相应的方法，如没在相应类中找到相应方法会在当前文件夹中的DefaultControl.php中寻找，
+如果还没找到，会到上app/Control/"CURSCRIPT"/DefaultControl中寻找，如还没找到是到app/DefaultControl寻找，再找不到就报错
+
+如访问/?p=view/abc/test
+
+会先找app/Control/main/view/AbcControl中test方法，如果没找到再上面说的方式一级级去找，如果找不到就报错
+
+如访问/?p=view/test
+
+会先找app/Control/main/ViewControl中test方法，如果没找到再上面说的方式一级级去找，如果找不到就报错
+
+如访问/?p=test
+
+会先找app/Control/main/TestControl中test方法，如果没找到再上面说的方式一级级去找，如果找不到就报错
+
+## 数据获取
+
+通过self::input()获取外部传参
+
+## 数据输出
+
+共有5种输出方式
+
+1、$this->view(),用于模板渲染加载输出
+
+2、$this->directTo(),直接跳转，提示信息cookie保存，如需提示，通过cookie获取
+
+3、$this->json(),返回json数据
+
+4、$this->jsonCallback(),用于跨域请求
+
+5、self::response(),根据请求的content-type返回相应的数据类型
+
 ## apache伪静态规则
 RewriteEngine On
 
