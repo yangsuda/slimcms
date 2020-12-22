@@ -11,9 +11,10 @@ class SysenumTable extends Table
     /**
      * 列表数据获取之前的自定义处理
      * @param $param
-     * @return array
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
-    public function dataListBefore(&$param)
+    public function dataListBefore(&$param): int
     {
         $where = [];
         if (defined('MANAGE') && MANAGE == 1) {
@@ -36,9 +37,10 @@ class SysenumTable extends Table
      * 列表数据获取之后的自定义处理
      * @param $list
      * @param $param
-     * @return array
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
-    public function dataListAfter(&$list, $param)
+    public function dataListAfter(&$list, $param): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             $evalue = aval($param, 'get/evalue');
@@ -50,9 +52,11 @@ class SysenumTable extends Table
     /**
      * 数据保存后的自定义处理
      * @param $data
-     * @return array
+     * @param array $row
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveAfter($data, $row = [])
+    public function dataSaveAfter($data, $row = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if ($data['mngtype'] == 'add') {
