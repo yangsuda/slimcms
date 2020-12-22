@@ -12,7 +12,7 @@ class Forms_fieldsTable extends Table
     /**
      * 数据获取之后的自定义处理
      * @param $data
-     * @return array
+     * @return int
      */
     public function dataViewAfter(&$data): int
     {
@@ -25,10 +25,11 @@ class Forms_fieldsTable extends Table
     /**
      * 数据保存前的自定义处理
      * @param $data
-     * @param $row
-     * @return array
+     * @param array $row
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveBefore(&$data, $row = ''): int
+    public function dataSaveBefore(&$data, $row = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (!empty($data['rules'])) {
@@ -57,7 +58,9 @@ class Forms_fieldsTable extends Table
     /**
      * 数据保存后的自定义处理
      * @param $data
-     * @return array
+     * @param array $row
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
     public function dataSaveAfter($data, $row = []): int
     {
@@ -79,7 +82,8 @@ class Forms_fieldsTable extends Table
     /**
      * 数据删除后的自定义处理
      * @param $data
-     * @return array
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
     public function dataDelAfter($data): int
     {
@@ -94,8 +98,11 @@ class Forms_fieldsTable extends Table
 
     /**
      * 表单HTML获取之前的自定义处理
+     * @param $fields
      * @param $data
-     * @return array
+     * @param $form
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
     public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {

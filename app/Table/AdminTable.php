@@ -12,7 +12,8 @@ class AdminTable extends Table
     /**
      * 数据获取之后的自定义处理
      * @param $data
-     * @return array
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
     public function dataViewAfter(&$data): int
     {
@@ -26,8 +27,10 @@ class AdminTable extends Table
 
     /**
      * 表单HTML获取之前的自定义处理
+     * @param $fields
      * @param $data
-     * @return array
+     * @param $form
+     * @return int
      */
     public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {
@@ -40,7 +43,8 @@ class AdminTable extends Table
     /**
      * 数据保存前的自定义处理
      * @param $data
-     * @return array
+     * @param array $row
+     * @return int
      */
     public function dataSaveBefore(&$data, $row = []): int
     {
@@ -50,7 +54,7 @@ class AdminTable extends Table
     /**
      * 删除前检测
      * @param $data
-     * @return array
+     * @return int
      */
     public function dataDelBefore($data): int
     {

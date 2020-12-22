@@ -11,9 +11,11 @@ class FormsTable extends Table
 {
     /**
      * 自定义表单数据保存处理
-     * @param type $data
+     * @param $data
+     * @param array $row
+     * @return int
      */
-    public function dataSaveBefore(&$data, $row = ''): int
+    public function dataSaveBefore(&$data, $row = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (empty($data['name'])) {
@@ -35,7 +37,8 @@ class FormsTable extends Table
     /**
      * 数据删除后的自定义处理
      * @param $data
-     * @return array
+     * @return int
+     * @throws \SlimCMS\Error\TextException
      */
     public function dataDelAfter($data): int
     {

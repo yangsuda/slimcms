@@ -10,8 +10,10 @@ class AdmingroupTable extends Table
 {
     /**
      * 表单HTML获取之前的自定义处理
+     * @param $fields
      * @param $data
-     * @return array
+     * @param $form
+     * @return int
      */
     public function getFormHtmlBefore(&$fields, &$data, &$form): int
     {
@@ -26,10 +28,10 @@ class AdmingroupTable extends Table
     /**
      * 数据保存前的自定义处理
      * @param $data
-     * @param $row
-     * @return array
+     * @param string $row
+     * @return int
      */
-    public function dataSaveBefore(&$data, $row = ''): int
+    public function dataSaveBefore(&$data, $row = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (!empty($data['purviews'])) {
