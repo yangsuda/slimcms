@@ -99,7 +99,7 @@ Model层数据统一以Output对象形式返回，
 
 默认模板在template/forms/中，如自定义模板，先创建相应的文件夹，再根据表单ID(fid)创建相应的模板。
 
-如：自定义fid为1的模板，在template/forms/中创建dataList文件夹，在其中创建1.htm模板，系统会自动加载此模板，
+如：自定义fid为1的列表模板，在template/forms/中创建dataList文件夹，在其中创建1.htm模板，系统会自动加载此模板，
 如不能满足需求，可自行开发
 
 ## 模板标签
