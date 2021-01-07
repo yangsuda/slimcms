@@ -61,7 +61,7 @@ order:排序（<!--{loop $v[orderFields] $k1 $v1}-->{$v1[identifier]}{$v1[title]
 <!--{else}-->
 order:排序（rand()随机显示）
 <!--{/if}-->
-<a href="?p=api/dataList&fid=$v[id]&page=1&pagesize=100" target="_blank">访问</a>
+<a href="$cfg[basehost]{$data[fileName]}.php?p=api/dataList&fid=$v[id]&page=1&pagesize=100" target="_blank">访问</a>
                         </pre>
                         <p>返回</p>
                         <pre>
@@ -129,7 +129,7 @@ order:排序（rand()随机显示）
 <!--{/if}-->
 {echo "\n"}
 <!--{/loop}-->
-<a href="?p=api/dataCount&fid=$v[id]" target="_blank">访问</a>
+<a href="$cfg[basehost]{$data[fileName]}.php?p=api/dataCount&fid=$v[id]" target="_blank">访问</a>
                         </pre>
                         <p>返回</p>
                         <pre>
