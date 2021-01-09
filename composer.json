@@ -20,7 +20,7 @@
     "require": {
         "php": "^7.2",
         "yangsuda/framework": "2.0.0.x-dev",
-        "yangsuda/slimcms-public": "dev-main",
+        "yangsuda/slimcms-public": "2.0.0.x-dev",
         "oomphinc/composer-installers-extender": "2.0.0"
     },
     "repositories": {
