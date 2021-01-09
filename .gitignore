@@ -2,6 +2,7 @@
 .vscode/
 /data/
 /vendor/
+/public/
 /public/uploads/
 composer.lock
 readme.txt
