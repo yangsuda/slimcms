@@ -19,22 +19,12 @@
     ],
     "require": {
         "php": "^7.2",
-        "yangsuda/framework": "2.0.0.x-dev",
-        "yangsuda/slimcms-public": "2.0.0.x-dev",
-        "oomphinc/composer-installers-extender": "2.0.0"
+        "yangsuda/framework": "2.0.0.x-dev"
     },
     "repositories": {
         "packagist": {
             "type": "composer",
             "url": "https://packagist.phpcomposer.com"
-        }
-    },
-    "extra":
-    {
-        "installer-types": ["public"],
-        "installer-paths":
-        {
-            "public/":["yangsuda/slimcms-public"]
         }
     },
     "config": {
