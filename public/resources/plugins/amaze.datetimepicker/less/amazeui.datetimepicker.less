@@ -1,0 +1,317 @@
+/*!
+ * Datetimepicker for Amaze UI
+ *
+ * Copyright 2012 Stefan Petre
+ * Improvements by Andrew Rowls
+ * Improvements by Sébastien Malot
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+// Name:            datetimepicker
+//
+// Description:     Define style for Datepicker
+//
+// Component:       `.datetimepicker`
+//
+// States:          `.active`
+//                  `.disabled`
+//
+// Uses:            Icon
+//                  mixins
+//
+// =============================================================================
+
+@import "../node_modules/amazeui/less/variables";
+@import "../node_modules/amazeui/less/mixins";
+
+// Variables
+// =============================================================================
+// 配合Amaze UI 的颜色选项，修改 @datetimepicker-color
+// 可选颜色：@global-secondary
+// @global-success
+// @global-warning
+// @global-danger
+
+@datetimepicker-color: @global-secondary;
+
+@td-width: 34px;
+@td-height: 34px;
+@th-height: 40px;
+
+@table-width: @td-width * 7;
+@span-width: @table-width / 4;
+@span-height: 38px;
+
+@td-color: #555;
+@td-bg-hover: #f0f0f0;
+@td-active-color: @datetimepicker-color;
+@td-active-bg: #ececec;
+@td-disable-color: #999;
+@td-disable-bg: rgb(250, 250, 250);
+
+@th-bg: @datetimepicker-color;
+@th-color: @white;
+@th-bg-hover: fadeout(darken(@datetimepicker-color, 10%), 50%);
+@th-color-hover: darken(saturate(@th-bg, 30%), 20%);
+
+@old-new-color: saturate(lighten(@datetimepicker-color, 18%), 15%); // #89d7ff;
+@today-bd: fadeout(darken(@datetimepicker-color, 10%), 50%);
+@today-color: @white;
+
+.datetimepicker {
+  margin-top: 10px;
+  border-radius: 2px;
+  box-shadow: 0 0 6px #ccc;
+  text-align: center;
+
+  &:before {
+    content: '';
+    display: block;
+    .caret-up(7px, @datetimepicker-color);
+    position: absolute;
+  }
+
+  &.datetimepicker-rtl {
+    direction: rtl;
+    table {
+      tr {
+        td {
+          span {
+            float: right;
+          }
+        }
+      }
+    }
+  }
+  & > div {
+    display: none;
+  }
+
+  table {
+    width: @table-width;
+    background: @datetimepicker-color;
+    border-radius: 2px;
+
+    th {
+      width: @td-width;
+      height: @th-height;
+      text-align: center;
+      font-weight: normal;
+      transition: background-color 300ms ease-out;
+
+      &.switch {
+        width: (@table-width / 7) * 5;
+        background: @th-bg;
+        color: @th-color;
+        cursor: pointer;
+        &:hover {
+          background: @th-bg-hover;
+          color: @th-color-hover;
+        }
+      }
+
+      &.next,
+      &.prev {
+        background: @th-bg;
+        color: @white;
+        transition: background-color 300ms ease-out;
+        cursor: pointer;
+        i {
+          width: @td-width;
+          height: @td-width;
+          display: inline-block;
+        }
+
+        &:hover {
+          background: @th-bg-hover;
+          color: @th-color-hover;
+        }
+      }
+
+      &.next {
+        border-top-right-radius: 2px;
+      }
+
+      &.prev {
+        border-top-left-radius: 2px;
+      }
+
+      &.dow {
+        color: @datetimepicker-color;
+        background: @white;
+      }
+
+      &.today {
+        background: @white;
+        color: @datetimepicker-color;
+        cursor: pointer;
+        &:hover {
+          background: @td-bg-hover;
+        }
+      }
+    }
+
+    .icon-arrow-left {
+      &:before {
+        .am-icon-font;
+        content: @fa-var-chevron-left;
+        vertical-align: bottom;
+      }
+    }
+
+    .icon-arrow-right {
+      &:before {
+        .am-icon-font;
+        content: @fa-var-chevron-right;
+        vertical-align: bottom;
+      }
+    }
+
+    td {
+      width: @td-width;
+      height: @td-height;
+      cursor: pointer;
+      font-size: 1.4rem;
+      color: @td-color;
+      background: @white;
+      &.today {
+        background: @today-bd;
+        color: @today-color;
+      }
+    }
+
+    td.active,
+    span.active {
+      background: @td-active-bg;
+      color: @td-active-color;
+    }
+
+    .old,
+    .new {
+      color: @old-new-color;
+    }
+    .disabled {
+      background: @td-disable-bg;
+      color: @td-disable-color;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.datetimepicker-days {
+  td:hover {
+    background: @td-bg-hover;
+  }
+}
+
+.datetimepicker-years,
+.datetimepicker-months,
+.datetimepicker-hours,
+.datetimepicker-minutes {
+  table {
+    td {
+      height: auto;
+      background: @white;
+      .clearfix();
+    }
+  }
+
+  span.year,
+  span.month,
+  span.hour,
+  span.minute {
+    float: left;
+    height: @span-height;
+    width: @span-width;
+    line-height: @span-height;
+
+    &:hover {
+      background: @td-bg-hover;
+    }
+  }
+}
+
+.datetimepicker-hours,
+.datetimepicker-minutes {
+  legend, fieldset {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.datetimepicker-inline {
+  width: @table-width;
+  &:before {
+    content: none;
+  }
+}
+
+.datetimepicker-dropdown-bottom-right {
+  &:before{
+    top: -7px;
+    left: 10px;
+  }
+}
+
+.datetimepicker-dropdown-bottom-left {
+  &:before {
+    top: -7px;
+    right: 10px;
+  }
+}
+
+.datetimepicker-dropdown-top-left {
+  margin-top: 0;
+  &:before {
+    .caret-down(7px, @white);
+    bottom: -7px;
+    right: 10px;
+  }
+}
+
+.datetimepicker-dropdown-top-right {
+  margin-top: 0;
+  &:before {
+    .caret-down(7px, @white);
+    bottom: -7px;
+    right: 10px;
+  }
+}
+
+.am-input-group.date span.add-on {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  display: none;
+}
+
+@media @small-only {
+  .datetimepicker {
+    width: 100%;
+    left: 0!important;
+
+    table {
+      width: 100%;
+    }
+    td {
+      span.year,
+      span.month,
+      span.hour,
+      span.minute {
+        width: 25%;
+      }
+    }
+    &:before {
+      content: none;
+    }
+  }
+
+  .prev,
+  .next {
+    width: 44px;
+    height: 44px;
+  }
+}
