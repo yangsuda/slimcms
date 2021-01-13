@@ -12,6 +12,7 @@ namespace App\Control\main;
 use App\Core\Forms;
 use App\Core\Upload;
 use SlimCMS\Abstracts\ControlAbstract;
+use SlimCMS\Interfaces\UploadInterface;
 
 class ImageControl extends ControlAbstract
 {
@@ -24,7 +25,8 @@ class ImageControl extends ControlAbstract
         $post['files'] = aval($_FILES, 'file');
         $post['water'] = self::input('water') ? true : false;
         $post['fileid'] = self::input('id');
-        $res = Upload::webupload($post);
+        $upload = self::$container->get(UploadInterface::class);
+        $res = $upload->webupload($post);
         if ($res->getCode() != 200) {
             echo '上传失败:' . $res->getMsg();
         } else {
@@ -43,7 +45,8 @@ class ImageControl extends ControlAbstract
         if (!isset($_SESSION['bigfile_info'][$id])) {
             exit();
         }
-        Upload::uploadDel($_SESSION['bigfile_info'][$id]);
+        $upload = self::$container->get(UploadInterface::class);
+        $upload->uploadDel($_SESSION['bigfile_info'][$id]);
         unset($_SESSION['file_info'][$id]);
         unset($_SESSION['bigfile_info'][$id]);
         exit("已删除");

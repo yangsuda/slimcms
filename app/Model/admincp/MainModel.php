@@ -9,6 +9,7 @@ use SlimCMS\Abstracts\ModelAbstract;
 use App\Core\Forms;
 use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Helper\Ipdata;
+use SlimCMS\Interfaces\UploadInterface;
 
 class MainModel extends ModelAbstract
 {
@@ -123,7 +124,8 @@ class MainModel extends ModelAbstract
         if (empty($row[$param['identifier']])) {
             return self::$output->withCode(21001);
         }
-        Upload::uploadDel($row[$param['identifier']]);
+        $upload = self::$container->get(UploadInterface::class);
+        $upload->uploadDel($row[$param['identifier']]);
         self::t($tableName)->withWhere($param['id'])->update([$param['identifier'] => '']);
         return self::$output->withCode(200);
     }
