@@ -39,7 +39,7 @@ class AliOSS extends ModelAbstract implements UploadInterface
      * 存储空间名称
      * @var string
      */
-    private $bucket = 'slimcms';
+    private $bucket = '';
 
     public function __construct()
     {
@@ -219,13 +219,15 @@ class AliOSS extends ModelAbstract implements UploadInterface
                 return self::$output->withCode(21045);
             }
             if (is_array($_SESSION['bigfile_info'])) {
+                $upload = self::$container->get(UploadInterface::class);
                 foreach ($_SESSION['bigfile_info'] as $_k => $_v) {
-                    if ($imginfos = getimagesize(CSPUBLIC . ltrim($_v, '/'))) {
+                    $info = $upload->metaInfo($_v, 'url,width')->getData();
+                    if (!empty($info)) {
                         $key = md5($_v);
                         $imgurls[$key]['img'] = $_v;
                         $imgurls[$key]['text'] = self::input('picinfook' . $_k);
-                        $imgurls[$key]['width'] = $imginfos[0];
-                        $imgurls[$key]['height'] = $imginfos[1];
+                        $imgurls[$key]['width'] = $info['width'];
+                        $imgurls[$key]['height'] = $info['height'];
                     }
                 }
             }
@@ -243,6 +245,8 @@ class AliOSS extends ModelAbstract implements UploadInterface
             return self::$output->withCode(21002);
         }
         try {
+            $parse = parse_url($url);
+            $url = trim($parse['path'], '/');
             $ossClient = new OssClient($this->accessKeyId, $this->accessKeySecret, $this->endpoint);
             $ossClient->deleteObject($this->bucket, $url);
             return self::$output->withCode(200);
@@ -296,7 +300,7 @@ class AliOSS extends ModelAbstract implements UploadInterface
             $ossClient = new OssClient($this->accessKeyId, $this->accessKeySecret, $this->endpoint);
             $parse = parse_url($pic);
             $url = trim($parse['path'], '/');
-            if($ossClient->doesObjectExist($this->bucket, $url)){
+            if ($ossClient->doesObjectExist($this->bucket, $url)) {
                 return $pic . '?x-oss-process=image/resize,m_fill,w_' . $width . ',h_' . $height . $style;
             }
             return $nopic;
