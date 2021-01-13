@@ -157,6 +157,21 @@ $v[...]
 ```
 更多标签说明具体参见Template.php
 
+## 附件上传
+
+默认是上传附件本地存储，
+如想改成阿里云的OSS存储
+
+1、加载阿里云的SDK
+```bash
+composer require aliyuncs/oss-sdk-php
+```
+2、修改调用参数$accessKeyId、$accessKeySecret等：app/Core/AliOSS.php
+
+3、修改加载的上传类：app/Core/settings.php
+
+将new Upload()改成new AliOSS(),注意相应的引用要改一下
+
 ## apache伪静态规则
 ```bash
 RewriteEngine On

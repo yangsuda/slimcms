@@ -11,9 +11,11 @@ use SlimCMS\Interfaces\CookieInterface;
 use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Interfaces\TemplateInterface;
 use SlimCMS\Interfaces\DatabaseInterface;
+use SlimCMS\Interfaces\UploadInterface;
 use App\Core\Routes;
 use App\Core\Redis;
 use App\Core\Template;
+use App\Core\Upload;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Output;
 use SlimCMS\Core\Database;
@@ -54,6 +56,9 @@ return function (ContainerBuilder $containerBuilder) {
         Redis::class => function (ContainerInterface $c) {
             $redis = new Redis($c);
             return $redis->selectDB();
+        },
+        UploadInterface::class => function (ContainerInterface $c) {
+            return new Upload();
         },
     ]);
 };
