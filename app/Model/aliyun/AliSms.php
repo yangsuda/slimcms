@@ -78,6 +78,10 @@ class AliSms extends ModelAbstract
                     ],
                 ])
                 ->request();
+            $res = $result->toArray();
+            if ($res['Code'] != 'OK') {
+                return self::$output->withCode(21000, ['msg' => $res['Message']]);
+            }
             return self::$output->withCode(200);
         } catch (ClientException $e) {
             return self::$output->withCode(21000, ['msg' => $e->getErrorMessage()]);
