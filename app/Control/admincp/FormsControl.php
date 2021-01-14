@@ -9,9 +9,7 @@ declare(strict_types=1);
 namespace App\Control\admincp;
 
 use App\Core\Forms;
-use SlimCMS\Core\Page;
-use SlimCMS\Helper\File;
-use SlimCMS\Interfaces\OutputInterface;
+use App\Core\Page;
 
 class FormsControl extends AdmincpControl
 {

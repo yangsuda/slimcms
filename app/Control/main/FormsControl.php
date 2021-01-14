@@ -8,9 +8,9 @@ declare(strict_types=1);
 namespace App\Control\main;
 
 use App\Core\Forms;
+use App\Core\Page;
 use App\Model\admincp\MainModel;
 use SlimCMS\Abstracts\ControlAbstract;
-use SlimCMS\Core\Page;
 
 class FormsControl extends ControlAbstract
 {
