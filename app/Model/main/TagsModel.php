@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace App\Model\main;
 
 use App\Core\Forms;
+use App\Core\Page;
 use SlimCMS\Abstracts\ModelAbstract;
-use SlimCMS\Core\Page;
 use SlimCMS\Error\TextException;
 
 class TagsModel extends ModelAbstract
