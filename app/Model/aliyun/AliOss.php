@@ -1,12 +1,14 @@
 <?php
 /**
- * 阿里云OSS上传类,替换方式：将app/Core/settings.php中Upload()改成AliOSS()，注意引用要改一下
+ * 阿里云OSS上传类，替换方式：
+ * 1、加载阿里云SDK:composer require aliyuncs/oss-sdk-php
+ * 2、替换上传类：将app/Core/settings.php中Upload()改成AliOSS()，注意引用要改一下
  * @author zhucy
  */
 
 declare(strict_types=1);
 
-namespace App\Core;
+namespace App\Model\aliyun;
 
 use OSS\Core\OssException;
 use OSS\OssClient;
@@ -16,11 +18,11 @@ use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Interfaces\UploadInterface;
 use SlimCMS\Abstracts\ModelAbstract;
 
-class AliOSS extends ModelAbstract implements UploadInterface
+class AliOss extends ModelAbstract implements UploadInterface
 {
 
     /**
-     * RAM账号
+     * RAM账号，创建地址：https://ram.console.aliyun.com/users
      * @var string
      */
     private $accessKeyId = '';
