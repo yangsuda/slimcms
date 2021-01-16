@@ -168,7 +168,7 @@ $v[...]
 ```bash
 composer require aliyuncs/oss-sdk-php
 ```
-2、修改调用参数$accessKeyId、$accessKeySecret等：app/Core/AliOSS.php
+2、修改调用参数$accessKeyId、$accessKeySecret等：app/Model/aliyun/AliOss.php
 
 3、修改加载的上传类：app/Core/settings.php
 
