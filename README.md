@@ -172,7 +172,7 @@ composer require aliyuncs/oss-sdk-php
 
 3、修改加载的上传类：app/Core/settings.php
 
-将new Upload()改成new AliOSS(),注意相应的引用要改一下
+将new Upload()改成new AliOss(),注意相应的引用要改一下
 
 ## apache伪静态规则
 ```bash
