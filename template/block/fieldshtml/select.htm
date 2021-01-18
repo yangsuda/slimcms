@@ -1,4 +1,4 @@
-<select class="form-control $data[css]" $data[validform] id="$data[identifier]" name="$data[identifier]">
+<select class="form-control {echo count($data[rules])>10?'select2':''} $data[css]" $data[validform] id="$data[identifier]" name="$data[identifier]">
     <option value="">{echo aval($data, 'tip')?:'请选择'}</option>
     <!--{loop $data[rules] $k $v}-->
     <!--{if $k}-->
@@ -6,3 +6,13 @@
     <!--{/if}-->
     <!--{/loop}-->
 </select>
+
+<!--{if $data[isloadSelect2]==1}-->
+<link href="$cfg[resourceUrl]assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>
+<script src="$cfg[resourceUrl]assets/plugins/select2/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+</script>
+<!--{/if}-->
