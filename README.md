@@ -47,6 +47,14 @@ URL通过?p=CLASS/METHOD方式访问控制层相应的方法，如没在相应�
 
 通过self::input()获取外部传参
 
+或
+
+self::inputInt获取强转为int类型的外部传参
+
+self::inputFloat获取强转为float类型的外部传参
+
+self::inputString获取强转为string类型的外部传参
+
 ## 数据结构
 
 Model层数据统一以Output对象形式返回，
