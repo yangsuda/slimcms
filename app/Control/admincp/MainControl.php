@@ -48,7 +48,7 @@ class MainControl extends AdmincpControl
      */
     public function updateVerifyKey()
     {
-        $file = (string)self::input('file');
+        $file = self::inputString('file');
         $res = MainModel::updateVerifyKey($file)->withReferer(self::url('?p=forms/dataList&fid=3'));
         return $this->directTo($res);
     }

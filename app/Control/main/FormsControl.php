@@ -100,7 +100,7 @@ class FormsControl extends ControlAbstract
 
             //如启用验证码，对验证码验证
             if (self::$config['ccode'] == '1') {
-                $ccode = (string)self::input('ccode');
+                $ccode = self::inputString('ccode');
                 $img = new \Securimage();
                 if (!$img->check($ccode)) {
                     $output = self::$output->withCode(24023);
