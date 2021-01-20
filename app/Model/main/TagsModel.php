@@ -49,7 +49,7 @@ class TagsModel extends ModelAbstract
     {
         $param = json_decode($param, true);
         $param['fid'] = (int)aval($param, 'fid');
-        $page = (int)self::input('page', 'int');
+        $page = self::inputInt('page');
         $param['page'] = (int)aval($param, 'page', $page);
         $where = [];
         if (!empty($param['ischeck'])) {

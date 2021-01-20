@@ -174,8 +174,8 @@ class ApiControl extends ControlAbstract
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = (int)self::input('fid', 'int');
-        $id = (int)self::input('id', 'int');
+        $fid = self::inputInt('fid');
+        $id = self::inputInt('id');
         $res = Forms::dataView($fid, $id);
         if ($res->getCode() != 200) {
             return $this->json($res);
@@ -201,8 +201,8 @@ class ApiControl extends ControlAbstract
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = (int)self::input('fid', 'int');
-        $id = self::input('id', 'int');
+        $fid = self::inputInt('fid');
+        $id = self::inputInt('id');
         $res = Forms::dataFormHtml($fid, $id);
         if ($res->getCode() != 200) {
             return $this->json($res);
@@ -228,8 +228,8 @@ class ApiControl extends ControlAbstract
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = (int)self::input('fid', 'int');
-        $id = self::input('id', 'int');
+        $fid = self::inputInt('fid');
+        $id = self::inputInt('id');
         $res = Forms::formView($fid);
         if ($res->getCode() != 200) {
             return $this->json($res);
@@ -254,10 +254,10 @@ class ApiControl extends ControlAbstract
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = (int)self::input('fid', 'int');
+        $fid = self::inputInt('fid');
         $ids = self::input('ids');
         $ids = $ids ? explode(',', $ids) : [];
-        $ischeck = (int)self::input('ischeck', 'int');
+        $ischeck = self::inputInt('ischeck');
         $res = Forms::formView($fid);
         if ($res->getCode() != 200) {
             return $this->json($res);
@@ -282,7 +282,7 @@ class ApiControl extends ControlAbstract
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = (int)self::input('fid', 'int');
+        $fid = self::inputInt('fid');
         $ids = self::input('ids');
         $ids = $ids ? explode(',', $ids) : [];
         $res = Forms::formView($fid);

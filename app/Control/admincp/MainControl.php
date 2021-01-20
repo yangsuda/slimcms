@@ -27,7 +27,7 @@ class MainControl extends AdmincpControl
      */
     public function recovery()
     {
-        $id = (int)self::input('id', 'int');
+        $id = self::inputInt('id');
         $res = MainModel::recovery($id);
         return self::response($res);
     }

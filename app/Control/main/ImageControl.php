@@ -76,10 +76,10 @@ class ImageControl extends ControlAbstract
      */
     public function webuploadImageDel()
     {
-        $fid = (int)self::input('fid', 'int');
-        $id = (int)self::input('id', 'int');
-        $field = (string)self::input('field');
-        $pic = (string)self::input('pic');
+        $fid = self::inputInt('fid');
+        $id = self::inputInt('id');
+        $field = self::inputString('field');
+        $pic = self::inputString('pic');
         $res = Forms::imgsDel($fid, $id, $field, $pic);
         return self::response($res);
     }

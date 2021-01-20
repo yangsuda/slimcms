@@ -83,8 +83,8 @@ class FormsControl extends ControlAbstract
      */
     public function dataSave()
     {
-        $fid = (int)self::input('fid', 'int');
-        $id = (int)self::input('id', 'int');
+        $fid = self::inputInt('fid');
+        $id = self::inputInt('id');
 
         $res = $this->dataOpenCheck($fid, 6);
         if ($res->getCode() != 200) {
@@ -135,10 +135,10 @@ class FormsControl extends ControlAbstract
      */
     public function dataCheck()
     {
-        $fid = (int)self::input('fid', 'int');
+        $fid = self::inputInt('fid');
         $ids = self::input('ids');
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : '');
-        $ischeck = (int)self::input('ischeck', 'int');
+        $ischeck = self::inputInt('ischeck');
 
         $res = $this->dataOpenCheck($fid, 7);
         if ($res->getCode() != 200) {
@@ -155,7 +155,7 @@ class FormsControl extends ControlAbstract
      */
     public function dataDel()
     {
-        $fid = (int)self::input('fid', 'int');
+        $fid = self::inputInt('fid');
         $ids = self::input('ids');
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : '');
 
@@ -176,8 +176,8 @@ class FormsControl extends ControlAbstract
      */
     public function dataView()
     {
-        $fid = (int)self::input('fid', 'int');
-        $id = (int)self::input('id');
+        $fid = self::inputInt('fid');
+        $id = self::inputInt('id');
 
         $res = $this->dataOpenCheck($fid, 2);
         if ($res->getCode() != 200) {
