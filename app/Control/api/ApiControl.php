@@ -46,7 +46,7 @@ class ApiControl extends ControlAbstract
         }
         //token校验
         if (!empty(self::$config['tokenCheck'])) {
-            $token = (string)self::input('token');
+            $token = self::inputString('token');
             $res = LoginModel::checkToken($token);
             if ($res->getCode() != 200) {
                 return $res;
@@ -66,8 +66,8 @@ class ApiControl extends ControlAbstract
             $res = self::$output->withCode(223020);
             return $this->json($res);
         }
-        $userid = (string)self::input('userid');
-        $pwd = (string)self::input('pwd');
+        $userid = self::inputString('userid');
+        $pwd = self::inputString('pwd');
         $res = LoginModel::createToken($userid, $pwd);
         return $this->json($res);
     }

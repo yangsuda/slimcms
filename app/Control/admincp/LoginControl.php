@@ -19,7 +19,7 @@ class LoginControl extends ControlAbstract
     {
         $formhash = self::input('formhash');
         if ($formhash) {
-            $ccode = (string)self::input('ccode');
+            $ccode = self::inputString('ccode');
             $img = new \Securimage();
             if (!$img->check($ccode)) {
                 $output = self::$output->withCode(24023);

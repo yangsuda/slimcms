@@ -42,7 +42,7 @@ class AdmincpControl extends ControlAbstract
         }
         //检查权限许可
         $arr = ['main/index', 'forms/dataList', 'forms/dataSave', 'forms/dataCheck', 'forms/dataDel', 'forms/dataExport'];
-        $p = (string)self::input('p');
+        $p = self::inputString('p');
         if(empty($p)){
             throw new TextException(21062);
         }
