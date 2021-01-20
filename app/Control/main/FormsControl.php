@@ -69,9 +69,8 @@ class FormsControl extends ControlAbstract
         $output = Forms::orderFields($fid)->withData($res->getData());
 
         $template = '';
-        $p = self::input('p');
-        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . trim($p, '/') . '/' . $fid . '.htm')) {
-            $template = trim($p, '/') . '/' . $fid;
+        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
+            $template = $this->p . '/' . $fid;
         }
         return $this->view($output, $template);
     }
@@ -122,9 +121,8 @@ class FormsControl extends ControlAbstract
             return self::response($res);
         }
         $template = '';
-        $p = self::input('p');
-        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . trim($p, '/') . '/' . $fid . '.htm')) {
-            $template = trim($p, '/') . '/' . $fid;
+        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
+            $template = $this->p . '/' . $fid;
         }
         return $this->view($res, $template);
     }
@@ -187,9 +185,8 @@ class FormsControl extends ControlAbstract
         $res = Forms::dataView($fid, $id);
 
         $template = '';
-        $p = self::input('p');
-        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . trim($p, '/') . '/' . $fid . '.htm')) {
-            $template = trim($p, '/') . '/' . $fid;
+        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
+            $template = $this->p . '/' . $fid;
         }
         return $this->view($res, $template);
     }

@@ -27,6 +27,7 @@ class MainControl extends AdmincpControl
      */
     public function recovery()
     {
+        $this->checkAllow();
         $id = self::inputInt('id');
         $res = MainModel::recovery($id);
         return self::response($res);
@@ -38,6 +39,7 @@ class MainControl extends AdmincpControl
      */
     public function fileVerify()
     {
+        $this->checkAllow();
         $res = MainModel::fileVerify()->withReferer(self::url('?p=forms/dataList&fid=3'));
         return $this->directTo($res);
     }
@@ -48,6 +50,7 @@ class MainControl extends AdmincpControl
      */
     public function updateVerifyKey()
     {
+        $this->checkAllow();
         $file = self::inputString('file');
         $res = MainModel::updateVerifyKey($file)->withReferer(self::url('?p=forms/dataList&fid=3'));
         return $this->directTo($res);
@@ -59,6 +62,7 @@ class MainControl extends AdmincpControl
      */
     public function delImg()
     {
+        $this->checkAllow();
         $param = self::input(['fid' => 'int', 'id' => 'int', 'identifier' => 'string']);
         $res = MainModel::delImg($param);
         return self::response($res);
@@ -69,6 +73,7 @@ class MainControl extends AdmincpControl
      */
     public function apiIntro()
     {
+        $this->checkAllow();
         $res = MainModel::apiIntro();
         $template = '';
         if ($res->getCode() != 200) {

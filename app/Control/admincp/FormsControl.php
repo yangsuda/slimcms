@@ -39,9 +39,8 @@ class FormsControl extends AdmincpControl
         $output = Forms::orderFields($fid)->withData($res->getData());
 
         $template = '';
-        $p = self::input('p');
-        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . trim($p, '/') . '/' . $fid . '.htm')) {
-            $template = trim($p, '/') . '/' . $fid;
+        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
+            $template = $this->p . '/' . $fid;
         }
         return $this->view($output, $template);
     }
@@ -82,9 +81,8 @@ class FormsControl extends AdmincpControl
             return self::directTo($res);
         }
         $template = '';
-        $p = self::input('p');
-        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . trim($p, '/') . '/' . $fid . '.htm')) {
-            $template = trim($p, '/') . '/' . $fid;
+        if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
+            $template = $this->p . '/' . $fid;
         }
         return $this->view($res, $template);
     }
