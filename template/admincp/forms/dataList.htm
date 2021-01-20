@@ -61,7 +61,7 @@
                                                         <!--{elseif $f_v[datatype] == 'imgs'}-->
                                                         <td class="text-dark">{echo count($v['_'.$f_v['identifier']])}</td>
                                                         <!--{else}-->
-                                                        <td class="text-dark">{eval $val = aval($v,'_'.$f_v['identifier']);}{echo is_array($val)?aval($v,$f_v['identifier']):aval($v,'_'.$f_v['identifier'])}</td>
+                                                        <td class="text-dark">{eval $val = aval($v,'_'.$f_v['identifier']);}{echo is_array($val)?aval($v,$f_v['identifier']):aval($v,'_'.$f_v['identifier'])}$f_v[units]</td>
                                                         <!--{/if}-->
                                                         <!--{/loop}-->
                                                         <td class="text-dark">$v[_createtime]</td>
