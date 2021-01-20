@@ -40,15 +40,6 @@ class AdmincpControl extends ControlAbstract
             header('location:' . self::url('?p=login&referer=' . urlencode(self::url())));
             exit();
         }
-        //检查权限许可
-        $arr = ['main/index', 'forms/dataList', 'forms/dataSave', 'forms/dataCheck', 'forms/dataDel', 'forms/dataExport'];
-        $p = self::inputString('p');
-        if(empty($p)){
-            throw new TextException(21062);
-        }
-        $p = trim($p, '/');
-        !in_array($p, $arr) && $this->checkAllow($p);
-        LoginModel::logSave(self::$admin);
     }
 
     /**
@@ -56,14 +47,16 @@ class AdmincpControl extends ControlAbstract
      * @param $auth
      * @return array|\Psr\Http\Message\ResponseInterface
      */
-    protected function checkAllow($auth)
+    protected function checkAllow(string $auth = null)
     {
+        $auth = $auth ?: $this->p;
         $res = LoginModel::checkAllow(self::$admin, $auth);
         if ($res->getCode() != 200) {
             $this->directTo($res);
             header('location:' . $res->getReferer());
             exit;
         }
+        LoginModel::logSave(self::$admin);
     }
 
     /**
