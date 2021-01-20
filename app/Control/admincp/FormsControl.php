@@ -53,8 +53,8 @@ class FormsControl extends AdmincpControl
      */
     public function dataSave()
     {
-        $fid = (int)self::input('fid', 'int');
-        $id = (int)self::input('id', 'int');
+        $fid = self::inputInt('fid');
+        $id = self::inputInt('id');
         $this->checkAllow('dataSave' . $fid);
         $formhash = self::input('formhash');
         if ($formhash) {
@@ -95,10 +95,10 @@ class FormsControl extends AdmincpControl
      */
     public function dataCheck()
     {
-        $fid = (int)self::input('fid', 'int');
+        $fid = self::inputInt('fid');
         $ids = self::input('ids');
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : '');
-        $ischeck = (int)self::input('ischeck', 'int');
+        $ischeck = self::inputInt('ischeck');
         $this->checkAllow('dataCheck' . $fid);
         $res = Forms::dataCheck($fid, $ids, $ischeck);
         return self::response($res);
@@ -110,7 +110,7 @@ class FormsControl extends AdmincpControl
      */
     public function dataDel()
     {
-        $fid = (int)self::input('fid', 'int');
+        $fid = self::inputInt('fid');
         $ids = self::input('ids');
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : '');
         $this->checkAllow('dataDel' . $fid);
