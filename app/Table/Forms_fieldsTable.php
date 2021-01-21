@@ -69,7 +69,7 @@ class Forms_fieldsTable extends Table
                 $form = self::t('forms')->withWhere($row['formid'])->fetch();
                 $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
                     'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
-                    'main'];
+                    'main', 'linkurl'];
                 if (in_array($row['identifier'], $arr)) {
                     return 21059;
                 }
