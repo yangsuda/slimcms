@@ -26,32 +26,6 @@ class AdminTable extends Table
     }
 
     /**
-     * 表单HTML获取之前的自定义处理
-     * @param $fields
-     * @param $data
-     * @param $form
-     * @return int
-     */
-    public function getFormHtmlBefore(&$fields, &$data, &$form): int
-    {
-        if (defined('MANAGE') && MANAGE == 1) {
-            $data['groups'] = self::t('admingroup')->fetchList();
-        }
-        return 200;
-    }
-
-    /**
-     * 数据保存前的自定义处理
-     * @param $data
-     * @param array $row
-     * @return int
-     */
-    public function dataSaveBefore(&$data, $row = []): int
-    {
-        return LoginModel::adminSaveBefore($data, $row);
-    }
-
-    /**
      * 删除前检测
      * @param $data
      * @return int
