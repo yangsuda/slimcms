@@ -122,31 +122,6 @@ class LoginModel extends ModelAbstract
     }
 
     /**
-     * 修改密码
-     * @param $adminid
-     * @param $old
-     * @param $new
-     * @return array
-     */
-    public static function updatePwd(int $adminid, $old, $new): OutputInterface
-    {
-        if (empty($adminid) || empty($old) || empty($new)) {
-            return self::$output->withCode(21002);
-        }
-        $old = Crypt::pwd($old);
-        $row = self::t('admin')->withWhere($adminid)->fetch();
-        if (empty($row)) {
-            return self::$output->withCode(21001);
-        }
-        if ($old != $row['pwd']) {
-            return self::$output->withCode(211032);
-        }
-        $new = Crypt::pwd($new);
-        self::t('admin')->withWhere($adminid)->update(['pwd' => $new]);
-        return self::$output->withCode(200);
-    }
-
-    /**
      * 后台操作日志
      * @param array $user
      * @return OutputInterface
