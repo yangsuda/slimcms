@@ -147,39 +147,6 @@ class LoginModel extends ModelAbstract
     }
 
     /**
-     * 管理员保存前处理
-     * @param $data
-     * @param array $row
-     * @return array
-     */
-    public static function adminSaveBefore(&$data, $row = []): int
-    {
-        if (defined('MANAGE') && MANAGE == 1) {
-            if (empty($row['id']) && empty($data['pwd'])) {
-                return 223017;
-            }
-            if (!empty($data['userid'])) {
-                $admin = self::t('admin')->withWhere(['userid' => $data['userid']])->fetch();
-                if (!empty($row['id'])) {
-                    if ($admin && $admin['id'] != $row['id']) {
-                        return 223016;
-                    }
-                } else {
-                    if ($admin) {
-                        return 223016;
-                    }
-                }
-            }
-        }
-        if (!empty($data['pwd'])) {
-            $data['pwd'] = Crypt::pwd($data['pwd']);
-        } else {
-            unset($data['pwd']);
-        }
-        return 200;
-    }
-
-    /**
      * 后台操作日志
      * @param array $user
      * @return OutputInterface
