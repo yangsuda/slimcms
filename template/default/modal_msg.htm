@@ -79,7 +79,7 @@
         }, ttl);
     }
 
-    function resultMsg(msg, code, ttl = 2000) {
+    function resultMsg(msg, code, referer='', ttl = 2000) {
         if(code==200){
             $('#resultMsg i').prop('class','fa-2x mr-2 far fa-check-circle bigfonts text-success');
         }else{
@@ -88,6 +88,9 @@
         $('#resultMsg .msg').text(msg);
         $('#resultMsg').modal();
         setTimeout(function () {
+            if(referer){
+                location = referer;
+            }
             $('#resultMsg').modal('hide');
         }, ttl);
     }
@@ -107,7 +110,7 @@
             });
         })
         <!--{if !empty($data[errorMsg])}-->
-        resultMsg('$data[errorMsg]', $data[errorCode],{echo mb_strlen($data[errorMsg])>6?3000:2000});
+        resultMsg('$data[errorMsg]', $data[errorCode],'',{echo mb_strlen($data[errorMsg])>6?3000:2000});
         <!--{/if}-->
     })
 </script>
