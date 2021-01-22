@@ -37,7 +37,13 @@ class AdmincpControl extends ControlAbstract
             }
         }
         if (empty(self::$admin['id'])) {
-            header('location:' . self::url('?p=login&referer=' . urlencode(self::url())));
+            $url = self::url('?p=login&referer=' . urlencode(self::url()));
+            if (self::$response->determineContentType() == 'application/json') {
+                $res = self::$output->withCode(24071)->withReferer($url)->jsonSerialize();
+                echo json_encode($res);
+            } else {
+                header('location:' . $url);
+            }
             exit();
         }
     }
@@ -54,7 +60,12 @@ class AdmincpControl extends ControlAbstract
         if ($res->getCode() != 200) {
             $this->directTo($res);
             $url = $res->getReferer() ?: self::url('?p=main/index');
-            header('location:' . $url);
+            if (self::$response->determineContentType() == 'application/json') {
+                $res = self::$output->withCode(21048)->withReferer('')->jsonSerialize();
+                echo json_encode($res);
+            }else{
+                header('location:' . $url);
+            }
             exit;
         }
         LoginModel::logSave(self::$admin);
