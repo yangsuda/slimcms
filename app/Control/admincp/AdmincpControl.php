@@ -53,7 +53,8 @@ class AdmincpControl extends ControlAbstract
         $res = LoginModel::checkAllow(self::$admin, $auth);
         if ($res->getCode() != 200) {
             $this->directTo($res);
-            header('location:' . $res->getReferer());
+            $url = $res->getReferer() ?: self::url('?p=main/index');
+            header('location:' . $url);
             exit;
         }
         LoginModel::logSave(self::$admin);
