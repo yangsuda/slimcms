@@ -2,7 +2,7 @@
     <option value="">{echo aval($data, 'tip')?:'请选择'}</option>
     <!--{loop $data[rules] $k $v}-->
     <!--{if $k}-->
-    <option value="$k" {echo $k==$data[default]?'selected':''}>$v</option>
+    <option value="$k" {echo in_array($k,(array)$data[default])?'selected':''}>$v</option>
     <!--{/if}-->
     <!--{/loop}-->
 </select>
