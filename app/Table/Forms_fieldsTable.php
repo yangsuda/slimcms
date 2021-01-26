@@ -49,7 +49,7 @@ class Forms_fieldsTable extends Table
                     return 27012;
                 }
             } else {
-                unset($data['egroup']);
+                $data['egroup'] = '';
             }
         }
         return 200;
