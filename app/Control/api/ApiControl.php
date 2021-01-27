@@ -133,7 +133,7 @@ class ApiControl extends ControlAbstract
         if (!in_array(1, $arr)) {
             return $this->json(self::$output->withCode(211033));
         }
-        unset($data['form'], $data['where'], $data['currenturl'], $data['get']);
+        unset($data['form'], $data['where'], $data['currenturl'], $data['get'], $data['tags']);
         $res = self::$output->withCode(200)->withData($data);
         return $this->json($res);
     }
