@@ -1,5 +1,5 @@
 <div class="form-group row formgroup-$v[identifier]">
-    <label for="$v[identifier]" class="col-sm-2 col-form-label">$v[title]{echo $v[required]==1?'*':''}：</label>
+    <label for="$v[identifier]" class="col-sm-2 col-form-label">{echo $v[required]==1?'<sapn style="color: red">*</sapn>':''}$v[title]：</label>
     <div class="col-sm-6 {echo $v[datatype]=='radio'||$v[datatype]=='checkbox'?'form-inline':''}">
         <!--{if $v[units]}-->
         <div data-colorpicker-id="4" class="input-group mb-3">
