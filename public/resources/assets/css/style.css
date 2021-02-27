@@ -539,6 +539,7 @@ body.adminbody .main-sidebar.left {
 }
 
 #sidebar-menu ul ul li.active a {
+  color: #f3f3f3;
   background-color: #414d58
 }
 
@@ -554,7 +555,7 @@ body.adminbody .main-sidebar.left {
 }
 
 #sidebar-menu ul ul a:hover {
-  color: #fff
+  color: #efefef;
 }
 
 #sidebar-menu ul ul a i {
@@ -579,17 +580,19 @@ body.adminbody .main-sidebar.left {
 }
 
 #sidebar-menu>ul>li>a {
-  color: #fbfbfb;
+  color: #b5b5b5;
   display: block;
-  padding: 12px 10px 15px 10px;
+  padding: 12px 12px 15px 12px;
   font-weight: 400;
-  font-size: .9rem
+  font-size: 0.90rem;
+  border-left: 2px solid transparent;
 }
 
 #sidebar-menu>ul>li>a:hover {
-  color: #fff;
+  color: #FFF;
   background-color: #414d58;
-  text-decoration: none
+  text-decoration: none;
+  border-left: 2px solid #16957c;
 }
 
 #sidebar-menu>ul>li>a>span {

@@ -65,6 +65,9 @@ class Forms_fieldsTable extends Table
     public function dataSaveAfter($data, $row = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
+            if (!empty($row['id'])) {
+                $row = array_merge($row, $data);
+            }
             if (!empty($row['identifier']) && !empty($row['formid'])) {
                 $form = self::t('forms')->withWhere($row['formid'])->fetch();
                 $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
