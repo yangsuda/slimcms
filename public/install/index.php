@@ -111,7 +111,7 @@ if ($step == 1) {
 declare(strict_types=1);
 define('MANAGE', '1');
 define('CURSCRIPT', 'admincp');
-require __DIR__ . '/../App/init.php';
+require __DIR__ . '/../app/init.php';
 EOT;
     file_put_contents('../'.$filename . '.php', $code) or exit('后台访问地址创建失败，请检查根目录是否可写入！');
 
@@ -138,7 +138,7 @@ EOT;
 <?php
 declare(strict_types=1);
 define('CURSCRIPT', 'api');
-require __DIR__ . '/../App/init.php';
+require __DIR__ . '/../app/init.php';
 EOT;
     file_put_contents('../'.$apifilename . '.php', $code);
 
