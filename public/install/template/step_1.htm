@@ -199,19 +199,15 @@
             <td></td>
         </tr>
         <tr>
-            <td>PDO扩展</td>
+            <td>slimCMS核心框架</td>
             <td align="center">
                 <?php
-                        $pdocheck = true;
-                        if(extension_loaded('pdo')){
-                            echo '<i class="sui-icon icon-pc-right"></i> 支持';
-                }else{
-                $pdocheck = false;
-                echo '<i class="sui-icon icon-pc-error"></i> 不支持';
-                }
+                        echo $frameworkExist?'<i class="sui-icon icon-pc-right"></i> 已安装':'<i class="sui-icon icon-pc-error"></i> 未安装';
                 ?>
             </td>
-            <td></td>
+            <td><?php
+                        echo $frameworkExist?'':'(通过composer update更新安装)';
+                ?></td>
         </tr>
     </table>
 
@@ -249,7 +245,7 @@
     <div class="btn-box" style=" text-align: center;">
         <a href="?step=1" class="sui-btn btn-xlarge btn-default">上一步</a>
         <?php
-        if($isok===false||$pdocheck===false){
+        if($isok===false||$pdocheck===false||$frameworkExist===false){
            echo '<a class="sui-btn btn-xlarge btn-success" disabled>下一步</a>';
         }else{
         echo '<a href="?step=2&check=ok" class="sui-btn btn-xlarge btn-success">下一步</a>';

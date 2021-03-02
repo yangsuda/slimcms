@@ -55,6 +55,7 @@ if ($step == 1) {
     $gd = empty($tmp['GD Version']) ? 'noext' : $tmp['GD Version'];
     unset($tmp);
     $disksize = function_exists('disk_free_space') ? floor(disk_free_space(SLIMCMSROOT) / (1024 * 1024)) . 'M' : 'unknow';
+    $frameworkExist = is_file(SLIMCMSROOT.'../vendor/yangsuda/framework/src/function/Core.php');
 
     $dirs = ['../uploads/','../../config/', '../../data/', '../../data/template/', '../../data/sessions/'];
     $isok = true;
