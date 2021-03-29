@@ -19,12 +19,13 @@
     ],
     "require": {
         "php": "^7.2",
+        "aliyuncs/oss-sdk-php": "^2.4",
         "yangsuda/framework": "2.0.0.x-dev"
     },
     "repositories": {
         "packagist": {
             "type": "composer",
-            "url": "https://packagist.phpcomposer.com"
+            "url": "https://mirrors.tencent.com/composer/"
         }
     },
     "config": {
