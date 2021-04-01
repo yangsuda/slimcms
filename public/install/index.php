@@ -159,13 +159,13 @@ EOT;
     $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $_SERVER['HTTP_HOST'] . '\' where varname=\'domain\'');
     $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $basehost . '\' where varname=\'attachmentHost\'');
 
-    $cfg = require '../../data/configCache.php';
+    $cfg = require '../../data/ConfigCache.php';
     $cfg['cfg']['basehost'] = $basehost;
     $cfg['cfg']['resourceUrl'] = $basehost . 'resources/';
     $cfg['cfg']['domain'] = $_SERVER['HTTP_HOST'];
     $cfg['cfg']['attachmentHost'] = $basehost;
     $config = "<?php\n\r" . 'return ' . var_export($cfg, true) . ';';
-    file_put_contents('../../data/configCache.php', $config);
+    file_put_contents('../../data/ConfigCache.php', $config);
 
     //增加管理员帐号
     $adminuser = input('adminuser');

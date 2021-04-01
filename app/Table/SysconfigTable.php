@@ -64,7 +64,7 @@ class SysconfigTable extends Table
     public function dataSaveAfter($data, $row = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
-            $cfg = CSDATA . '/configCache.php';
+            $cfg = CSDATA . '/ConfigCache.php';
             if (!is_writeable($cfg)) {
                 return 21020;
             }
