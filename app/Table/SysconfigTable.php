@@ -83,6 +83,7 @@ class SysconfigTable extends Table
             $arr = ['cfg' => $arr];
             $str .= var_export($arr, true) . ';';
             file_put_contents($cfg, $str);
+            is_file(CSDATA . 'CompiledContainer.php') && unlink(CSDATA . 'CompiledContainer.php');
         }
         return 200;
     }
