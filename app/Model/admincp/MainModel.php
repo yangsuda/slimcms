@@ -159,8 +159,8 @@ class MainModel extends ModelAbstract
             $v['listFields'] = $result1->getData()['listFields'];
             $result1 = Forms::searchFields($id);//搜索条件显示
             $v['searchFields'] = $result1->getData()['searchFields'];
-            $result1 = Forms::orderFields($id);//排序字段
-            $v['orderFields'] = $result1->getData()['orderFields'];
+            $searchFields = Forms::fieldList(['formid' => $id, 'available' => 1, 'orderby' => 1]);
+            $v['orderFields'] = $searchFields;
             $result1 = Forms::allValidFields($id);//所有字段
             $v['allFields'] = $result1->getData()['allValidFields'];
         }
