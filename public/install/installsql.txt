@@ -354,7 +354,7 @@ INSERT INTO `#@#sysconfig` VALUES
 (null, 'appid', '微信APPID', '3', '1', '', '2', '1607323849', ''),
 (null, 'appsecret', '微信APPSECRET', '3', '1', '', '2', '1607323886', ''),
 (null, 'refererWhite', '来路白名单', '3', '2', '', '2', '1607327378', ''),
-(null, 'tokenCheck', '是否开启token校验', '3', '3', '1', '2', '1607327445', ''),
+(null, 'tokenCheck', '是否开启token校验', '3', '3', '0', '2', '1607327445', ''),
 (null, 'appid', 'appid', '4', '1', '', '2', '1607937907', ''),
 (null, 'appsecret', 'appsecret', '4', '1', '', '2', '1607937926', ''),
 (null, 'mchid', '商户号', '4', '1', '', '2', '1607937944', ''),
