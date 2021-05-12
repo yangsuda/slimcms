@@ -175,7 +175,7 @@ order:排序（rand()随机显示）
 *fid:$v[id]{echo "\n"}
 *id:信息ID{echo "\n"}
 {echo $v[id]==62?'*openid:openid':''}{echo "\n"}
-<a href="?p=api/dataView&fid=$v[id]&id=1" target="_blank">访问</a>
+<a href="$cfg[basehost]{$data[fileName]}.php?p=api/dataView&fid=$v[id]&id=1" target="_blank">访问</a>
                         </pre>
                         <p>返回</p>
                         <pre>
