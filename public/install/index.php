@@ -164,6 +164,7 @@ EOT;
     $cfg['cfg']['resourceUrl'] = $basehost . 'resources/';
     $cfg['cfg']['domain'] = $_SERVER['HTTP_HOST'];
     $cfg['cfg']['attachmentHost'] = $basehost;
+    $cfg['cfg']['tokenCheck'] = 0;
     $config = "<?php\n\r" . 'return ' . var_export($cfg, true) . ';';
     file_put_contents('../../data/ConfigCache.php', $config);
 
