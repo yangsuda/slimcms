@@ -73,11 +73,6 @@ class SysconfigTable extends Table
             $arr = [];
             foreach ($row as $v) {
                 $value = str_replace("'", '', $v['value']);
-                if ($v['type'] == 'number') {
-                    $value = (int)$v['value'];
-                } elseif ($v['type'] == 'serialize') {
-                    $value = Str::serializeData($v['value']);
-                }
                 $arr[$v['varname']] = $value;
             }
             $arr = ['cfg' => $arr];
