@@ -95,7 +95,7 @@ CREATE TABLE `#@#apiintro` (
 
 INSERT INTO `#@#apiintro` VALUES
 (null, '0', '1588205999', '', '获取OPENID', '&#042;code:微信返回CODE', '{\r\n      &quot;code&quot;: 200,\r\n      &quot;data&quot;: {\r\n         &quot;openid&quot;:&quot;OPENID&quot;,\r\n         &quot;session_key&quot;:&quot;session_key值&quot;,\r\n      },\r\n      &quot;msg&quot;: 操作成功\r\n}', 'api/getOpenid'),
-(null, '0', '1588206042', '', '解密用户信息', '&#042;sessionkey:sessionkey值\r\n&#042;encrypteddata:encrypteddata值\r\n&#042;iv:iv值', '{\r\n      &quot;code&quot;: 200,\r\n      &quot;data&quot;: {\r\n         &quot;openid&quot;:&quot;OPENID&quot;,\r\n         &quot;nickname&quot;:“昵称&quot;,\r\n         &quot;headimgurl&quot;:&quot;头像&quot;,\r\n      },\r\n      &quot;msg&quot;: 操作成功\r\n}', 'api/decryptData'),
+(null, '0', '1588206042', '', '解密用户信息', '&#042;sessionkey:sessionkey值\r\n&#042;encrypteddata:encrypteddata值\r\n&#042;iv:iv值\r\nopenid:OPENID&#040;传此值用于用户信息入库保存&#041;', '{\r\n      &quot;code&quot;: 200,\r\n      &quot;data&quot;: {\r\n         &quot;gender&quot;:&quot;性别&quot;,\r\n         &quot;nickName&quot;:“昵称&quot;,\r\n         &quot;avatarUrl&quot;:&quot;头像&quot;,\r\n      },\r\n      &quot;msg&quot;: 操作成功\r\n}', 'api/decryptData'),
 (null, '2', '1607419515', '', '上传图片', '&#042;name:上传图片', '{\r\n      &quot;code&quot;: 200,\r\n      &quot;data&quot;: {\r\n         &quot;pic&quot;:&quot;图片URL&quot;\r\n      },\r\n      &quot;msg&quot;: 操作成功\r\n}', 'api/uploadFile'),
 (null, '2', '1607493487', '', '生成小程序二维码', '&#042;scene:只能字母或数据\r\nwidth:宽度\r\npage:地址', '图片', 'api/qrcode'),
 (null, '2', '1607494628', '', '发送小程序订阅消息', '&#042;touser:接收者的 openid\r\n&#042;template_id:订阅模板id\r\n&#042;data:模板内容，格式形如 { &quot;key1&quot;: &#039;any&#039;, &quot;key2&quot;:&#039;any &#039;}\r\npage:跳转页面', '{\r\n      &quot;code&quot;: 200,\r\n      &quot;data&quot;: {\r\n      },\r\n      &quot;msg&quot;: 操作成功\r\n}', 'api/sendTemplateMessage'),
@@ -355,8 +355,6 @@ INSERT INTO `#@#sysconfig` VALUES
 (null, 'appsecret', '微信APPSECRET', '3', '1', '', '2', '1607323886', ''),
 (null, 'refererWhite', '来路白名单', '3', '2', '', '2', '1607327378', ''),
 (null, 'tokenCheck', '是否开启token校验', '3', '3', '0', '2', '1607327445', ''),
-(null, 'appid', 'appid', '4', '1', '', '2', '1607937907', ''),
-(null, 'appsecret', 'appsecret', '4', '1', '', '2', '1607937926', ''),
 (null, 'mchid', '商户号', '4', '1', '', '2', '1607937944', ''),
 (null, 'wxkey', '商户支付密钥', '4', '1', '', '2', '1607937966', ''),
 (null, 'sslcert_path', '商户证书&#040;cert&#041;', '4', '4', '', '2', '1607938055', ''),

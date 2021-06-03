@@ -106,7 +106,9 @@ class ApiControl extends ControlAbstract
         $res = Wxxcx::decryptData($output);
 
         //用户保存
-        Wxxcx::userSave($res->getData());
+        $data = $res->getData();
+        $data['openid'] = self::inputString('openid');
+        !empty($data['openid']) && Wxxcx::userSave($data);
         return $this->json($res);
     }
 
