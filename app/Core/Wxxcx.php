@@ -21,14 +21,13 @@ class Wxxcx extends \SlimCMS\Core\Wxxcx
         if (empty($param['openid'])) {
             return self::$output->withCode(21003);
         }
-        $param = array_map('strtolower', $param);
+        $param['openid'] = strtolower($param['openid']);
         $row = self::t('wxusers')->withWhere(['openid' => $param['openid']])->fetch();
         $data = [];
-        !empty($param['nickname']) && $data['nickname'] = $param['nickname'];
-        !empty($param['headimgurl']) && $data['headimgurl'] = $param['headimgurl'];
-        !empty($param['avatarurl']) && empty($data['headimgurl']) && $data['headimgurl'] = $param['avatarurl'];
+        !empty($param['nickName']) && $data['nickname'] = $param['nickName'];
+        !empty($param['avatarUrl']) && $data['headimgurl'] = $param['avatarUrl'];
         if (!empty($row)) {
-            $data && self::t('wxusers')->update($row['id'], $data);
+            $data && self::t('wxusers')->withWhere($row['id'])->update($data);
         } else {
             $data['openid'] = $param['openid'];
             $data['createtime'] = TIMESTAMP;
