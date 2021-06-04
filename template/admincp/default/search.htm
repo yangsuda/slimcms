@@ -1,7 +1,6 @@
 
 <!--{if $data[searchFields]||$data[form][export]==1}-->
-<link rel="stylesheet" href="$cfg[resourceUrl]plugins/amaze.datetimepicker/css/amazeui.datetimepicker.css" />
-<script src="$cfg[resourceUrl]plugins/amaze.datetimepicker/js/amazeui.datetimepicker.min.utf8.js"></script>
+<script src="$cfg[resourceUrl]plugins/laydate/laydate.js"></script>
 <div class="card-header">
     <form name='form3' action='{url &page=&ids=}' method='post' class="form-inline">
         <!--{loop $data[searchFields] $k $v}-->
@@ -19,12 +18,20 @@
         <div class="form-group mr-3 mb-1">
             <input placeholder="$v[title]" type='text' name='$v[identifier]_s' id='$v[identifier]_s' value="{echo aval($data,'get/'.$v[identifier].'_s')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
             <script>
-                $(document).ready(function() {$('#$v[identifier]_s').datetimepicker({language: 'zh-CN',autoclose: true,format: 'yyyy-mm-dd{echo $v[datatype]=="date"?"":" hh:ii"}',{echo $v[datatype]=="date"?"startView: 2,minView: 2,":""}});});
+                $(document).ready(function() {
+                    laydate.render({
+                        elem: '#$v[identifier]_s',type: '$v[datatype]'
+                    });
+                });
             </script>
             <label class=" ml-1 mr-1">至</label>
             <input placeholder="$v[title]" type='text' name='$v[identifier]_e' id='$v[identifier]_e' value="{echo aval($data,'get/'.$v[identifier].'_e')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
             <script>
-                $(document).ready(function() {$('#$v[identifier]_e').datetimepicker({language: 'zh-CN',autoclose: true,format: 'yyyy-mm-dd{echo $v[datatype]=="date"?"":" hh:ii"}',{echo $v[datatype]=="date"?"startView: 2,minView: 2,":""}});});
+                $(document).ready(function() {
+                    laydate.render({
+                        elem: '#$v[identifier]_e',type: '$v[datatype]'
+                    });
+                });
             </script>
         </div>
         <!--{elseif in_array($v[datatype],array('multidate'))}-->
