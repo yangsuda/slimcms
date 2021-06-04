@@ -2,8 +2,7 @@
 <input type="date" $data[validform] class="form-control $data[css]" id="$data[identifier]" name="$data[identifier]" value="$data[default]" $data[maxlength]/>
 <!--{else}-->
 <!--{if $data[isLoadDatetimepicker]==1}-->
-<link rel="stylesheet" href="$cfg[resourceUrl]plugins/amaze.datetimepicker/css/amazeui.datetimepicker.css" />
-<script src="$cfg[resourceUrl]plugins/amaze.datetimepicker/js/amazeui.datetimepicker.min.utf8.js"></script>
+<script src="$cfg[resourceUrl]plugins/laydate/laydate.js"></script>
 <!--{/if}-->
 <div class="am-input-group">
         <span class="am-input-group-label">
@@ -13,10 +12,9 @@
 </div>
 <script>
     $(document).ready(function() {
-        $('#{$data[identifier]}').datetimepicker({
-            language: 'zh-CN',
-            autoclose: true,
-            format: 'yyyy-mm-dd hh:ii',
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#{$data[identifier]}',type: 'datetime'
         });
     });
 </script>

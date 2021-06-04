@@ -21,7 +21,6 @@ class Wxxcx extends \SlimCMS\Core\Wxxcx
         if (empty($param['openid'])) {
             return self::$output->withCode(21003);
         }
-        $param['openid'] = strtolower($param['openid']);
         $row = self::t('wxusers')->withWhere(['openid' => $param['openid']])->fetch();
         $data = [];
         !empty($param['nickName']) && $data['nickname'] = $param['nickName'];
