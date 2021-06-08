@@ -28,6 +28,17 @@ class ApiControl extends ControlAbstract
         } else {
             $this->wxData = self::$output;
         }
+        $this->headNoCache();
+    }
+
+    /**
+     * 头部中设置不缓存数据
+     */
+    private function headNoCache()
+    {
+        @header("Pragma:no-cache\r\n");
+        @header("Cache-Control:no-cache\r\n");
+        @header("Expires:0\r\n");
     }
 
     /**
