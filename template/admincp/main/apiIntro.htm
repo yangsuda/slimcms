@@ -37,7 +37,7 @@
 *fid:$v[id]{echo "\n"}
 page:翻页数
 pagesize:一页显示数，默认30{echo "\n"}
-{echo $v[cpcheck]==1?"ifcheck:2未审核，1已审核\n":''}
+{echo $v[cpcheck]==1?"ischeck:2未审核，1已审核\n":''}
 <!--{loop $v[searchFields] $k1 $v1}-->
 <!--{if in_array($v1[datatype],['date','datetime'])}-->
 {$v1[identifier]}_s:$v1[title](起始)(格式：{echo date('Y-m-d',TIMESTAMP)})
@@ -71,7 +71,7 @@ order:排序（rand()随机显示）
        infolist:[{echo "\n"}
          id:自增ID
          createtime:创建时间
-         ifcheck:审核状态(无特殊说明，此值忽略){echo "\n"}
+         ischeck:审核状态(无特殊说明，此值忽略){echo "\n"}
 <!--{loop $v[listFields] $k1 $v1}-->
          {$v1[identifier]}:$v1[title]<!--{if !empty($v1[rules])}--> (<!--{loop unserialize($v1[rules]) $k2 $v2}--> {$k2}:$v2,<!--{/loop}--> ) <!--{/if}-->,{echo "\n"}
 <!--{/loop}-->
@@ -184,7 +184,7 @@ order:排序（rand()随机显示）
       "data": {{echo "\n"}
          id:自增ID
          createtime:创建时间
-         ifcheck:审核状态(无特殊说明，此值忽略){echo "\n"}
+         ischeck:审核状态(无特殊说明，此值忽略){echo "\n"}
 <!--{loop $v[allFields] $k1 $v1}-->
          {$v1[identifier]}:$v1[title],{echo !empty($v1[units])?'('.$v1[units].')':''}{echo !empty($v1[intro])?'(注：'.$v1[intro].')':''}<!--{if !empty($v1[rules])}--> (<!--{loop unserialize($v1[rules]) $k2 $v2}--> {$k2}:$v2,<!--{/loop}--> ) <!--{/if}-->{echo "\n"}
 <!--{/loop}-->
