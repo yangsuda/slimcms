@@ -36,9 +36,10 @@ class ApiControl extends ControlAbstract
      */
     private function headNoCache()
     {
-        @header("Pragma:no-cache\r\n");
-        @header("Cache-Control:no-cache\r\n");
-        @header("Expires:0\r\n");
+        self::$response->getResponse()
+            ->withHeader('Pragma', 'no-cache')
+            ->withHeader('Cache-Control', 'no-cache')
+            ->withHeader('Expires', '0');
     }
 
     /**
