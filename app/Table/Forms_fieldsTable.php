@@ -107,7 +107,7 @@ class Forms_fieldsTable extends Table
      * @return int
      * @throws \SlimCMS\Error\TextException
      */
-    public function getFormHtmlBefore(&$fields, &$data, &$form): int
+    public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (empty($data['displayorder']) && !empty($data['formid'])) {
