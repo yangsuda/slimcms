@@ -32,6 +32,12 @@ class Forms_fieldsTable extends Table
     public function dataSaveBefore(&$data, $row = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
+            $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
+                'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
+                'main', 'linkurl'];
+            if (in_array($data['identifier'], $arr)) {
+                return 21059;
+            }
             if (!empty($data['rules'])) {
                 $data['rules'] = Str::serializeData($data['rules']);
             }
@@ -70,12 +76,6 @@ class Forms_fieldsTable extends Table
             }
             if (!empty($row['identifier']) && !empty($row['formid'])) {
                 $form = self::t('forms')->withWhere($row['formid'])->fetch();
-                $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
-                    'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
-                    'main', 'linkurl'];
-                if (in_array($row['identifier'], $arr)) {
-                    return 21059;
-                }
                 self::t($form['table'])->fieldUpdate($row);
             }
         }
