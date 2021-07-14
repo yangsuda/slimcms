@@ -1,6 +1,6 @@
 <?php
 /**
- * 外部请求处理类
+ * redis类
  * @author zhucy
  */
 declare(strict_types=1);
