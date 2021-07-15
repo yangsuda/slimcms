@@ -50,11 +50,13 @@ class LoginControl extends ControlAbstract
         }
 
         //防止安装完后点登陆，成功后又退回安装页面
-        $referer = self::$output->getReferer();
-        if(preg_match('/(install\/index.php)$/',$referer)){
+        $referer = self::input('referer', 'url');
+        $referer = $referer ?: self::$output->getReferer();
+        if (preg_match('/(install\/index.php)$/', $referer)) {
             self::$output = self::$output->withReferer('');
         }
-        return $this->view();
+        $res = self::$output->withCode(200)->withData(['referer'=>$referer]);
+        return $this->view($res);
     }
 
     /**
