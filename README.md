@@ -7,7 +7,7 @@
 
 基于Slim4、PSR-7和PHP-DI容器实现。
 
-目前还没发布稳定版，只有开发版，debug默认是开启的，生产环境下CORE_DEBUG建议改成false
+debug默认是开启的，生产环境下CORE_DEBUG建议改成false
 
 生产环境下建议opcache扩展开启，本地测试性能会有近10倍的提升
 
