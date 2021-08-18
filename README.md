@@ -14,8 +14,6 @@
 数据库连接默认通过“mysql:host=XXX:XXX;”方式连接，有些情况下会连接不成功，可改成“mysql:host=XXX;port=XXX;”试试，
 操作方式：将config/settings.php中的connecttype参数置为空
 
-QQ交流群：6843297
-
 ## 开发版下载
 
 ```bash
