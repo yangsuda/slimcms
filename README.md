@@ -7,14 +7,13 @@
 
 基于Slim4、PSR-7和PHP-DI容器实现。
 
-目前还没发布稳定版，只有开发版，debug默认是开启的，生产环境下CORE_DEBUG建议改成false
+debug默认是开启的，生产环境下CORE_DEBUG建议改成false
 
 生产环境下建议opcache扩展开启，本地测试性能会有近10倍的提升
 
 数据库连接默认通过“mysql:host=XXX:XXX;”方式连接，有些情况下会连接不成功，可改成“mysql:host=XXX;port=XXX;”试试，
 操作方式：将config/settings.php中的connecttype参数置为空
 
-QQ交流群：6843297
 
 ## 开发版下载
 
