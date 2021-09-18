@@ -35,7 +35,7 @@ class Forms_fieldsTable extends Table
             $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
                 'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
                 'main', 'linkurl'];
-            if (in_array($data['identifier'], $arr)) {
+            if (!empty($data['identifier']) && in_array($data['identifier'], $arr)) {
                 return 21059;
             }
             if (!empty($data['rules'])) {
