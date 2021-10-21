@@ -43,7 +43,7 @@
                                                         <!--{if $data[form][cpcheck]==1}-->
                                                         <th width="70">审核状态</th>
                                                         <!--{/if}-->
-                                                        <th width="45">操作</th>
+                                                        <th width="180">操作</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -75,6 +75,8 @@
                                                         </td>
                                                         <!--{/if}-->
                                                         <td>
+                                                            <a href="{url &p=forms/dataList&fid=19&apiid=$v[id]}">返回参数</a>
+                                                            <a href="{url &p=forms/dataList&fid=18&apiid=$v[id]}">请求参数</a>
                                                             <a href="{url &p=forms/dataSave&id=$v[id]}">编辑</a>
                                                         </td>
                                                     </tr>

@@ -53,7 +53,7 @@ class LoginControl extends ControlAbstract
         $referer = self::input('referer', 'url');
         $referer = $referer ?: self::$output->getReferer();
         if (preg_match('/(install\/index.php)$/', $referer)) {
-            self::$output = self::$output->withReferer('');
+            $referer = '';
         }
         $res = self::$output->withCode(200)->withData(['referer' => $referer]);
         return $this->view($res);

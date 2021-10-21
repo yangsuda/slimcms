@@ -1,0 +1,361 @@
+<!--{template html_head}-->
+<link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css"/>
+<style type="text/css">
+    div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+        justify-content: flex-end !important;
+    }
+
+    body {
+        background-color: #fff;
+    }
+
+    .main-sidebar {
+        background: #fff;
+        border-right: 1px solid #ececec;
+    }
+
+    #sidebar-menu > ul > li > a.active {
+        color: #4b698a !important;
+        background-color: #fff;
+    }
+
+    #sidebar-menu > ul > li > a.active:hover {
+        color: #4b698a !important;
+        background-color: #f5f5f5;
+    }
+
+    #sidebar-menu > ul > li > a {
+        color: #4b698a;
+        padding: 10px;
+    }
+
+    #sidebar-menu ul li a i {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+
+    #sidebar-menu ul li .menu-arrow {
+        top: 10px;
+    }
+
+    #sidebar-menu > ul > li > a:hover {
+        color: #4b698a !important;
+        background-color: #ccc;
+    }
+
+    .sidebar-inner {
+        margin-top: 40px;
+    }
+
+    #sidebar-menu .subdrop {
+        color: #4b698a !important;
+        background-color: #fff;
+    }
+
+    #sidebar-menu ul ul a {
+        color: #4b698a;
+        padding: 10px 10px 10px 30px;
+    }
+
+    #sidebar-menu ul ul a:hover {
+        color: #4b698a;
+    }
+
+    #sidebar-menu > ul > li > ul > li > a:hover {
+        color: #4b698a !important;
+        background-color: #f5f5f5;
+    }
+    .card-header {
+        border-bottom: 0px solid rgba(111, 111, 111, .13);
+    }
+
+    thead tr:nth-of-type(1) {
+        background-color: rgba(0,0,0,.05);
+    }
+
+    .breadcrumb-item a{
+        color: #4b698a;
+    }
+    .breadcrumb-item + .breadcrumb-item::before {
+        display: inline-block;
+        padding-right: .5rem;
+        color: #6c757d;
+        content: "|";
+    }
+</style>
+<script>
+
+    //json格式化方法   参数1：json对象，参数2：缩进字符数
+    var JSONFormat = (function(){
+        var _toString = Object.prototype.toString;
+
+        function format(object, indent_count){
+            var html_fragment = '';
+            switch(_typeof(object)){
+                case 'Null' :0
+                    html_fragment = _format_null(object);
+                    break;
+                case 'Boolean' :
+                    html_fragment = _format_boolean(object);
+                    break;
+                case 'Number' :
+                    html_fragment = _format_number(object);
+                    break;
+                case 'String' :
+                    html_fragment = _format_string(object);
+                    break;
+                case 'Array' :
+                    html_fragment = _format_array(object, indent_count);
+                    break;
+                case 'Object' :
+                    html_fragment = _format_object(object, indent_count);
+                    break;
+            }
+            return html_fragment;
+        };
+
+        function _format_null(object){
+            return '<span class="json_null">null</span>';
+        }
+
+        function _format_boolean(object){
+            return '<span class="json_boolean">' + object + '</span>';
+        }
+
+        function _format_number(object){
+            return '<span class="json_number">' + object + '</span>';
+        }
+
+        function _format_string(object){
+            object = object.replace(/\</g,"<");
+            object = object.replace(/\>/g,">");
+            if(0 <= object.search(/^http/)){
+                object = '<a href="' + object + '" target="_blank" class="json_link">' + object + '</a>'
+            }
+            return '<span class="json_string">"' + object + '"</span>';
+        }
+
+        function _format_array(object, indent_count){
+            var tmp_array = [];
+            for(var i = 0, size = object.length; i < size; ++i){
+                tmp_array.push(indent_tab(indent_count) + format(object[i], indent_count + 1));
+            }
+            return '<span data-type="array" data-size="' + tmp_array.length + '"><i  style="cursor:pointer;" class="fa fa-minus-square-o" onclick="hide(this)"></i>[<br/>'
+                + tmp_array.join(',<br/>')
+                + '<br/>' + indent_tab(indent_count - 1) + ']</span>';
+        }
+
+        function _format_object(object, indent_count){
+            var tmp_array = [];
+            for(var key in object){
+                tmp_array.push( indent_tab(indent_count) + '<span class="json_key">"' + key + '"</span>:' +  format(object[key], indent_count + 1));
+            }
+            return '<span  data-type="object"><i  style="cursor:pointer;" class="fa fa-minus-square-o" onclick="hide(this)"></i>{<br/>'
+                + tmp_array.join(',<br/>')
+                + '<br/>' + indent_tab(indent_count - 1) + '}</span>';
+        }
+
+        function indent_tab(indent_count){
+            return (new Array(indent_count + 1)).join('　　');
+        }
+
+        function _typeof(object){
+            var tf = typeof object,
+                ts = _toString.call(object);
+            return null === object ? 'Null' :
+                'undefined' == tf ? 'Undefined'   :
+                    'boolean' == tf ? 'Boolean'   :
+                        'number' == tf ? 'Number'   :
+                            'string' == tf ? 'String'   :
+                                '[object Function]' == ts ? 'Function' :
+                                    '[object Array]' == ts ? 'Array' :
+                                        '[object Date]' == ts ? 'Date' : 'Object';
+        };
+
+        function loadCssString(){
+            var style = document.createElement('style');
+            style.type = 'text/css';
+            var code = Array.prototype.slice.apply(arguments).join('');
+            try{
+                style.appendChild(document.createTextNode(code));
+            }catch(ex){
+                style.styleSheet.cssText = code;
+            }
+            document.getElementsByTagName('head')[0].appendChild(style);
+        }
+
+        loadCssString(
+            '.json_key{ color: #92278f;font-weight:bold;}',
+            '.json_null{color: #f1592a;font-weight:bold;}',
+            '.json_string{ color: #3ab54a;font-weight:bold;}',
+            '.json_number{ color: #25aae2;font-weight:bold;}',
+            '.json_link{ color: #717171;font-weight:bold;}',
+            '.json_array_brackets{}');
+
+        var _JSONFormat = function(origin_data){
+            this.data = JSON.parse(origin_data);
+        };
+
+        _JSONFormat.prototype = {
+            constructor : JSONFormat,
+            toString : function(){
+                return format(this.data, 1);
+            }
+        }
+
+        return _JSONFormat;
+    })();
+
+    //json案例
+    var demoJson = $data[row][result];
+
+    //将格式化好的json显示到前台页面
+    function showJson(demoJson) {
+        var result = new JSONFormat(JSON.stringify(demoJson),4).toString()
+        $('.jsonhtml').html(result);
+    }
+    <!--{if $data[row][result]}-->
+    $(function () {
+        showJson(demoJson);
+    })
+    <!--{/if}-->
+</script>
+</head>
+<body class="adminbody">
+
+<div id="main">
+    <!-- top bar navigation -->
+    <div class="headerbar">
+        <div class="breadcrumb-holder">
+            <h1 class="main-title float-left">$cfg[webname]接口文档</h1>
+            <ol class="breadcrumb float-right mr-5">
+                <li class="breadcrumb-item"><a href="?p=api/doc&identifier=c4466b3f51715045899b0b8bd142b23c">获取ACCESSTOKEN</a></li>
+                <li class="breadcrumb-item"><a href="?p=api/errCode">错误代码</a></li>
+                <!--{if $data[appid]}-->
+                <li class="breadcrumb-item"><a href="?p=api/docLogout">退出</a></li>
+                <!--{else}-->
+                <li class="breadcrumb-item"><a href="?p=api/docLogin">登陆</a></li>
+                <!--{/if}-->
+            </ol>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+    <!-- End Navigation -->
+
+    <!-- Left Sidebar -->
+    <div class="left main-sidebar">
+        <div class="sidebar-inner leftscroll">
+            <div id="sidebar-menu">
+                <ul>
+                    <!--{loop $data[list] $v}-->
+                    <li class="submenu">
+                        <a href="#" class="{echo in_array($data[identifier],array_column($v[list],'identifier'))?'active':''}"><span>$v[groupname]</span> <span class="menu-arrow"></span></a>
+                        <ul class="list-unstyled">
+                            <!--{loop $v[list] $v1}-->
+                            <li  class="{echo $data[identifier]==$v1[identifier]?'active':''}"><a href="?p=api/doc&identifier=$v1[identifier]">$v1[apiname]</a></li>
+                            <!--{/loop}-->
+                        </ul>
+                    </li>
+                    <!--{/loop}-->
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+    <!-- End Sidebar -->
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="mb-3">
+                            <div class="card-body">
+                                <h3>$data[row][apiname]</h3>
+                                <p>$data[row][intro]</p>
+
+                                <p><b>请求方式：</b>$data[row][_method]</p>
+                                <p><b>请求地址：</b>$cfg[basehost]{$data[fileName]}.php?p=$data[row][path]{echo $data[row][tokencheck]==1?'&accessToken=ACCESSTOKEN':''}</p>
+
+                                <p><b>参数说明：</b></p>
+                                <table class="table table-responsive-xl table-bordered">
+                                    <thead>
+                                    <tr role="row">
+                                        <th>参数</th>
+                                        <th>类型</th>
+                                        <th>必须</th>
+                                        <th>默认值</th>
+                                        <th>说明</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <!--{if $data[row][tokencheck]==1}-->
+                                    <tr bgcolor="#FFFFFF">
+                                        <td>token</td>
+                                        <td>string</td>
+                                        <td>必填</td>
+                                        <td></td>
+                                        <td>调用接口凭证。获取方法查看“<a href="?p=api/doc&identifier=c4466b3f51715045899b0b8bd142b23c">获取accessToken</a>”</td>
+                                    </tr>
+                                    <!--{/if}-->
+                                    <tr bgcolor="#FFFFFF">
+                                        <td>p</td>
+                                        <td>string</td>
+                                        <td>必填</td>
+                                        <td></td>
+                                        <td>固定值：$data[row][path]</td>
+                                    </tr>
+                                    <!--{loop $data[row][requestParam][list] $v}-->
+                                    <tr bgcolor="#FFFFFF">
+                                        <td>$v[name]</td>
+                                        <td>$v[_types]</td>
+                                        <td>{echo $v[ismust]==1?'必填':''}</td>
+                                        <td>$v[default]</td>
+                                        <td>$v[intro]</td>
+                                    </tr>
+                                    <!--{/loop}-->
+                                    </tbody>
+                                </table>
+
+                                <!--{if $data[row][result]}-->
+                                <p><b>返回结果：</b></p>
+
+                                <div class="card mb-3">
+                                    <div class="card-header jsonhtml">
+                                    </div>
+                                </div>
+                                <!--{/if}-->
+                                <!--{if $data[row][responseParam][list]}-->
+                                <p><b>返回参数说明：</b></p>
+                                <table class="table table-responsive-xl table-bordered">
+                                    <thead>
+                                    <tr role="row">
+                                        <th>参数</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <!--{loop $data[row][responseParam][list] $v}-->
+                                    <tr bgcolor="#FFFFFF">
+                                        <td>$v[name]</td>
+                                        <td>$v[_types]</td>
+                                        <td>$v[_intro]</td>
+                                    </tr>
+                                    <!--{/loop}-->
+                                    </tbody>
+                                </table>
+                                <!--{/if}-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!--{template footer}-->
+</body>
+</html>

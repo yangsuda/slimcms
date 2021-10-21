@@ -18,7 +18,9 @@ class MainControl extends AdmincpControl
      */
     public function index()
     {
-        return $this->view();
+        $apiName = substr(md5(self::$setting['security']['authkey']), -8);
+        self::$output = self::$output->withData(['apiName'=>$apiName]);
+        return $this->view(self::$output);
     }
 
     /**
@@ -66,21 +68,5 @@ class MainControl extends AdmincpControl
         $param = self::input(['fid' => 'int', 'id' => 'int', 'identifier' => 'string']);
         $res = MainModel::delImg($param);
         return self::response($res);
-    }
-
-    /**
-     * 接口文档
-     */
-    public function apiIntro()
-    {
-        $this->checkAllow();
-        $res = MainModel::apiIntro();
-        $template = '';
-        if ($res->getCode() != 200) {
-            $template = 'prompt';
-        }
-        $fileName = substr(md5(self::$setting['security']['authkey']), -8);
-        $res = $res->withData(['fileName' => $fileName]);
-        return $this->view($res, $template);
     }
 }
