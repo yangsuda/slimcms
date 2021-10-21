@@ -7,12 +7,14 @@ declare(strict_types=1);
 namespace App\Control\api;
 
 use App\Core\Forms;
-use App\Model\admincp\LoginModel;
+use App\Model\main\AppsModel;
 use SlimCMS\Abstracts\ControlAbstract;
 use slimCMS\Core\Request;
 use slimCMS\Core\Response;
 use App\Core\Wxxcx;
 use SlimCMS\Core\Wxgzh;
+use SlimCMS\Error\TextException;
+use SlimCMS\Helper\Crypt;
 use SlimCMS\Interfaces\OutputInterface;
 
 class ApiControl extends ControlAbstract
@@ -32,6 +34,19 @@ class ApiControl extends ControlAbstract
     }
 
     /**
+     * 请求方式测试
+     * @param $method
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    private function requestCheck($method)
+    {
+        $server = self::$request->getRequest()->getServerParams();
+        if ($server['REQUEST_METHOD'] != $method) {
+            throw new TextException(21063);
+        }
+    }
+
+    /**
      * 头部中设置不缓存数据
      */
     private function headNoCache()
@@ -46,7 +61,7 @@ class ApiControl extends ControlAbstract
      * 权限检测
      * @return OutputInterface
      */
-    private static function purviewCheck(): OutputInterface
+    private static function purviewCheck(...$identifier): OutputInterface
     {
         //验证请求来路
         if (!empty(self::$config['refererWhite'])) {
@@ -58,8 +73,8 @@ class ApiControl extends ControlAbstract
         }
         //token校验
         if (!empty(self::$config['tokenCheck'])) {
-            $token = self::inputString('token');
-            $res = LoginModel::checkToken($token);
+            $accessToken = self::inputString('accessToken');
+            $res = AppsModel::checkAccessToken($accessToken, $identifier);
             if ($res->getCode() != 200) {
                 return $res;
             }
@@ -68,19 +83,100 @@ class ApiControl extends ControlAbstract
     }
 
     /**
-     * 生成token
+     * 接口列表
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    public function doc()
+    {
+        isset($_SESSION) ? '' : session_start();
+        $docAuth = (string)aval($_SESSION, 'docAuth');
+        $appid = (string)Crypt::decrypt($docAuth);
+        if (empty(self::$config['tokenCheck']) || !empty($appid)) {
+            $identifier = self::inputString('identifier');
+            self::$output = AppsModel::apiList($appid)->withData(['identifier' => $identifier, 'appid' => $appid]);
+            if ($identifier) {
+                self::$output = AppsModel::apiView($identifier);
+                $data = self::$output->getData();
+                if (empty($data['row'])) {
+                    return self::$response->getResponse()
+                        ->withHeader('location', self::url() . '&p=api/doc&identifier=c4466b3f51715045899b0b8bd142b23c');
+                }
+            }
+            return $this->view(self::$output, __FUNCTION__);
+        } else {
+            return self::$response->getResponse()->withHeader('location', self::url() . '&p=api/docLogin');
+        }
+    }
+
+    /**
+     * 接口文档查看登陆
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws TextException
+     */
+    public function docLogin()
+    {
+        $formhash = self::input('formhash');
+        if ($formhash) {
+            $res = Forms::submitCheck($formhash);
+            if ($res->getCode() != 200) {
+                return $this->response($res);
+            }
+            $appid = self::inputString('appid');
+            $res = AppsModel::docLogin($appid);
+            if ($res->getCode() == 200) {
+                isset($_SESSION) ? '' : session_start();
+                $_SESSION['docAuth'] = Crypt::encrypt($appid);
+                $res = $res->withReferer('?p=api/doc&identifier=c4466b3f51715045899b0b8bd142b23c');
+            }
+            return $this->response($res);
+        }
+        return $this->view(self::$output, __FUNCTION__);
+    }
+
+    /**
+     * 退出
+     * @return array
+     */
+    public function docLogout()
+    {
+        isset($_SESSION) ? '' : session_start();
+        unset($_SESSION['docAuth']);
+        $output = self::$output->withCode(200, 21047)->withReferer('?p=api/docLogin');
+        return self::directTo($output);
+    }
+
+    /**
+     * 错误代码
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    public function errCode()
+    {
+        isset($_SESSION) ? '' : session_start();
+        $docAuth = (string)aval($_SESSION, 'docAuth');
+        $appid = Crypt::decrypt($docAuth);
+        if (empty(self::$config['tokenCheck']) || !empty($appid)) {
+            self::$output = AppsModel::apiList($appid)->withData(['appid' => $appid, 'prompts' => self::$output->prompts()]);
+            return $this->view(self::$output, __FUNCTION__);
+        } else {
+            return self::$response->getResponse()->withHeader('location', self::url() . '&p=api/docLogin');
+        }
+    }
+
+    /**
+     * 获取accessToken
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public function createToken()
+    public function getAccessToken()
     {
+        $this->requestCheck('GET');
         if (empty(self::$config['tokenCheck'])) {
             $res = self::$output->withCode(223020);
             return $this->json($res);
         }
-        $userid = self::inputString('userid');
-        $pwd = self::inputString('pwd');
-        $res = LoginModel::createToken($userid, $pwd);
+        $appid = self::inputString('appid');
+        $appsecret = self::inputString('appsecret');
+        $res = AppsModel::getAccessToken($appid, $appsecret);
         return $this->json($res);
     }
 
@@ -90,7 +186,8 @@ class ApiControl extends ControlAbstract
      */
     public function getOpenid()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $res = self::purviewCheck('api/' . __FUNCTION__);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -109,7 +206,8 @@ class ApiControl extends ControlAbstract
      */
     public function decryptData()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $res = self::purviewCheck('api/' . __FUNCTION__);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -131,11 +229,12 @@ class ApiControl extends ControlAbstract
      */
     public function dataList()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int', 'order' => 'string', 'by' => 'string', 'ischeck' => 'int']);
+        $res = self::purviewCheck('api/' . __FUNCTION__, $param['fid'], 1);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int', 'order' => 'string', 'by' => 'string', 'ischeck' => 'int']);
         $param['inlistField'] = 'inlist';
         aval($param, 'order') != 'rand&#040;&#041;' && $param['cacheTime'] = 60;
         $res = Forms::dataList($param);
@@ -143,11 +242,7 @@ class ApiControl extends ControlAbstract
             return $this->json($res);
         }
         $data = $res->getData();
-        $arr = explode(',', $data['form']['openapi']);
-        if (!in_array(1, $arr)) {
-            return $this->json(self::$output->withCode(211033));
-        }
-        unset($data['form'], $data['where'], $data['currenturl'], $data['get'], $data['tags']);
+        unset($data['form'], $data['where'], $data['currenturl'], $data['get'], $data['tags'], $data['fid'], $data['by']);
         $res = self::$output->withCode(200)->withData($data);
         return $this->json($res);
     }
@@ -159,20 +254,17 @@ class ApiControl extends ControlAbstract
      */
     public function dataCount()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $param = self::input(['fid' => 'int']);
+        $res = self::purviewCheck('api/' . __FUNCTION__, $param['fid'], 8);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $param = self::input(['fid' => 'int']);
         $res = Forms::dataCount($param);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
         $data = $res->getData();
-        $arr = explode(',', $data['form']['openapi']);
-        if (!in_array(8, $arr)) {
-            return $this->json(self::$output->withCode(211033));
-        }
         unset($data['form']);
         $res = self::$output->withCode(200)->withData($data);
         return $this->json($res);
@@ -184,21 +276,21 @@ class ApiControl extends ControlAbstract
      */
     public function dataView()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $fid = self::inputInt('fid');
+        $res = self::purviewCheck('api/' . __FUNCTION__, $fid, 2);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = self::inputInt('fid');
         $id = self::inputInt('id');
-        $res = Forms::dataView($fid, $id);
+        $fields = self::t('forms_fields')
+            ->withWhere(['formid' => $fid, 'available' => 1, 'infront' => 1])
+            ->onefieldList('identifier');
+        $res = Forms::dataView($fid, $id, implode(',', $fields));
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
         $data = $res->getData();
-        $arr = explode(',', $data['form']['openapi']);
-        if (!in_array(2, $arr)) {
-            return $this->json(self::$output->withCode(211033));
-        }
         unset($data['form'], $data['fields']);
         $res = self::$output->withCode(200)->withData($data);
         return $this->json($res);
@@ -211,22 +303,23 @@ class ApiControl extends ControlAbstract
      */
     public function dataForm()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $fid = self::inputInt('fid');
+        $res = self::purviewCheck('api/' . __FUNCTION__, $fid, 6);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = self::inputInt('fid');
         $id = self::inputInt('id');
-        $res = Forms::dataFormHtml($fid, $id);
+        $res = Forms::dataFormHtml($fid, $id, ['infront' => true]);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
         $data = $res->getData();
-        $arr = explode(',', $data['form']['openapi']);
-        if (!in_array(6, $arr)) {
-            return $this->json(self::$output->withCode(211033));
+        $val = [];
+        foreach ($data['fieldshtml'] as $v) {
+            $val[] = ['id' => $v['id'], 'title' => $v['title'], 'identifier' => $v['identifier'], 'field' => $v['field']];
         }
-        unset($data['fields'], $data['data']);
+        $data = ['fieldshtml' => $val];
         $res = self::$output->withCode(200)->withData($data);
         return $this->json($res);
     }
@@ -238,20 +331,16 @@ class ApiControl extends ControlAbstract
      */
     public function dataSave()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('POST');
+        $fid = self::inputInt('fid');
+        $res = self::purviewCheck('api/' . __FUNCTION__, $fid, 3);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = self::inputInt('fid');
         $id = self::inputInt('id');
         $res = Forms::formView($fid);
         if ($res->getCode() != 200) {
             return $this->json($res);
-        }
-        $data = $res->getData();
-        $arr = explode(',', $data['form']['openapi']);
-        if (!in_array(3, $arr)) {
-            return $this->json(self::$output->withCode(211033));
         }
         $res = Forms::dataSave($fid, $id);
         return $this->json($res);
@@ -264,22 +353,18 @@ class ApiControl extends ControlAbstract
      */
     public function dataCheck()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('POST');
+        $fid = self::inputInt('fid');
+        $res = self::purviewCheck('api/' . __FUNCTION__, $fid, 7);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = self::inputInt('fid');
         $ids = self::input('ids');
         $ids = $ids ? explode(',', $ids) : [];
         $ischeck = self::inputInt('ischeck');
         $res = Forms::formView($fid);
         if ($res->getCode() != 200) {
             return $this->json($res);
-        }
-        $data = $res->getData();
-        $arr = explode(',', $data['form']['openapi']);
-        if (!in_array(7, $arr)) {
-            return $this->json(self::$output->withCode(211033));
         }
         $res = Forms::dataCheck($fid, $ids, $ischeck);
         return $this->json($res);
@@ -292,21 +377,17 @@ class ApiControl extends ControlAbstract
      */
     public function dataDel()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('POST');
+        $fid = self::inputInt('fid');
+        $res = self::purviewCheck('api/' . __FUNCTION__, $fid, 4);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-        $fid = self::inputInt('fid');
         $ids = self::input('ids');
         $ids = $ids ? explode(',', $ids) : [];
         $res = Forms::formView($fid);
         if ($res->getCode() != 200) {
             return $this->json($res);
-        }
-        $data = $res->getData();
-        $arr = explode(',', $data['form']['openapi']);
-        if (!in_array(4, $arr)) {
-            return $this->json(self::$output->withCode(211033));
         }
         $res = Forms::dataDel($fid, $ids);
         return $this->json($res);
@@ -317,20 +398,15 @@ class ApiControl extends ControlAbstract
      */
     public function dataExport()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int']);
+        $res = self::purviewCheck('api/' . __FUNCTION__, $param['fid'], 5);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
-
-        $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int']);
         $res = Forms::formView((int)$param['fid']);
         if ($res->getCode() != 200) {
             return $this->json($res);
-        }
-        $data = $res->getData();
-        $arr = explode(',', $data['form']['openapi']);
-        if (!in_array(5, $arr)) {
-            return $this->json(self::$output->withCode(211033));
         }
 
         $res = Forms::dataExport($param);
@@ -364,7 +440,8 @@ class ApiControl extends ControlAbstract
      */
     public function uploadFile()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('POST');
+        $res = self::purviewCheck('api/' . __FUNCTION__);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -378,7 +455,8 @@ class ApiControl extends ControlAbstract
      */
     public function qrcode()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $res = self::purviewCheck('api/' . __FUNCTION__);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -402,7 +480,8 @@ class ApiControl extends ControlAbstract
      */
     public function sendTemplateMessage()
     {
-        $res = self::purviewCheck();
+        $this->requestCheck('GET');
+        $res = self::purviewCheck('api/' . __FUNCTION__);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -416,6 +495,7 @@ class ApiControl extends ControlAbstract
      */
     public function getCode()
     {
+        $this->requestCheck('GET');
         $param = self::input(['scope' => 'string', 'redirect' => 'url']);
         $res = Wxgzh::getCode($this->wxData->withData($param));
         header('location:' . $res->getReferer());
@@ -428,6 +508,7 @@ class ApiControl extends ControlAbstract
      */
     public function getUserInfo()
     {
+        $this->requestCheck('GET');
         $param = self::input(['code' => 'string']);
         $res = Wxgzh::getUserInfo($this->wxData->withData($param));
         return $this->json($res);
@@ -439,6 +520,7 @@ class ApiControl extends ControlAbstract
      */
     public function wxJsapiConfig()
     {
+        $this->requestCheck('GET');
         $param = self::input(['url' => 'url']);
         $res = Wxgzh::wxJsapiConfig($this->wxData->withData($param));
         return $this->json($res);

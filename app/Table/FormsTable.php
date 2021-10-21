@@ -6,6 +6,7 @@ namespace App\Table;
 
 use App\Core\Forms;
 use App\Core\Table;
+use App\Model\admincp\ApimanageModel;
 
 class FormsTable extends Table
 {
@@ -30,6 +31,21 @@ class FormsTable extends Table
             }
             $table = (string)aval($data, 'table');
             Forms::createTable($table);
+        }
+        return 200;
+    }
+
+    /**
+     * 数据保存后的自定义处理
+     * @param $data
+     * @param array $row
+     * @return int
+     * @throws \SlimCMS\Error\TextException
+     */
+    public function dataSaveAfter($data, $row = []): int
+    {
+        if (defined('MANAGE') && MANAGE == 1) {
+            ApimanageModel::formApiManage((int)$data['id']);
         }
         return 200;
     }
