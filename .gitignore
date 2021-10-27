@@ -4,6 +4,7 @@
 /vendor/
 /public/
 /public/uploads/
+/tests/
 composer.lock
 readme.txt
 config/settings.php
