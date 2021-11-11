@@ -146,6 +146,28 @@ class ApiControl extends ControlAbstract
     }
 
     /**
+     * 接口搜索
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws TextException
+     */
+    public function docSearch()
+    {
+        isset($_SESSION) ? '' : session_start();
+        $docAuth = (string)aval($_SESSION, 'docAuth');
+        $appid = (string)Crypt::decrypt($docAuth);
+        if (empty(self::$config['tokenCheck']) || !empty($appid)) {
+            $words = self::inputString('words');
+            self::$output = AppsModel::apiList($appid)->withData(['appid' => $appid]);
+            if ($words) {
+                self::$output = AppsModel::apiSearch($words);
+            }
+            return $this->view(self::$output, __FUNCTION__);
+        } else {
+            return self::$response->getResponse()->withHeader('location', self::url() . '&p=api/docLogin');
+        }
+    }
+
+    /**
      * 错误代码
      * @return array|\Psr\Http\Message\ResponseInterface
      */

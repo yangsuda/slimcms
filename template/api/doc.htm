@@ -82,6 +82,21 @@
         color: #6c757d;
         content: "|";
     }
+    #words{
+        height: calc(0.7em + 0.75rem + 2px);
+        font-size: 12px;
+    }
+    .search{
+        position:absolute;
+        width:50px;
+        height:50px;
+        top:16px;
+        right:30px;
+        z-index:99;
+    }
+    .list-inline-item a {
+        color: #424141;
+    }
 </style>
 <script>
 
@@ -228,15 +243,37 @@
     <div class="headerbar">
         <div class="breadcrumb-holder">
             <h1 class="main-title float-left">$cfg[webname]接口文档</h1>
-            <ol class="breadcrumb float-right mr-5">
-                <li class="breadcrumb-item"><a href="?p=api/doc&identifier=c4466b3f51715045899b0b8bd142b23c">获取ACCESSTOKEN</a></li>
-                <li class="breadcrumb-item"><a href="?p=api/errCode">错误代码</a></li>
+            <ul class="list-inline float-right float-right mr-5">
+                <li class="list-inline-item">
+                    <a href="?p=api/doc&identifier=c4466b3f51715045899b0b8bd142b23c">获取ACCESSTOKEN</a> |
+                </li>
+                <li class="list-inline-item">
+                    <a href="?p=api/errCode">错误代码</a> |
+                </li>
                 <!--{if $data[appid]}-->
-                <li class="breadcrumb-item"><a href="?p=api/docLogout">退出</a></li>
+                <li class="list-inline-item"><a href="?p=api/docLogout">退出</a></li>
                 <!--{else}-->
-                <li class="breadcrumb-item"><a href="?p=api/docLogin">登陆</a></li>
+                <li class="list-inline-item"><a href="?p=api/docLogin">登陆</a></li>
                 <!--{/if}-->
-            </ol>
+                <li class="list-inline-item">
+                    <input id="words" type="text" placeholder="接口名称或接口地址" class="form-control " name="words" style="width: 200px;">
+                    <i class="fa fa-search bigfonts search" aria-hidden="true"></i>
+                </li>
+                <script>
+                    $(function () {
+                        $('.search').click(function () {
+                            var words = $('#words').val();
+                            location = '?p=api/docSearch&words='+words;
+                        });
+                        $(document).keypress(function (e) {
+                            if (e.keyCode == 13){
+                                var words = $('#words').val();
+                                location = '?p=api/docSearch&words='+words;
+                            }
+                        });
+                    });
+                </script>
+            </ul>
             <div class="clearfix"></div>
         </div>
     </div>
@@ -356,6 +393,6 @@
     </div>
 
 </div>
-<!--{template footer}-->
+<script src="$cfg[resourceUrl]assets/js/pikeadmin.js"></script>
 </body>
 </html>
