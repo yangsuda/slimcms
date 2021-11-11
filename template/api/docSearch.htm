@@ -15,17 +15,17 @@
     }
 
     #sidebar-menu > ul > li > a.active {
-        color: #424141 !important;
+        color: #4b698a !important;
         background-color: #fff;
     }
 
     #sidebar-menu > ul > li > a.active:hover {
-        color: #424141 !important;
+        color: #4b698a !important;
         background-color: #f5f5f5;
     }
 
     #sidebar-menu > ul > li > a {
-        color: #424141;
+        color: #4b698a;
         padding: 10px;
     }
 
@@ -39,7 +39,7 @@
     }
 
     #sidebar-menu > ul > li > a:hover {
-        color: #424141 !important;
+        color: #4b698a !important;
         background-color: #ccc;
     }
 
@@ -48,21 +48,21 @@
     }
 
     #sidebar-menu .subdrop {
-        color: #424141 !important;
+        color: #4b698a !important;
         background-color: #fff;
     }
 
     #sidebar-menu ul ul a {
-        color: #424141;
+        color: #4b698a;
         padding: 10px 10px 10px 30px;
     }
 
     #sidebar-menu ul ul a:hover {
-        color: #424141;
+        color: #4b698a;
     }
 
     #sidebar-menu > ul > li > ul > li > a:hover {
-        color: #424141 !important;
+        color: #4b698a !important;
         background-color: #f5f5f5;
     }
     .card-header {
@@ -74,7 +74,7 @@
     }
 
     .breadcrumb-item a{
-        color: #424141;
+        color: #4b698a;
     }
     .breadcrumb-item + .breadcrumb-item::before {
         display: inline-block;
@@ -98,7 +98,6 @@
         color: #424141;
     }
 </style>
-
 </head>
 <body class="adminbody">
 
@@ -150,7 +149,7 @@
                 <ul>
                     <!--{loop $data[list] $v}-->
                     <li class="submenu">
-                        <a href="#"><span>$v[groupname]</span> <span class="menu-arrow"></span></a>
+                        <a href="#" class=""><span>$v[groupname]</span> <span class="menu-arrow"></span></a>
                         <ul class="list-unstyled">
                             <!--{loop $v[list] $v1}-->
                             <li><a href="?p=api/doc&identifier=$v1[identifier]">$v1[apiname]</a></li>
@@ -176,15 +175,17 @@
                                 <table class="table table-responsive-xl table-bordered">
                                     <thead>
                                     <tr role="row">
-                                        <th>代码</th>
-                                        <th>错误说明</th>
+                                        <th>接口名称</th>
+                                        <th>路由地址</th>
+                                        <th>请求方式</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <!--{loop $data[prompts] $k $v}-->
+                                    <!--{loop $data[apiList] $v}-->
                                     <tr bgcolor="#FFFFFF">
-                                        <td>$k</td>
-                                        <td>$v</td>
+                                        <td><a href="?p=api/doc&identifier=$v[identifier]">$v[apiname]</a></td>
+                                        <td>$v[path]</td>
+                                        <td>{echo $v[method]==1?'POST':'GET'}</td>
                                     </tr>
                                     <!--{/loop}-->
                                     </tbody>

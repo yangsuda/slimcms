@@ -96,6 +96,23 @@ class AppsModel extends ModelAbstract
         return self::$output->withCode(200)->withData(['row' => $data, 'fileName' => $fileName]);
     }
 
+
+    /**
+     * 搜索接口列表
+     * @param string $words
+     * @return OutputInterface
+     */
+    public static function apiSearch(string $words): OutputInterface
+    {
+        if(empty($words)){
+            return self::$output->withCode(21002);
+        }
+        $where = [];
+        $where[] = self::t('apilist')->field('concat(apiname,path)', $words, 'like');
+        $apiList = self::t('apilist')->withWhere($where)->fetchList();
+        return self::$output->withCode(200)->withData(['apiList' => $apiList]);
+    }
+
     /**
      * 后台操作日志
      * @param array $user
