@@ -1,5 +1,11 @@
 <div class="form-group row formgroup-$v[identifier]">
     <label for="$v[identifier]" class="col-sm-2 col-form-label">{echo $v[required]==1?'<sapn style="color: red">*</sapn>':''}$v[title]：</label>
+    <!--{if $v[datatype]=='map'}-->
+    <div class="col-sm-10">
+        $v[field]
+        <div class="invalid-feedback"></div>
+    </div>
+    <!--{else}-->
     <div class="col-sm-6 {echo $v[datatype]=='radio'||$v[datatype]=='checkbox'?'form-inline':''}">
         <!--{if $v[units]}-->
         <div data-colorpicker-id="4" class="input-group mb-3">
@@ -25,4 +31,5 @@
         <div class="invalid-feedback"></div>
     </div>
     <div class="col-sm-4 text-muted">{echo nl2br($v[intro])}</div>
+    <!--{/if}-->
 </div>
