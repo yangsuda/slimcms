@@ -1,0 +1,119 @@
+<input name="$data[identifier]" id="$data[identifier]" type="hidden" value="$data[default]"/>
+<!--{if $data[isloadMapJs]==1}-->
+<script src="https://map.qq.com/api/gljs?v=1.exp&key={$cfg[mapkey]}"></script>
+<!--{/if}-->
+<style type="text/css">
+    #searchInput{$data[identifier]} {
+        padding: 3px 4px;
+    }
+
+    #searchPart{$data[identifier]} {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+    }
+</style>
+<div id="bdcontainer{$data[identifier]}"></div>
+<div id="searchPart{$data[identifier]}">
+    <input type="text" id="searchInput{$data[identifier]}" placeholder="请输入">
+    <button type="button" id="searchBtn{$data[identifier]}">搜索</button>
+</div>
+{eval $coordinate = $data['default']?:$cfg['coordinate'];list($lng,$lat)=explode(',',$coordinate);}
+<script>
+    initMap{$data[identifier]}();
+    var map{$data[identifier]}, marker{$data[identifier]};
+
+    //地图初始化函数，本例取名为init，开发者可根据实际情况定义
+    function initMap{$data[identifier]}() {
+        //定义map变量，调用 TMap.Map() 构造函数创建地图
+        map{$data[identifier]} = new TMap.Map(document.getElementById('bdcontainer{$data[identifier]}'), {
+            center: new TMap.LatLng($lat, $lng),//设置地图中心点坐标
+            zoom: 16.2,   //设置地图缩放级别
+            pitch: 43.5,  //设置俯仰角
+            rotation: 0    //设置地图旋转角度
+        });
+        //初始marker
+        marker{$data[identifier]} = new TMap.MultiMarker({
+            id: 'marker-layer',
+            map: map{$data[identifier]},
+            styles: {
+                "marker": new TMap.MarkerStyle({
+                    "width": 24,
+                    "height": 35,
+                    "anchor": {x: 12, y: 35},
+                    "src": 'https://mapapi.qq.com/web/lbs/javascriptGL/demo/img/markerDefault.png'
+                })
+            },
+            geometries: [{
+                "id": 'demo1',
+                "styleId": 'marker',
+                "position": new TMap.LatLng($lat, $lng),
+                "properties": {
+                    "title": "marker"
+                }
+            }]
+        });
+        //监听点击事件添加marker
+        map{$data[identifier]}.on("click", (evt) => {
+            marker{$data[identifier]}.setGeometries([]);
+            marker{$data[identifier]}.add({
+                position: evt.latLng
+            });
+            $('#{$data[identifier]}').val(evt.latLng.lng+','.evt.latLng.lat);
+        });
+
+        // 添加搜索按钮点击事件
+        const searchBtn{$data[identifier]} = document.getElementById('searchBtn{$data[identifier]}');
+        searchBtn{$data[identifier]}.addEventListener('click', searchClick{$data[identifier]}, false);
+    }
+
+    function searchClick{$data[identifier]}() {
+        let searchInput{$data[identifier]} = $('#searchInput{$data[identifier]}').val(); // 获取搜索内容
+        let url = [
+            'https://apis.map.qq.com/ws/place/v1/search',
+            '?boundary=nearby($lat,$lng,20000,0)',
+            '&keyword=' + searchInput{$data[identifier]},
+            '&page_size=10&page_index=1&orderby=_distance',
+            '&output=jsonp&callback=cb{$data[identifier]}',
+            '&key=$cfg[mapkey]'
+        ].join('');
+        jsonp_request{$data[identifier]}(url);
+        //infoWindow.close(); // 关闭信息窗口
+    }
+
+    // 使用jsonp调用接口
+    function jsonp_request{$data[identifier]}(url) {
+        let script = document.createElement('script');
+        script.src = url;
+        document.body.appendChild(script);
+    }
+
+    // jsonp运行的回调函数
+    function cb{$data[identifier]}(ret) {
+        let newBounds = new TMap.LatLngBounds();
+        let markerArr = [];
+        if (ret && ret.status === 0 && ret.data.length > 0) {
+            // 将搜索结果保存进数组中
+            ret.data.forEach((item, index) => {
+                let position = new TMap.LatLng(item.location.lat, item.location.lng);
+                markerArr.push({
+                    position: position,
+                    properties: {
+                        title: item.title,
+                        address: item.address,
+                        tel: item.tel !== ' ' ? item.tel : '暂无'
+                    }
+                });
+                // 寻找搜索结果的边界
+                newBounds.extend(position);
+            });
+            // 更新marker层，显示标记
+            marker{$data[identifier]}.setGeometries(markerArr);
+            // 地图自适应边界
+            map{$data[identifier]}.fitBounds(newBounds, {
+                padding: 100  // 边界与内容之间留的间距
+            });
+        }
+    }
+</script>
