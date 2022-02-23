@@ -30,7 +30,7 @@ class FormsTable extends Table
                 }
             }
             $table = (string)aval($data, 'table');
-            Forms::createTable($table);
+            empty($data['jumpurl']) && Forms::createTable($table);
         }
         return 200;
     }
