@@ -18,7 +18,7 @@ class AdmingroupTable extends Table
     public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
-            $data['forms'] = self::t('forms')->fetchList();
+            $data['forms'] = self::t('forms')->withWhere(['jumpurl' => ''])->fetchList();
             $data['permissions'] = self::t('adminpermission')->fetchList();
             $data['_purviews'] = !empty($data['purviews']) ? explode(',', $data['purviews']) : [];
         }
