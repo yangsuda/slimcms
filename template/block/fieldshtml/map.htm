@@ -60,7 +60,8 @@
             marker{$data[identifier]}.add({
                 position: evt.latLng
             });
-            $('#{$data[identifier]}').val(evt.latLng.lng+','.evt.latLng.lat);
+            console.log(evt)
+            $('#{$data[identifier]}').val(evt.latLng.lng+','+evt.latLng.lat);
         });
 
         // 添加搜索按钮点击事件
