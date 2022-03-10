@@ -169,7 +169,7 @@ class AppsModel extends ModelAbstract
         $data = [
             'lastip' => Ipdata::getip(),
             'lasttime' => TIMESTAMP,
-            'accessToken' => $accessToken
+            'accesstoken' => $accessToken
         ];
         self::t('apps')->withWhere($row['id'])->update($data);
         return self::$output->withCode(200)->withData(['accessToken' => $accessToken]);
