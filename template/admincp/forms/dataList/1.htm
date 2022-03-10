@@ -70,9 +70,12 @@
                                                         </td>
                                                         <!--{/if}-->
                                                         <td>
-                                                            <a href="{url &p=forms/dataSave&fid=$data[fid]&id=$v[id]}">编辑</a> <span class="text-info">|</span>
+                                                            <a href="{url &p=forms/dataSave&fid=$data[fid]&id=$v[id]}">编辑</a>
+                                                            <!--{if !$v[jumpurl]}-->
+                                                            <span class="text-info">|</span>
                                                             <a href="{url ?p=forms/dataList&fid=2&formid=$v[id]}">字段</a> <span class="text-info">|</span>
                                                             <a href="{url ?p=forms/dataList&page=&id=&fid=$v[id]}">数据查看</a>
+                                                            <!--{/if}-->
                                                         </td>
                                                     </tr>
                                                     <!--{/loop}-->
