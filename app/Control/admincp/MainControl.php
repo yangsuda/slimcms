@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace App\Control\admincp;
 
 use App\Model\admincp\MainModel;
+use SlimCMS\Interfaces\UploadInterface;
 
 class MainControl extends AdmincpControl
 {
@@ -68,5 +69,21 @@ class MainControl extends AdmincpControl
         $param = self::input(['fid' => 'int', 'id' => 'int', 'identifier' => 'string']);
         $res = MainModel::delImg($param);
         return self::response($res);
+    }
+
+    /**
+     * 超大附件上传
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    public function superFileUpload()
+    {
+        $file = aval($_FILES, 'file');
+        $index = self::inputInt('index');
+        $filename = self::inputString('filename');
+        $upload = self::$container->get(UploadInterface::class);
+        $res = $upload->superFileUpload($file, $index, $filename);
+        return $this->json($res);
     }
 }

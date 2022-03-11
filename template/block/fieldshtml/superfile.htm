@@ -1,0 +1,87 @@
+<style type="text/css">
+    .am-form-file input[type="file"] {
+        position: absolute;
+        left: 0;
+        z-index: 1;
+        opacity: 0;
+        cursor: pointer;
+    }
+</style>
+<div class="am-form-file">
+    <button type="button" class="btn btn-secondary btn-sm"><i class="fa-1x fas fa-cloud-upload-alt"></i> 超大文件上传</button>
+    <input type="file" id="file$data[identifier]" onchange="upFile{$data[identifier]}()"/>
+    <input type="hidden" id="{$data[identifier]}" name="{$data[identifier]}" value="$data[default]" $data[validform]/>
+    <div class="progress" id="progress_$data[identifier]" style="display: none;">
+        <div class="progress-bar progress-xs bg-danger" id="progress-bar_$data[identifier]" role="progressbar"
+             style="width: 0%"></div>
+    </div>
+</div>
+<div id="{$data[identifier]}_html" class="m-1">
+    <!--{if $data[default]}-->
+    <a href="$data[default]">$data[default]</a>
+    <!--{/if}-->
+</div>
+
+<script>
+    var upFile{$data[identifier]} = function () {
+        var file{$data[identifier]} = document.getElementById('file$data[identifier]');
+        var f{$data[identifier]} = file{$data[identifier]}.files[0];
+        //alert(f{$data[identifier]}.name);
+        var totalSize{$data[identifier]} = f{$data[identifier]}.size;
+        var len{$data[identifier]} = 2 * 1024 * 1024;
+        var start{$data[identifier]} = 0;
+        var end{$data[identifier]} = start{$data[identifier]} + len{$data[identifier]};
+        var index{$data[identifier]} = 1;
+        var url{$data[identifier]} = '';
+
+        function sliceandpost{$data[identifier]}() {
+
+            if (start{$data[identifier]} >= totalSize{$data[identifier]}) {
+                $('#$data[identifier]').val(url{$data[identifier]});
+                return;
+            }
+
+            var formData{$data[identifier]} = new FormData();
+            formData{$data[identifier]}.append('file', f{$data[identifier]}.slice(start{$data[identifier]}, end{$data[identifier]}));
+            formData{$data[identifier]}.append('filename', f{$data[identifier]}.name);
+            formData{$data[identifier]}.append('index', index{$data[identifier]});
+            xhr{$data[identifier]} = new XMLHttpRequest();
+            xhr{$data[identifier]}.onreadystatechange = onchange;
+            xhr{$data[identifier]}.open('POST', '?p=main/superFileUpload');
+            xhr{$data[identifier]}.send(formData{$data[identifier]});
+
+            function onchange() {
+                // 4 = "loaded"
+                if (xhr{$data[identifier]}.readyState == 4) {
+                    // 200 = "OK"
+                    if (xhr{$data[identifier]}.status == 200) {
+                        var headers{$data[identifier]} = JSON.parse(xhr{$data[identifier]}.response);
+                        if(headers{$data[identifier]}.code!=200){
+                            alert(headers{$data[identifier]}.msg);
+                            return false;
+                        }
+                        url{$data[identifier]} = headers{$data[identifier]}.data.fileurl;
+                        //分片上传成功
+                        index{$data[identifier]} = index{$data[identifier]} + 1;
+                        // 改变下一次截取的位置
+                        start{$data[identifier]} = end{$data[identifier]};
+                        end{$data[identifier]} = start{$data[identifier]} + len{$data[identifier]};
+                        // 因为截取可能超过totalSize，判断最后一次截取是否大于totalSize如果大于就直接让end等于totalSize
+                        if (end{$data[identifier]} > totalSize{$data[identifier]}) {
+                            end{$data[identifier]} = totalSize{$data[identifier]};
+                        }
+                        $('#progress_$data[identifier]').show();
+                        $('#progress-bar_$data[identifier]').css('width', (end{$data[identifier]} / totalSize{$data[identifier]} * 100) + '%').text(parseInt(end{$data[identifier]} / totalSize{$data[identifier]} * 100) + '%');
+                        sliceandpost{$data[identifier]}();
+
+                    } else {
+                        alert("Problem retrieving XML data:" + xhr{$data[identifier]}.statusText);
+                    }
+
+                }
+            }
+        }
+
+        sliceandpost{$data[identifier]}();
+    }
+</script>

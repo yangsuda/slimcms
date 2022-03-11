@@ -310,4 +310,10 @@ class AliOss extends ModelAbstract implements UploadInterface
             return $nopic;
         }
     }
+
+    public function superFileUpload(array $file, int $index, string $filename): OutputInterface
+    {
+
+    }
+
 }
