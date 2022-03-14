@@ -28,7 +28,7 @@
                                                 <table id="form$data[fid]" class="table table-hover display dataTable">
                                                     <thead>
                                                     <tr role="row" align="center">
-                                                        <!--{if $data[form][cpcheck]==1||$data[form][cpdel]==1}-->
+                                                        <!--{if $data[form][cpcheck]==1 && (empty($data[admin][purviews]) || in_array('dataCheck'.$data[fid],$data[admin][purviews]))||$data[form][cpdel]==1 && (empty($data[admin][purviews]) || in_array('dataDel'.$data[fid],$data[admin][purviews]))}-->
                                                         <th width="45">选择</th>
                                                         <!--{/if}-->
                                                         <th class="{echo $data[by]=='asc'?'sorting_asc':'sorting_desc'}" data-order="id">
@@ -40,16 +40,18 @@
                                                         </th>
                                                         <!--{/loop}-->
                                                         <th>创建时间</th>
-                                                        <!--{if $data[form][cpcheck]==1}-->
+                                                        <!--{if $data[form][cpcheck]==1 && (empty($data[admin][purviews]) || in_array('dataCheck'.$data[fid],$data[admin][purviews]))}-->
                                                         <th width="70">审核状态</th>
                                                         <!--{/if}-->
+                                                        <!--{if  empty($data[admin][purviews]) || in_array('dataSave'.$data[fid],$data[admin][purviews])}-->
                                                         <th width="45">操作</th>
+                                                        <!--{/if}-->
                                                     </tr>
                                                     </thead>
                                                     <tbody>
                                                     <!--{loop $data[list] $v}-->
                                                     <tr align='center' bgcolor="#FFFFFF">
-                                                        <!--{if $data[form][cpdel]==1}-->
+                                                        <!--{if $data[form][cpcheck]==1 && (empty($data[admin][purviews]) || in_array('dataCheck'.$data[fid],$data[admin][purviews]))||$data[form][cpdel]==1 && (empty($data[admin][purviews]) || in_array('dataDel'.$data[fid],$data[admin][purviews]))}-->
                                                         <td>
                                                             <label class="am-checkbox-inline"><input name="ids" type="checkbox" id="diyid_$v[id]" value="$v[id]" /><span style="display:inline-block;"></span></label>
                                                         </td>
@@ -65,29 +67,32 @@
                                                         <!--{/if}-->
                                                         <!--{/loop}-->
                                                         <td class="text-dark">$v[_createtime]</td>
-                                                        <!--{if $data[form][cpcheck]==1}-->
+                                                        <!--{if $data[form][cpcheck]==1 && (empty($data[admin][purviews]) || in_array('dataCheck'.$data[fid],$data[admin][purviews]))}-->
                                                         <td>
                                                             <!--{if $v[ischeck]==1}-->
+
                                                             <span style="line-height:1;cursor: pointer;" class="btn btn-success btn-sm btn-check" data-id="$v[id]" data-ischeck="2">已审核</span>
                                                             <!--{else}-->
                                                             <span style="line-height:1;cursor: pointer;" class="btn btn-danger btn-sm btn-check" data-id="$v[id]" data-ischeck="1">未审核</span>
                                                             <!--{/if}-->
                                                         </td>
                                                         <!--{/if}-->
+                                                        <!--{if  empty($data[admin][purviews]) || in_array('dataSave'.$data[fid],$data[admin][purviews])}-->
                                                         <td>
                                                             <a href="{url &p=forms/dataSave&id=$v[id]}">编辑</a>
                                                         </td>
+                                                        <!--{/if}-->
                                                     </tr>
                                                     <!--{/loop}-->
-                                                    <!--{if $data[form][cpcheck]==1||$data[form][cpdel]==1}-->
+                                                    <!--{if $data[form][cpcheck]==1 && (empty($data[admin][purviews]) || in_array('dataCheck'.$data[fid],$data[admin][purviews]))||$data[form][cpdel]==1 && (empty($data[admin][purviews]) || in_array('dataDel'.$data[fid],$data[admin][purviews]))}-->
                                                     <tr>
                                                         <td height="36" colspan="{echo count($data[listFields])+($data[form][cpcheck]==1?5:4)}">
                                                             <span onClick="$('input[type=checkbox]').prop('checked', true);" style="line-height:1" class="btn btn-dark btn-sm">全选</span>
                                                             <span onClick="$('input[type=checkbox]').prop('checked', false);" style="line-height:1" class="btn btn-dark btn-sm">取消</span>
-                                                            <!--{if $data[form][cpcheck]==1}-->
+                                                            <!--{if $data[form][cpcheck]==1 && (empty($data[admin][purviews]) || in_array('dataCheck'.$data[fid],$data[admin][purviews]))}-->
                                                             <span onClick="AuditSel();" style="line-height:1" class="btn btn-dark btn-sm">审核</span>
                                                             <!--{/if}-->
-                                                            <!--{if $data[form][cpdel]==1}-->
+                                                            <!--{if $data[form][cpdel]==1 && (empty($data[admin][purviews]) || in_array('dataDel'.$data[fid],$data[admin][purviews]))}-->
                                                             <span onClick="DelSel()" style="line-height:1" class="btn btn-dark btn-sm">删除</span>
                                                             <!--{/if}-->
                                                         </td>

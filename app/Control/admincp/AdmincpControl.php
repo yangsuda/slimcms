@@ -77,7 +77,12 @@ class AdmincpControl extends ControlAbstract
     public function view(OutputInterface $output = null, string $template = '')
     {
         $output = $output ?? self::$output;
-        $output = $output->withData(['admin' => self::$admin, 'leftMenu' => $this->leftMenu()]);
+        $data = [];
+        $data['leftMenu'] = $this->leftMenu();
+        if(empty($output->getData()['admin'])){
+            $data['admin'] = self::$admin;
+        }
+        $output = $output->withData($data);
         return parent::view($output, $template);
     }
 

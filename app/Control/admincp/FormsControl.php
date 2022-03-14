@@ -30,6 +30,8 @@ class FormsControl extends AdmincpControl
             return self::directTo($res);
         }
         $data = $res->getData();
+        $data['admin'] = self::$admin;
+        $data['admin']['purviews'] = preg_match('/admin_AllowAll/i', $data['admin']['_groupid']['purviews']) ? [] : explode(',', $data['admin']['_groupid']['purviews']);
         $data['mult'] = Page::multi($data['count'], $data['pagesize'], $data['page'], $data['currenturl'], $data['maxpages'], 5, true, true);
         //处理展示字段
         $res = Forms::listFields($fid)->withData($data);
