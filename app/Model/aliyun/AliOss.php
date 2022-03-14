@@ -311,7 +311,7 @@ class AliOss extends ModelAbstract implements UploadInterface
         }
     }
 
-    public function superFileUpload(array $file, int $index, string $filename): OutputInterface
+    public function superFileUpload(array $file, int $index, string $filename, string $diyDir = ''): OutputInterface
     {
 
     }

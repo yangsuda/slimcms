@@ -49,7 +49,7 @@
                                                 ID
                                             </th>
                                             <!--{loop $data[listFields] $k $v}-->
-                                            <th class="{echo in_array($v[id],$data[orderFields])?($data[by]=='asc'?'sorting_asc':'sorting_desc'):''}" data-order="$v[identifier]" aria-controls="form$data[fid]" aria-label="$v[title]">
+                                            <th class="{echo in_array($v[id],(array)aval($data,'orderFields'))?($data[by]=='asc'?'sorting_asc':'sorting_desc'):''}" data-order="$v[identifier]" aria-controls="form$data[fid]" aria-label="$v[title]">
                                                 $v[title]
                                             </th>
                                             <!--{/loop}-->

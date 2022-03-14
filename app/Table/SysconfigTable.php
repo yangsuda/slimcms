@@ -42,7 +42,7 @@ class SysconfigTable extends Table
      * @param array $row
      * @return int
      */
-    public function dataSaveBefore(&$data, $row = []): int
+    public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if ($data['type'] == 5) {
@@ -61,7 +61,7 @@ class SysconfigTable extends Table
      * @param array $row
      * @return int
      */
-    public function dataSaveAfter($data, $row = []): int
+    public function dataSaveAfter($data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             $cfg = CSDATA . '/ConfigCache.php';

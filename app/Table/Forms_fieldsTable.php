@@ -29,7 +29,7 @@ class Forms_fieldsTable extends Table
      * @return int
      * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveBefore(&$data, $row = []): int
+    public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
@@ -68,7 +68,7 @@ class Forms_fieldsTable extends Table
      * @return int
      * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveAfter($data, $row = []): int
+    public function dataSaveAfter($data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (!empty($row['id'])) {
@@ -88,7 +88,7 @@ class Forms_fieldsTable extends Table
      * @return int
      * @throws \SlimCMS\Error\TextException
      */
-    public function dataDelAfter($data): int
+    public function dataDelAfter($data, $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (!empty($data['identifier']) && !empty($data['formid'])) {
