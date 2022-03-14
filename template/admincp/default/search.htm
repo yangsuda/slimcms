@@ -57,10 +57,10 @@
         </div>
         <!--{/if}-->
         <div class="form-group mb-1">
-            <!--{if $data[searchFields]}-->
+            <!--{if $data[searchFields] || $data[form][cpcheck]==1}-->
             <button type="submit" class="btn btn-success">搜索</button>
             <!--{/if}-->
-            <!--{if $data[form][export]==1}-->
+            <!--{if $data[form][export]==1 && (empty($data[admin][purviews]) || in_array('dataExport'.$data[fid],$data[admin][purviews]))}-->
              <a class="btn btn-success ml-1" href='{url $data[currenturl]&p=forms/dataExport&page=}' target='_blank'>导出</a>
             <!--{/if}-->
         </div>
