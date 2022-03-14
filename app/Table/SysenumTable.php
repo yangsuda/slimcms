@@ -56,7 +56,7 @@ class SysenumTable extends Table
      * @return int
      * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveAfter($data, $row = []): int
+    public function dataSaveAfter($data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if ($data['mngtype'] == 'add') {

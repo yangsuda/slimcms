@@ -31,7 +31,7 @@ class AdmingroupTable extends Table
      * @param string $row
      * @return int
      */
-    public function dataSaveBefore(&$data, $row = []): int
+    public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (!empty($data['purviews'])) {

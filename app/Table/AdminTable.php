@@ -30,7 +30,7 @@ class AdminTable extends Table
      * @param $data
      * @return int
      */
-    public function dataDelBefore($data): int
+    public function dataDelBefore($data, $options = []): int
     {
         if ($data['id'] == 1) {
             return 21051;

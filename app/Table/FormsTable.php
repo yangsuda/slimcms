@@ -16,7 +16,7 @@ class FormsTable extends Table
      * @param array $row
      * @return int
      */
-    public function dataSaveBefore(&$data, $row = []): int
+    public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (empty($data['name'])) {
@@ -42,7 +42,7 @@ class FormsTable extends Table
      * @return int
      * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveAfter($data, $row = []): int
+    public function dataSaveAfter($data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             ApimanageModel::formApiManage((int)$data['id']);
@@ -56,7 +56,7 @@ class FormsTable extends Table
      * @return int
      * @throws \SlimCMS\Error\TextException
      */
-    public function dataDelAfter($data): int
+    public function dataDelAfter($data, $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (!empty($data['id'])) {

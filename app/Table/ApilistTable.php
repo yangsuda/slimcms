@@ -15,7 +15,7 @@ class ApilistTable extends Table
      * @param array $row
      * @return int
      */
-    public function dataSaveBefore(&$data, $row = []): int
+    public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
             !empty($data['result']) && $data['result'] = self::$request->htmlspecialchars($data['result'],'de');
