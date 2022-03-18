@@ -19,7 +19,6 @@
     ],
     "require": {
         "php": "^7.3",
-        "aliyuncs/oss-sdk-php": "^2.4",
         "yangsuda/framework": "^2.1"
     },
     "repositories": {
