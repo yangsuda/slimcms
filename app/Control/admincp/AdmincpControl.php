@@ -95,7 +95,16 @@ class AdmincpControl extends ControlAbstract
         $weight = [];
         foreach ($res['list'] as $v) {
             if (!in_array('admin_AllowAll', $purviews) && !in_array('dataList' . $v['id'], $purviews)) {
-                continue;
+                if (empty($v['jumpurl'])) {
+                    continue;
+                } else {
+                    //本地URL跳转菜单是否显示判断
+                    $parseurl = parse_url($v['jumpurl']);
+                    !empty($parseurl['query']) && parse_str($parseurl['query'], $parameter);
+                    if (!empty($parameter['p']) && !in_array($parameter['p'], $purviews)) {
+                        continue;
+                    }
+                }
             }
             if (!empty($v['types'])) {
                 $weight[$v['types']][] = $v['weight'];
