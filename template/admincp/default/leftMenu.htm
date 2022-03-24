@@ -7,10 +7,10 @@
                 <li class="submenu">
                     <!--{if count($v[subMenu])==1}-->
                     <!--{loop $v[subMenu] $val}-->
-                    <a href="{if $val[jumpurl]}$val[jumpurl]{else}{url ?p=forms/dataList&fid=$val[id]}{/if}" class="{echo !empty($data[form][types]) && $v[types][key]==$data[form][types]?'active':''}"><i class="fa-1x $v[types][key]"></i> <span> $val[name] </span></a>
+                    <a href="{if $val[jumpurl]}$val[jumpurl]{else}{url ?p=forms/dataList&fid=$val[id]}{/if}" class="{echo !empty($data[form][types]) && $v[types][key]==$data[form][types]||strpos($v[types][jumpurl],$data[p])!==false?'active':''}"><i class="fa-1x $v[types][key]"></i> <span> $val[name] </span></a>
                     <!--{/loop}-->
                     <!--{else}-->
-                    <a href="#" class="{echo !empty($data[form][types]) && $v[types][key]==$data[form][types]?'active':''}"><i class="fa-1x $v[types][key]"></i> <span> $v[types][name] </span> <span class="menu-arrow"></span></a>
+                    <a href="#" class="{echo !empty($data[form][types]) && $v[types][key]==$data[form][types]||strpos($v[types][jumpurl],$data[p])!==false?'active':''}"><i class="fa-1x $v[types][key]"></i> <span> $v[types][name] </span> <span class="menu-arrow"></span></a>
                     <ul class="list-unstyled">
                         <!--{loop $v[subMenu] $val}-->
                         <li class="{echo !empty($val[jumpurl]) && strpos($val[jumpurl],$data[p])!==false || $data[p]=='forms/dataList' && !empty($data[fid]) && $data[fid]==$val[id]?'active':''}"><a href="{if $val[jumpurl]}$val[jumpurl]{else}{url ?p=forms/dataList&fid=$val[id]}{/if}">$val[name]</a></li>

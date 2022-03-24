@@ -94,21 +94,19 @@ class AdmincpControl extends ControlAbstract
         $arr = [];
         $weight = [];
         foreach ($res['list'] as $v) {
-            if (!in_array('admin_AllowAll', $purviews) && !in_array('dataList' . $v['id'], $purviews)) {
-                if (empty($v['jumpurl'])) {
-                    continue;
-                } else {
-                    //本地URL跳转菜单是否显示判断
-                    $parseurl = parse_url($v['jumpurl']);
-                    !empty($parseurl['query']) && parse_str($parseurl['query'], $parameter);
-                    if (!empty($parameter['p']) && !in_array($parameter['p'], $purviews)) {
-                        continue;
-                    }
-                }
+            if (!empty($v['jumpurl']) && !preg_match('/^http/i', $v['jumpurl'])) {
+                $urlinfo = parse_url($v['jumpurl']);
+                parse_str($urlinfo['query'], $para);
+                $purview = !empty($para['p']) ? $para['p'] : '';
+            } else {
+                $purview = 'dataList' . $v['id'];
+            }
+            if (!in_array('admin_AllowAll', $purviews) && !in_array($purview, $purviews)) {
+                continue;
             }
             if (!empty($v['types'])) {
                 $weight[$v['types']][] = $v['weight'];
-                $arr[$v['types']]['types'] = ['key' => $v['types'], 'name' => $v['_types']];
+                $arr[$v['types']]['types'] = ['key' => $v['types'], 'jurmpurl' => $v['jumpurl'], 'name' => $v['_types']];
                 $arr[$v['types']]['subMenu'][] = $v;
             }
         }
