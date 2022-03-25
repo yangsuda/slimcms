@@ -106,7 +106,7 @@ class AdmincpControl extends ControlAbstract
             }
             if (!empty($v['types'])) {
                 $weight[$v['types']][] = $v['weight'];
-                $arr[$v['types']]['types'] = ['key' => $v['types'], 'jurmpurl' => $v['jumpurl'], 'name' => $v['_types']];
+                $arr[$v['types']]['types'] = ['key' => $v['types'], 'jumpurl' => $v['jumpurl'], 'name' => $v['_types']];
                 $arr[$v['types']]['subMenu'][] = $v;
             }
         }
