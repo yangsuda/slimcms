@@ -6,7 +6,7 @@ namespace App\Table;
 
 use App\Core\Forms;
 use App\Core\Table;
-use App\Model\admincp\ApimanageModel;
+use App\Model\plugin\PluginModel;
 
 class FormsTable extends Table
 {
@@ -30,7 +30,8 @@ class FormsTable extends Table
                 }
             }
             $table = (string)aval($data, 'table');
-            empty($data['jumpurl']) && Forms::createTable($table);
+            $name = (string)aval($data, 'name');
+            empty($data['jumpurl']) && Forms::createTable($table, $name);
         }
         return 200;
     }
@@ -45,7 +46,10 @@ class FormsTable extends Table
     public function dataSaveAfter($data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
-            ApimanageModel::formApiManage((int)$data['id']);
+            $res = PluginModel::hook(get_called_class(), __FUNCTION__, $data, $row, $options);
+            if ($res->getCode() != 200) {
+                return $res->getCode();
+            }
         }
         return 200;
     }

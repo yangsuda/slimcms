@@ -19,7 +19,19 @@ class AdmingroupTable extends Table
     {
         if (defined('MANAGE') && MANAGE == 1) {
             $data['forms'] = self::t('forms')->withWhere(['jumpurl' => ''])->fetchList();
-            $data['permissions'] = self::t('adminpermission')->fetchList();
+            $permissions = self::t('adminpermission')->fetchList();
+            $data['permissions'] = [];
+            foreach ($permissions as $v1) {
+                $index = strpos($v1['purview'], '/') ? stristr($v1['purview'], '/', true) : '_';
+                $data['permissions'][$index][] = $v1;
+            }
+            //插件中设置的权限
+            $where = ['isinstall' => 1, 'available' => 1];
+            $where[] = self::t()->field('permission', '', '<>');
+            $data['plugin'] = self::t('plugins')->withWhere($where)->fetchList();
+            foreach ($data['plugin'] as &$v) {
+                $v['permission'] = unserialize($v['permission']);
+            }
             $data['_purviews'] = !empty($data['purviews']) ? explode(',', $data['purviews']) : [];
         }
         return 200;

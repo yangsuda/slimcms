@@ -1,0 +1,191 @@
+<!--{template html_head}-->
+<link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css" />
+<style type="text/css">
+    div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+        justify-content: flex-end !important;
+    }
+</style>
+</head>
+<body class="adminbody">
+
+<div id="main">
+    <!--{template head}-->
+    <!--{template leftMenu}-->
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <!--{template navigation_list}-->
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="card mb-3">
+                            <!--{template search}-->
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table id="form$data[fid]" class="table table-hover display dataTable">
+                                                    <thead>
+                                                    <tr role="row" align="center">
+                                                        <!--{loop $data[listFields] $k $v}-->
+                                                        <!--{if in_array($v[identifier],['isinstall','available','description','version'])}-->
+                                                        <!--{else}-->
+                                                        <th class="{echo in_array($v[id],$data[orderFields])?($data[by]=='asc'?'sorting_asc':'sorting_desc'):''}" data-order="$v[identifier]" aria-controls="form$data[fid]" aria-label="$v[title]">
+                                                            $v[title]
+                                                        </th>
+                                                        <!--{/if}-->
+                                                        <!--{/loop}-->
+                                                        <!--{if  empty($data[admin][purviews]) || in_array('dataSave'.$data[fid],$data[admin][purviews])}-->
+                                                        <th>操作</th>
+                                                        <!--{/if}-->
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <!--{loop $data[list] $v}-->
+                                                    <tr align='center' bgcolor="#FFFFFF">
+                                                        <!--{loop $data[listFields] $f_v}-->
+                                                        <!--{if in_array($f_v[identifier],['isinstall','available','description','version'])}-->
+                                                        <!--{elseif in_array($f_v[identifier],['name'])}-->
+                                                        <td class="text-dark" style="text-align: left;">$v[_name]($v[version])<br><span class="text-secondary small">$v[_description]</span></td>
+                                                        <!--{elseif $f_v[datatype] == 'img'}-->
+                                                        <td><a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="{echo copyImage($v[$f_v['identifier']],60,60)}" width="60" /></a></td>
+                                                        <!--{elseif $f_v[identifier] == 'menu'}-->
+                                                        <td class="text-dark">{echo $v[isinstall]==1?$v[_menu]:''}</td>
+                                                        <!--{else}-->
+                                                        <td class="text-dark">{eval $val = aval($v,'_'.$f_v['identifier']);}{echo is_array($val)?aval($v,$f_v['identifier']):aval($v,'_'.$f_v['identifier'])}$f_v[units]</td>
+                                                        <!--{/if}-->
+                                                        <!--{/loop}-->
+
+                                                        <td>
+                                                            <!--{if $v[isinstall]==-1}-->
+                                                            <a class="btn btn-success btn-sm btn-install" href="javascript:void(0)" data-identifier="$v[identifier]">安装</a>
+                                                            <a class="btn btn-secondary btn-sm btn-tel btn-delete" href="javascript:void(0)" data-identifier="$v[identifier]">删除</a>
+                                                            <!--{else}-->
+                                                            <!--{if $v[available]==1}-->
+                                                            <a class="btn btn-secondary btn-sm btn-switch" href="javascript:void(0)" data-open="-1" data-identifier="$v[identifier]">关闭</a>
+                                                            <!--{else}-->
+                                                            <a class="btn btn-success btn-sm btn-switch" href="javascript:void(0)" data-open="1" data-identifier="$v[identifier]">开启</a>
+                                                            <!--{/if}-->
+                                                            <a class="btn btn-warning btn-sm btn-unstall" href="javascript:void(0)" data-identifier="$v[identifier]">卸载</a>
+                                                            <!--{/if}-->
+                                                        </td>
+                                                    </tr>
+                                                    <!--{/loop}-->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <!--{if !empty($data[mult])}-->
+                                        <div class="row">
+                                            <div class="col-sm-12 col-md-12">
+                                                <div class="dataTables_paginate paging_simple_numbers" id="paginate">$data[mult]</div>
+                                            </div>
+                                        </div>
+                                        <!--{/if}-->
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--{template modal_msg}-->
+    <!--{template listjs}-->
+
+    <div class="modal fade" id="confirmUnstall" tabindex="-1" role="dialog" aria-labelledby="confirmUnstall" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="width: 500px;">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-3 col-md-3 text-right">
+                            <i class="fa fa-warning bigfonts text-warning" style="font-size: 40px; line-height:100px;"></i>
+                        </div>
+                        <div class="mt-3 text-left h5">
+                            <span class="custom-control custom-checkbox mr-2">
+        <input type="checkbox" sucmsg="" class="custom-control-input " id="delTable" name="delTable" value="1">
+        <label for="delTable" class="custom-control-label">删除相关数据库中相关数据？</label>
+    </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success btn-submit">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            function confirmUnstall(callback) {
+                $('#confirmUnstall').modal();
+                $('#confirmUnstall .btn-submit').unbind('click').click(function () {
+                    typeof callback === 'function' && callback();
+                })
+            }
+
+            $('.btn-install').click(function () {
+                var identifier = $(this).data('identifier');
+                $.getJSON('{url ?p=plugin/install&identifier='+identifier+'}',function (res) {
+                    resultMsg(res.msg,res.code);
+                    if(res.code==200){
+                        setTimeout(function () {
+                            location = res.referer;
+                        }, 2000);
+                    }
+                })
+            })
+            $('.btn-unstall').click(function () {
+                var identifier = $(this).data('identifier');
+                confirmUnstall(function () {
+                    var delTable = $('#delTable').prop('checked')?1:0;
+                    $.getJSON('{url ?p=plugin/unstall&identifier='+identifier+'&delTable='+delTable+'}',function (res) {
+                        $('#confirmUnstall').modal('hide');
+                        resultMsg(res.msg,res.code);
+                        if(res.code==200){
+                            setTimeout(function () {
+                                location = res.referer;
+                            }, 2000);
+                        }
+                    })
+                })
+            })
+            $('.btn-switch').click(function () {
+                var identifier = $(this).data('identifier');
+                var open = $(this).data('open');
+                $.getJSON('{url ?p=plugin/openSwitch&identifier='+identifier+'&switch='+open+'}',function (res) {
+                    resultMsg(res.msg,res.code);
+                    if(res.code==200){
+                        setTimeout(function () {
+                            location = res.referer;
+                        }, 2000);
+                    }
+                })
+            })
+            $('.btn-delete').click(function () {
+                var identifier = $(this).data('identifier');
+                confirmMsg('你确定要删除此插件?',function () {
+                    $.getJSON('{url ?p=plugin/delete&identifier='+identifier+'}',function (res) {
+                        $('#confirmMsg').modal('hide');
+                        resultMsg(res.msg,res.code);
+                        if(res.code==200){
+                            setTimeout(function () {
+                                location = res.referer;
+                            }, 2000);
+                        }
+                    })
+                });
+            })
+        })
+    </script>
+
+</div>
+<!--{template footer}-->
+</body>
+</html>

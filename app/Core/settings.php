@@ -16,8 +16,8 @@ use App\Core\Routes;
 use App\Core\Redis;
 use App\Core\Template;
 use App\Core\Upload;
+use App\Core\Output;
 use SlimCMS\Core\Cookie;
-use SlimCMS\Core\Output;
 use SlimCMS\Core\Database;
 
 return function (ContainerBuilder $containerBuilder) {
