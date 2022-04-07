@@ -51,7 +51,7 @@
                                                         <!--{elseif $f_v[datatype] == 'img'}-->
                                                         <td><a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="{echo copyImage($v[$f_v['identifier']],60,60)}" width="60" /></a></td>
                                                         <!--{elseif $f_v[identifier] == 'menu'}-->
-                                                        <td class="text-dark">{echo $v[isinstall]==1?$v[_menu]:''}</td>
+                                                        <td class="text-dark">{echo $v[isinstall]==1 && $v[available]==1?$v[_menu]:''}</td>
                                                         <!--{else}-->
                                                         <td class="text-dark">{eval $val = aval($v,'_'.$f_v['identifier']);}{echo is_array($val)?aval($v,$f_v['identifier']):aval($v,'_'.$f_v['identifier'])}$f_v[units]</td>
                                                         <!--{/if}-->
@@ -60,7 +60,7 @@
                                                         <td>
                                                             <!--{if $v[isinstall]==-1}-->
                                                             <a class="btn btn-success btn-sm btn-install" href="javascript:void(0)" data-identifier="$v[identifier]">安装</a>
-                                                            <a class="btn btn-secondary btn-sm btn-tel btn-delete" href="javascript:void(0)" data-identifier="$v[identifier]">删除</a>
+                                                            <a class="btn btn-danger btn-sm btn-tel btn-delete" href="javascript:void(0)" data-identifier="$v[identifier]">删除</a>
                                                             <!--{else}-->
                                                             <!--{if $v[available]==1}-->
                                                             <a class="btn btn-secondary btn-sm btn-switch" href="javascript:void(0)" data-open="-1" data-identifier="$v[identifier]">关闭</a>

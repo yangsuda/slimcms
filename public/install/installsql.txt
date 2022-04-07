@@ -96,21 +96,6 @@ CREATE TABLE `#@#archivedata` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='已删除文档数据表';
 
-DROP TABLE IF EXISTS `#@#fileverify`;
-CREATE TABLE `#@#fileverify` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
-  `createtime` int(11) NOT NULL DEFAULT '0',
-  `ip` varchar(20) NOT NULL DEFAULT '',
-  `filename` varchar(250) NOT NULL DEFAULT '' COMMENT '文件名称',
-  `srcverifykey` varchar(250) NOT NULL DEFAULT '' COMMENT '原始文件校验码',
-  `curverifykey` varchar(250) NOT NULL DEFAULT '' COMMENT '当前文件校验码',
-  `status` tinyint(1) NOT NULL DEFAULT '3' COMMENT '状态(1=正常,2=改动,3=新增,4=删除)',
-  PRIMARY KEY (`id`),
-  KEY `issame` (`status`),
-  KEY `filename` (`filename`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 DROP TABLE IF EXISTS `#@#forms`;
 CREATE TABLE `#@#forms` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -135,7 +120,6 @@ CREATE TABLE `#@#forms` (
 INSERT INTO `#@#forms` VALUES
 ('1', '自定义表单', 'forms', '2', '1', '2', '1569318020', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
 ('2', '自定义表单字段管理', 'forms_fields', '2', '2', '2', '1569312001', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
-('3', '文件安全校验', 'fileverify', '2', '2', '2', '1601194023', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
 ('5', '后台操作日志', 'adminlog', '2', '2', '2', '1569318020', '2', '', '1', '-1', 'fas fa-cog', '1', '',''),
 ('6', '后台权限设置', 'adminpermission', '2', '2', '2', '1574321014', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
 ('7', '已删除文档数据', 'archivedata', '2', '2', '2', '1569318020', '2', '', '-1', '0', 'fas fa-cog', '1', '',''),
@@ -281,10 +265,6 @@ INSERT INTO `#@#forms_fields` VALUES
 (null, '头像', 'headimgurl', '14', 'img', '48', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1600392883', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '用户组名称', 'groupname', '15', 'text', '50', '1', '1', '2', '1', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1573799095', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '权限设置', 'purviews', '15', 'multitext', '48', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '保存时传数组类型', '', '', '', '', '', '', '', '1573799112', '1', '', '', 'text', '0.0000', '1', '3', '1', ''),
-(null, '文件名称', 'filename', '3', 'text', '50', '1', '1', '2', '2', '1', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1601194155', '1', '', '', '', '0.0000', '2', '3', '1', ''),
-(null, '原始文件校验码', 'srcverifykey', '3', 'text', '49', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1601194456', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '当前文件校验码', 'curverifykey', '3', 'text', '48', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1601194504', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '状态', 'status', '3', 'select', '47', '1', '1', '2', '2', '1', '1', '2', '1', '1', '3', '0', '', '', '', '', 'a:4:{i:1;s:6:\"正常\";i:2;s:6:\"改动\";i:3;s:6:\"新增\";i:4;s:6:\"删除\";}', '', '', '', '1601194681', '1', '', '', 'tinyint', '1.0000', '1', '1', '1', ''),
 (null, '默认排序', 'defaultorder', '2', 'radio', '31', '1', '1', '2', '2', '2', '2', '2', '2', '1', '3', '0', '', '', '', '', 'a:3:{i:1;s:21:\"是&#040;倒序&#041;\";i:2;s:21:\"是&#040;正序&#041;\";i:3;s:3:\"否\";}', '', '', '', '1604018846', '1', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
 (null, '联动数据', 'egroup', '2', 'hidden', '46', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1607051385', '2', '', '', '', '0.0000', '1', '3', '1', '0'),
 (null, '开放前端WEB功能', 'openweb', '1', 'checkbox', '41', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', 'a:7:{i:1;s:6:\"列表\";i:2;s:6:\"展示\";i:3;s:12:\"添加修改\";i:4;s:6:\"删除\";i:5;s:6:\"导出\";i:6;s:12:\"表单结构\";i:7;s:6:\"审核\";}', '', '', '', '1608181821', '2', '', '', '', '0.0000', '1', '3', '1', '');
@@ -426,4 +406,6 @@ CREATE TABLE `#@#plugins` (
   KEY `isinstall` (`isinstall`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件表';
 
-INSERT INTO `#@#plugins` VALUES (null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', '0b405bba602162e9371b6fab71e49807');
+INSERT INTO `#@#plugins` VALUES
+(null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', '0b405bba602162e9371b6fab71e49807'),
+(null, '2', '1648188930', '', '文件安全校验', 'fileverify', '防止app、template、vender三个文件夹中文件被篡改。安装启用后点文件校验按钮初始化（默认当前文件都是正常文件），<br>所有文件会显示为新增，再点一下文件校验按钮后，所有文件将变成正常，后续如果有增删改操作，点文件校验按钮后将会显示出来', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"?p=plugin/fileverify/dataList\">文件校验</a>', 'a:2:{i:0;a:2:{s:4:\"name\";s:12:\"文件校验\";s:7:\"purview\";s:28:\"plugin/fileverify/fileVerify\";}i:1;a:2:{s:4:\"name\";s:21:\"更新文件校验KEY\";s:7:\"purview\";s:33:\"plugin/fileverify/updateVerifyKey\";}}', 'bdcee55c5cc05a47032689c93c49e8ce');
