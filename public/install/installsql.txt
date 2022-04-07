@@ -126,7 +126,6 @@ INSERT INTO `#@#forms` VALUES
 ('9', '后台登陆错误日志', 'adminloginlog', '2', '2', '2', '1574645979', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
 ('8', '插件管理', 'plugins', '2', '2', '2', '1648186951', '1', '', '1', '0', 'fa fa-fw fa-th', '1', '', ''),
 ('10', '联动菜单', 'sysenum', '2', '2', '2', '1569318020', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
-('11', '微信用户管理', 'wxusers', '2', '2', '2', '1588212542', '2', '', '-1', '0', 'fas fa-cog', '1', '',''),
 ('12', '系统设置', 'sysconfig', '2', '2', '2', '1569318020', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
 ('13', '附件管理', 'uploads', '2', '2', '2', '1569318020', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
 ('14', '管理员', 'admin', '2', '2', '2', '1569312565', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
@@ -241,9 +240,6 @@ INSERT INTO `#@#forms_fields` VALUES
 (null, '备注', 'remarks', '10', 'text', '51', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1571634701', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '别名', 'alias', '10', 'text', '52', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1571634717', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '图标', 'litpic', '10', 'img', '50', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1571634739', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, 'OPENID', 'openid', '11', 'text', '50', '1', '1', '2', '2', '1', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1588212560', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '昵称', 'nickname', '11', 'text', '49', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1588212576', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '头像', 'headimgurl', '11', 'img', '48', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1588212594', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '参数标识符', 'varname', '12', 'text', '50', '1', '1', '2', '1', '1', '2', '1', '1', '2', '', '0', '只能是字母或数字或_', '', '', '', '', '', '', 's', '1574665350', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '参数说明', 'info', '12', 'text', '49', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1574665382', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '分组', 'groupid', '12', 'select', '48', '1', '1', '2', '2', '1', '1', '2', '1', '1', '', '0', '', '', '', '', 'a:5:{i:1;s:12:\"站点设置\";i:2;s:12:\"附件设置\";i:4;s:12:\"微信支付\";i:5;s:15:\"支付宝支付\";i:6;s:12:\"水印设置\";}', '', '', '', '1574665524', '1', '', '', '', '0.0000', '1', '2', '1', ''),
@@ -372,19 +368,6 @@ CREATE TABLE `#@#uploads` (
   KEY `isfirst` (`isfirst`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='上传附件记录表';
 
-DROP TABLE IF EXISTS `#@#wxusers`;
-CREATE TABLE `#@#wxusers` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
-  `createtime` int(11) NOT NULL DEFAULT '0',
-  `ip` varchar(20) NOT NULL DEFAULT '',
-  `openid` varchar(250) NOT NULL DEFAULT '' COMMENT 'OPENID',
-  `nickname` varchar(250) NOT NULL DEFAULT '' COMMENT '昵称',
-  `headimgurl` varchar(250) NOT NULL DEFAULT '' COMMENT '头像',
-  PRIMARY KEY (`id`),
-  KEY `openid` (`openid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='微信用户名';
-
 DROP TABLE IF EXISTS `#@#plugins`;
 CREATE TABLE `#@#plugins` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -407,5 +390,5 @@ CREATE TABLE `#@#plugins` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件表';
 
 INSERT INTO `#@#plugins` VALUES
-(null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', '0b405bba602162e9371b6fab71e49807'),
+(null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', 'cd4fe623edc0dff4a8e197bb949d5964'),
 (null, '2', '1648188930', '', '文件安全校验', 'fileverify', '防止app、template、vender三个文件夹中文件被篡改。安装启用后点文件校验按钮初始化（默认当前文件都是正常文件），<br>所有文件会显示为新增，再点一下文件校验按钮后，所有文件将变成正常，后续如果有增删改操作，点文件校验按钮后将会显示出来', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"?p=plugin/fileverify/dataList\">文件校验</a>', 'a:2:{i:0;a:2:{s:4:\"name\";s:12:\"文件校验\";s:7:\"purview\";s:28:\"plugin/fileverify/fileVerify\";}i:1;a:2:{s:4:\"name\";s:21:\"更新文件校验KEY\";s:7:\"purview\";s:33:\"plugin/fileverify/updateVerifyKey\";}}', 'bdcee55c5cc05a47032689c93c49e8ce');
