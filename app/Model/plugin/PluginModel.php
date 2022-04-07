@@ -53,11 +53,11 @@ class PluginModel extends ModelAbstract
             return $res;
         }
         $configurl = CSDATA . '/plugins/' . $identifier . '/config.php';
-        $config = [];
-        if (is_file($configurl)) {
-            $config = require_once $configurl;
+        static $configs = [];
+        if (empty($configs[$identifier]) && is_file($configurl)) {
+            $configs[$identifier] = require_once $configurl;
         }
-        return self::$output->withCode(200)->withData(['config' => $config]);
+        return self::$output->withCode(200)->withData(['config' => aval($configs, $identifier, [])]);
     }
 
     /**
@@ -280,6 +280,9 @@ class PluginModel extends ModelAbstract
             if (!empty($arr['unstall'])) {
                 $arr['unstall']();
             }
+        }
+        if (is_file(CSDATA . 'plugins/' . $identifier . '/config.php')) {
+            unlink(CSDATA . 'plugins/' . $identifier . '/config.php');
         }
         return self::$output->withCode(200);
     }
