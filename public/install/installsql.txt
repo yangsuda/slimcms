@@ -426,4 +426,4 @@ CREATE TABLE `#@#plugins` (
   KEY `isinstall` (`isinstall`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件表';
 
-INSERT INTO `#@#plugins` VALUES (null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', '37e757299f343b01a48af1c89c853604');
+INSERT INTO `#@#plugins` VALUES (null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', '1dc9b8acaa14ae34c34f7d0bc2e49ec8');
