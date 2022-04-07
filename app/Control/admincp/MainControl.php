@@ -37,29 +37,6 @@ class MainControl extends AdmincpControl
     }
 
     /**
-     * 文件校验
-     * @return array
-     */
-    public function fileVerify()
-    {
-        $this->checkAllow();
-        $res = MainModel::fileVerify()->withReferer(self::url('?p=forms/dataList&fid=3'));
-        return $this->directTo($res);
-    }
-
-    /**
-     * 更新文件校验KEY
-     * @return array
-     */
-    public function updateVerifyKey()
-    {
-        $this->checkAllow();
-        $file = self::inputString('file');
-        $res = MainModel::updateVerifyKey($file)->withReferer(self::url('?p=forms/dataList&fid=3'));
-        return $this->directTo($res);
-    }
-
-    /**
      * 删除附件图片
      * @return array
      */

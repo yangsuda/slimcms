@@ -39,13 +39,28 @@
                                     <div class="form-group row">
                                         <label class="col-sm-2 col-form-label">$v[title]{echo $v[required]==1?'*':''}：</label>
                                         <div class="col-sm-10">
+                                            <!--{loop $data[data][permissions] $k2 $v2}-->
                                             <div class="row">
                                                 <div class="col-sm-12 form-inline">
-                                                    <!--{loop $data[data][permissions] $k1 $v1}-->
+                                                    <!--{loop $v2 $k1 $v1}-->
                                                     <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' id="purviews$k1" type='checkbox' class='custom-control-input' value='$v1[purview]' {if !empty($data[data][_purviews]) && in_array($v1[purview],$data[data][_purviews])} checked {/if}><label for="purviews$k1" class="custom-control-label">$v1[name]<font color='#070'>($v1[purview])</font></label></span>
                                                     <!--{/loop}-->
                                                 </div>
                                             </div>
+                                            <hr>
+                                            <!--{/loop}-->
+                                            <!--{loop $data[data][plugin] $k1 $v1}-->
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <span class="custom-control" style="padding-left:0px;">$v1[name]:</span>
+                                                </div>
+                                                <div class="col-sm-9 form-inline">
+                                                    <!--{loop $v1[permission] $k2 $v2}-->
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="plugin$k2" value='$v2[purview]' {if !empty($data[data][_purviews]) && in_array($v2[purview],$data[data][_purviews])} checked {/if}><label for="plugin$k2" class="custom-control-label">$v2[name]<font color='#070'>($v2[purview])</font></label></span>
+                                                    <!--{/loop}-->
+                                                </div>
+                                            </div>
+                                            <!--{/loop}-->
                                             <hr>
                                             <!--{loop $data[data][forms] $k1 $v1}-->
                                             <div class="row">

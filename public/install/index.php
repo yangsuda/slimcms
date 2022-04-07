@@ -172,7 +172,7 @@ EOT;
     $adminuser = input('adminuser');
     $adminpwd = input('adminpwd');
     $pwd = substr(md5($adminpwd . $settings['security']['authkey']), 5, 20);
-    $link->query("INSERT INTO `".$dbprefix."admin` VALUES (null, '1', '" . $adminuser . "', '" . $pwd . "', '0', '', '0', '', '0', '', '1', '', '');");
+    $link->query("INSERT INTO `".$dbprefix."admin` VALUES (null, '1', '" . $adminuser . "', '" . $pwd . "', '0', '', '0', '', '0', '', '1', '');");
 
     unlink('./index.php');
     unlink('./installsql.txt');

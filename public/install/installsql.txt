@@ -12,7 +12,6 @@ CREATE TABLE `#@#admin` (
   `realname` varchar(250) NOT NULL DEFAULT '' COMMENT '真实姓名',
   `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态(1=正常,2=禁用)',
   `headimgurl` varchar(250) NOT NULL DEFAULT '' COMMENT '头像',
-  `token` varchar(250) NOT NULL DEFAULT '' COMMENT 'token',
   PRIMARY KEY (`id`),
   KEY `groupid` (`groupid`),
   KEY `status` (`status`),
@@ -78,7 +77,12 @@ INSERT INTO `#@#adminpermission` VALUES
 (null, '0', '1603941564', '', '删除附件图片', 'main/delImg'),
 (null, '2', '1606901984', '', '文件校验', 'main/fileVerify'),
 (null, '2', '1606901999', '', '更新文件校验KEY', 'main/updateVerifyKey'),
-(null, '2', '1606901999', '', '超大附件上传', 'main/superFileUpload');
+(null, '2', '1606901999', '', '超大附件上传', 'main/superFileUpload'),
+(null, '2', '1648708128', '', '安装插件', 'plugin/install'),
+(null, '2', '1648708147', '', '卸载插件', 'plugin/unstall'),
+(null, '2', '1648708162', '', '插件启用开关', 'plugin/switch'),
+(null, '2', '1648708177', '', '删除插件', 'plugin/delete');
+
 
 DROP TABLE IF EXISTS `#@#archivedata`;
 CREATE TABLE `#@#archivedata` (
@@ -92,21 +96,6 @@ CREATE TABLE `#@#archivedata` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='已删除文档数据表';
 
-DROP TABLE IF EXISTS `#@#fileverify`;
-CREATE TABLE `#@#fileverify` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
-  `createtime` int(11) NOT NULL DEFAULT '0',
-  `ip` varchar(20) NOT NULL DEFAULT '',
-  `filename` varchar(250) NOT NULL DEFAULT '' COMMENT '文件名称',
-  `srcverifykey` varchar(250) NOT NULL DEFAULT '' COMMENT '原始文件校验码',
-  `curverifykey` varchar(250) NOT NULL DEFAULT '' COMMENT '当前文件校验码',
-  `status` tinyint(1) NOT NULL DEFAULT '3' COMMENT '状态(1=正常,2=改动,3=新增,4=删除)',
-  PRIMARY KEY (`id`),
-  KEY `issame` (`status`),
-  KEY `filename` (`filename`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 DROP TABLE IF EXISTS `#@#forms`;
 CREATE TABLE `#@#forms` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -118,7 +107,6 @@ CREATE TABLE `#@#forms` (
   `createtime` int(10) DEFAULT '0' COMMENT '创建时间',
   `ischeck` tinyint(1) DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
   `ip` varchar(20) DEFAULT '',
-  `openapi` varchar(50) NOT NULL DEFAULT '' COMMENT '开放前端接口(1=列表,2=展示,3=添加修改,4=删除,5=导出,6=表单结构,7=审核,8=统计)',
   `cpadd` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否允许后台添加数据(-1=不允许,1=允许)',
   `weight` int(11) NOT NULL DEFAULT '0' COMMENT '权重',
   `types` varchar(50) NOT NULL DEFAULT 'fas fa-bars' COMMENT '分类(fas fa-bars=管理,fas fa-cog=系统,fas fa-bookmark=常用,fa fa-link bigfonts=接口,fab fa-digital-ocean=其它)',
@@ -130,25 +118,19 @@ CREATE TABLE `#@#forms` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='自定义表单';
 
 INSERT INTO `#@#forms` VALUES
-('1', '自定义表单', 'forms', '2', '1', '2', '1569318020', '1', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('2', '自定义表单字段管理', 'forms_fields', '2', '2', '2', '1569312001', '2', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('3', '文件安全校验', 'fileverify', '2', '2', '2', '1601194023', '2', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('5', '后台操作日志', 'adminlog', '2', '2', '2', '1569318020', '2', '', '', '1', '-1', 'fas fa-cog', '1', '',''),
-('6', '后台权限设置', 'adminpermission', '2', '2', '2', '1574321014', '2', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('7', '已删除文档数据', 'archivedata', '2', '2', '2', '1569318020', '2', '', '', '-1', '0', 'fas fa-cog', '1', '',''),
-('9', '后台登陆错误日志', 'adminloginlog', '2', '2', '2', '1574645979', '2', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('10', '联动菜单', 'sysenum', '2', '2', '2', '1569318020', '1', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('11', '微信用户管理', 'wxusers', '2', '2', '2', '1588212542', '2', '', '', '-1', '0', 'fas fa-cog', '1', '',''),
-('12', '系统设置', 'sysconfig', '2', '2', '2', '1569318020', '1', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('13', '附件管理', 'uploads', '2', '2', '2', '1569318020', '2', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('14', '管理员', 'admin', '2', '2', '2', '1569312565', '1', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('15', '管理组', 'admingroup', '2', '2', '2', '1569318009', '1', '', '', '1', '0', 'fas fa-cog', '1', '',''),
-('16', '接口管理', 'apilist', '2', '1', '2', '1631928913', '1', '', '', '1', '0', 'fa fa-link bigfonts', '1', '',''),
-('17', '接口分组', 'apigroup', '2', '2', '2', '1631945559', '1', '', '', '1', '0', 'fa fa-link bigfonts', '1', '',''),
-('18', '接口请求参数', 'apirequest', '2', '2', '2', '1632274311', '2', '', '', '1', '0', 'fa fa-link bigfonts', '1', '',''),
-('19', '接口返回参数', 'apiresponse', '2', '2', '2', '1632274349', '2', '', '', '1', '0', 'fa fa-link bigfonts', '1', '',''),
-('20', '应用管理', 'apps', '2', '1', '2', '1634273000', '1', '', '', '1', '0', 'fa fa-link bigfonts', '1', '',''),
-('21', '应用调用日志', 'applog', '2', '2', '2', '1634287288', '1', '', '', '1', '0', 'fa fa-link bigfonts', '1', '','');
+('1', '自定义表单', 'forms', '2', '1', '2', '1569318020', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
+('2', '自定义表单字段管理', 'forms_fields', '2', '2', '2', '1569312001', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
+('5', '后台操作日志', 'adminlog', '2', '2', '2', '1569318020', '2', '', '1', '-1', 'fas fa-cog', '1', '',''),
+('6', '后台权限设置', 'adminpermission', '2', '2', '2', '1574321014', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
+('7', '已删除文档数据', 'archivedata', '2', '2', '2', '1569318020', '2', '', '-1', '0', 'fas fa-cog', '1', '',''),
+('9', '后台登陆错误日志', 'adminloginlog', '2', '2', '2', '1574645979', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
+('8', '插件管理', 'plugins', '2', '2', '2', '1648186951', '1', '', '1', '0', 'fa fa-fw fa-th', '1', '', ''),
+('10', '联动菜单', 'sysenum', '2', '2', '2', '1569318020', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
+('11', '微信用户管理', 'wxusers', '2', '2', '2', '1588212542', '2', '', '-1', '0', 'fas fa-cog', '1', '',''),
+('12', '系统设置', 'sysconfig', '2', '2', '2', '1569318020', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
+('13', '附件管理', 'uploads', '2', '2', '2', '1569318020', '2', '', '1', '0', 'fas fa-cog', '1', '',''),
+('14', '管理员', 'admin', '2', '2', '2', '1569312565', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
+('15', '管理组', 'admingroup', '2', '2', '2', '1569318009', '1', '', '1', '0', 'fas fa-cog', '1', '','');
 
 DROP TABLE IF EXISTS `#@#forms_fields`;
 CREATE TABLE `#@#forms_fields` (
@@ -193,10 +175,9 @@ CREATE TABLE `#@#forms_fields` (
 
 INSERT INTO `#@#forms_fields` VALUES
 (null, '权重', 'weight', '1', 'int', '40', '1', '1', '2', '2', '2', '1', '1', '1', '1', '', '0', '数值越大越靠前', '', '', '', '', '', '', '', '1588224083', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '分类', 'types', '1', 'select', '51', '1', '1', '2', '2', '2', '2', '1', '1', '1', 'fas fa-bars', '0', '', '', '', '', 'a:5:{s:11:\"fas fa-bars\";s:6:\"管理\";s:10:\"fas fa-cog\";s:6:\"系统\";s:15:\"fas fa-bookmark\";s:6:\"常用\";s:19:\"fa fa-link bigfonts\";s:6:\"接口\";s:20:\"fab fa-digital-ocean\";s:6:\"其它\";}', '', '', '', '1588224131', '1', '', '', 'varchar', '50.0000', '1', '3', '1', ''),
+(null, '分类', 'types', '1', 'select', '51', '1', '1', '2', '2', '2', '2', '1', '1', '1', 'fas fa-bars', '0', '', '', '', '', 'a:4:{s:11:\"fas fa-bars\";s:6:\"管理\";s:10:\"fas fa-cog\";s:6:\"系统\";s:15:\"fas fa-bookmark\";s:6:\"常用\";s:20:\"fab fa-digital-ocean\";s:6:\"其它\";}', '', '', '', '1588224131', '1', '', '', 'varchar', '50.0000', '1', '3', '1', ''),
 (null, '是否允许后台删除数据', 'cpdel', '1', 'radio', '44', '1', '1', '2', '2', '2', '2', '2', '1', '1', '1', '0', '', '', '', '', 'a:2:{i:-1;s:9:\"不允许\";i:1;s:6:\"允许\";}', '', '', '', '1600335752', '1', '222.92.73.130', '', 'tinyint', '1.0000', '1', '3', '1', ''),
 (null, '是否允许后台添加数据', 'cpadd', '1', 'radio', '43', '1', '1', '2', '2', '2', '2', '1', '1', '1', '1', '0', '', '', '', '', 'a:2:{i:-1;s:9:\"不允许\";i:1;s:6:\"允许\";}', '', '', '', '1584319399', '1', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
-(null, '开放前端接口', 'openapi', '1', 'checkbox', '42', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', 'a:8:{i:1;s:6:\"列表\";i:2;s:6:\"展示\";i:3;s:12:\"添加修改\";i:4;s:6:\"删除\";i:5;s:6:\"导出\";i:6;s:12:\"表单结构\";i:7;s:6:\"审核\";i:8;s:6:\"统计\";}', '', '', '', '1583886124', '1', '', '', 'varchar', '50.0000', '1', '3', '1', ''),
 (null, '自定义表单名称', 'name', '1', 'text', '50', '1', '1', '1', '2', '2', '2', '1', '1', '1', '', '0', '如果为联动数据类型，名称格式“名称|字段名称，如：地区|area”', '', '', '', '', '', '', '', '1569318020', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '数据表名', 'table', '1', 'text', '49', '1', '1', '1', '1', '1', '2', '1', '1', '2', '', '0', '前缀不需要填写', '', '', '', '', '', '', '', '1569318020', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '是否导出', 'export', '1', 'radio', '47', '1', '1', '2', '2', '2', '2', '1', '1', '1', '2', '0', '', '', '', '', 'a:2:{i:1;s:3:\"是\";i:2;s:3:\"否\";}', '', '', '', '1569318020', '1', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
@@ -241,6 +222,16 @@ INSERT INTO `#@#forms_fields` VALUES
 (null, '表单ID', 'formid', '7', 'int', '50', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1573543950', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '信息ID', 'aid', '7', 'int', '50', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1573543969', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '内容', 'content', '7', 'multitext', '50', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1573543982', '1', '', '', '', '0.0000', '1', '3', '1', ''),
+(null, '签名', 'signature', '8', 'text', '41', '1', '1', '2', '2', '2', '2', '2', '2', '2', '', '0', '', '', '', '', '', '', '', '', '1648633531', '2', '', '', '', '0.0000', '1', '3', '1', ''),
+(null, '权限', 'permission', '8', 'serialize', '42', '1', '1', '2', '2', '2', '2', '2', '2', '2', '', '0', '', '', '', '', '', '', '', '', '1648456106', '2', '', '', '', '0.0000', '1', '3', '1', ''),
+(null, '管理', 'menu', '8', 'htmltext', '43', '1', '1', '2', '2', '2', '2', '2', '1', '2', '', '0', '', '', '', '', '', '', '', '', '1648453291', '2', '', '', '', '0.0000', '1', '3', '1', ''),
+(null, '插件名称', 'name', '8', 'text', '50', '1', '1', '2', '2', '2', '2', '2', '1', '2', '', '0', '', '', '', '', '', '', '', '', '1648187253', '2', '', '', '', '0.0000', '1', '3', '1', ''),
+(null, '标识符', 'identifier', '8', 'text', '49', '1', '1', '2', '2', '2', '2', '2', '1', '2', '', '0', '', '', '', '', '', '', '', '', '1648187397', '2', '', '', '', '0.0000', '1', '3', '1', ''),
+(null, '描述', 'description', '8', 'multitext', '48', '1', '1', '2', '2', '2', '2', '2', '1', '2', '', '0', '', '', '', '', '', '', '', '', '1648187435', '2', '', '', '', '0.0000', '1', '3', '1', ''),
+(null, '版本号', 'version', '8', 'text', '47', '1', '1', '2', '2', '2', '2', '2', '1', '2', '', '0', '', '', '', '', '', '', '', '', '1648187555', '2', '', '', '', '0.0000', '1', '3', '1', ''),
+(null, '是否可用', 'available', '8', 'radio', '46', '1', '1', '2', '2', '1', '2', '2', '1', '2', '-1', '0', '', '', '', '', 'a:2:{i:-1;s:3:\"否\";i:1;s:3:\"是\";}', '', '', '', '1648187620', '2', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
+(null, '是否安装', 'isinstall', '8', 'radio', '45', '1', '1', '2', '2', '1', '2', '2', '1', '2', '-1', '0', '', '', '', '', 'a:2:{i:-1;s:3:\"否\";i:1;s:3:\"是\";}', '', '', '', '1648188092', '2', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
+(null, '作者', 'author', '8', 'text', '44', '1', '1', '2', '2', '2', '2', '2', '1', '2', '', '0', '', '', '', '', '', '', '', '', '1648188555', '2', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '用户名', 'userid', '9', 'text', '50', '1', '1', '2', '2', '1', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1574646056', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '登陆密码', 'pwd', '9', 'text', '49', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1574646075', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '名称', 'ename', '10', 'text', '57', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1571628359', '1', '', '', '', '0.0000', '1', '3', '1', ''),
@@ -255,7 +246,7 @@ INSERT INTO `#@#forms_fields` VALUES
 (null, '头像', 'headimgurl', '11', 'img', '48', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1588212594', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '参数标识符', 'varname', '12', 'text', '50', '1', '1', '2', '1', '1', '2', '1', '1', '2', '', '0', '只能是字母或数字或_', '', '', '', '', '', '', 's', '1574665350', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '参数说明', 'info', '12', 'text', '49', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1574665382', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '分组', 'groupid', '12', 'select', '48', '1', '1', '2', '2', '1', '1', '2', '1', '1', '', '0', '', '', '', '', 'a:6:{i:1;s:12:\"站点设置\";i:2;s:12:\"附件设置\";i:3;s:12:\"接口设置\";i:4;s:12:\"微信支付\";i:5;s:15:\"支付宝支付\";i:6;s:12:\"水印设置\";}', '', '', '', '1574665524', '1', '', '', '', '0.0000', '1', '2', '1', ''),
+(null, '分组', 'groupid', '12', 'select', '48', '1', '1', '2', '2', '1', '1', '2', '1', '1', '', '0', '', '', '', '', 'a:5:{i:1;s:12:\"站点设置\";i:2;s:12:\"附件设置\";i:4;s:12:\"微信支付\";i:5;s:15:\"支付宝支付\";i:6;s:12:\"水印设置\";}', '', '', '', '1574665524', '1', '', '', '', '0.0000', '1', '2', '1', ''),
 (null, '类型', 'type', '12', 'select', '47', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', 'a:5:{i:1;s:6:\"文本\";i:2;s:12:\"多行文本\";i:5;s:9:\"富文本\";i:3;s:6:\"判断\";i:4;s:6:\"附件\";}', '', '', '', '1574665628', '1', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
 (null, '值', 'value', '12', 'multitext', '46', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1574665655', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '附件地址', 'url', '13', 'img', '55', '1', '1', '2', '2', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1569560539', '1', '', '', 'varchar', '100.0000', '1', '3', '1', ''),
@@ -274,57 +265,16 @@ INSERT INTO `#@#forms_fields` VALUES
 (null, '头像', 'headimgurl', '14', 'img', '48', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1600392883', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '用户组名称', 'groupname', '15', 'text', '50', '1', '1', '2', '1', '2', '2', '1', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1573799095', '1', '', '', '', '0.0000', '1', '3', '1', ''),
 (null, '权限设置', 'purviews', '15', 'multitext', '48', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '保存时传数组类型', '', '', '', '', '', '', '', '1573799112', '1', '', '', 'text', '0.0000', '1', '3', '1', ''),
-(null, '文件名称', 'filename', '3', 'text', '50', '1', '1', '2', '2', '1', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1601194155', '1', '', '', '', '0.0000', '2', '3', '1', ''),
-(null, '原始文件校验码', 'srcverifykey', '3', 'text', '49', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1601194456', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '当前文件校验码', 'curverifykey', '3', 'text', '48', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1601194504', '1', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '状态', 'status', '3', 'select', '47', '1', '1', '2', '2', '1', '1', '2', '1', '1', '3', '0', '', '', '', '', 'a:4:{i:1;s:6:\"正常\";i:2;s:6:\"改动\";i:3;s:6:\"新增\";i:4;s:6:\"删除\";}', '', '', '', '1601194681', '1', '', '', 'tinyint', '1.0000', '1', '1', '1', ''),
 (null, '默认排序', 'defaultorder', '2', 'radio', '31', '1', '1', '2', '2', '2', '2', '2', '2', '1', '3', '0', '', '', '', '', 'a:3:{i:1;s:21:\"是&#040;倒序&#041;\";i:2;s:21:\"是&#040;正序&#041;\";i:3;s:3:\"否\";}', '', '', '', '1604018846', '1', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
 (null, '联动数据', 'egroup', '2', 'hidden', '46', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1607051385', '2', '', '', '', '0.0000', '1', '3', '1', '0'),
-(null, 'token', 'token', '14', 'text', '47', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '开启token校验时接口调用使用', '', '', '', '', '', '', '', '1608109823', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '开放前端WEB功能', 'openweb', '1', 'checkbox', '41', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', 'a:7:{i:1;s:6:\"列表\";i:2;s:6:\"展示\";i:3;s:12:\"添加修改\";i:4;s:6:\"删除\";i:5;s:6:\"导出\";i:6;s:12:\"表单结构\";i:7;s:6:\"审核\";}', '', '', '', '1608181821', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '接口名称', 'apiname', '16', 'text', '50', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1631934423', '2', '', '', 'varchar', '50.0000', '1', '3', '1', ''),
-(null, '接口路由地址', 'path', '16', 'text', '49', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '如：“XXX?p=api/test”，接口路由地址为p参数值', '', '', '如:api/test', '', '', '', '', '1631934932', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '接口分组', 'groupid', '16', 'select', '48', '1', '1', '2', '2', '1', '2', '2', '1', '1', '1', '0', '', '', '', '', 'a:1:{s:8:\"apigroup\";s:73:\"{&quot;name&quot;:&quot;groupname&quot;,&quot;value&quot;:&quot;id&quot;}\";}', '', '', '', '1631935428', '2', '', '', 'tinyint', '2.0000', '1', '3', '1', ''),
-(null, '请求方式', 'method', '16', 'select', '47', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', 'a:2:{i:1;s:4:\"POST\";i:2;s:3:\"GET\";}', '', '', '', '1631946362', '2', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
-(null, '所属表单', 'formid', '16', 'select', '44', '1', '1', '2', '2', '1', '2', '2', '2', '1', '', '0', '', '', '', '', 'a:1:{s:5:\"forms\";s:130:\"{&quot;condition&quot;:&quot;openapi&lt;&gt;&#039;&#039;&quot;,&quot;name&quot;:&quot;name&quot;,&quot;value&quot;:&quot;id&quot;}\";}', '', '', '', '1632272296', '2', '', '', 'int', '10.0000', '1', '3', '1', ''),
-(null, '开放前端接口ID', 'openapiid', '16', 'select', '43', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', 'a:8:{i:1;s:6:\"列表\";i:2;s:6:\"展示\";i:3;s:12:\"添加修改\";i:4;s:6:\"删除\";i:5;s:6:\"导出\";i:6;s:12:\"表单结构\";i:7;s:6:\"审核\";i:8;s:6:\"统计\";}', '', '', '', '1632272507', '2', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
-(null, '返回结果', 'result', '16', 'multitext', '42', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1632820860', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '接口说明', 'intro', '16', 'multitext', '41', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1634023987', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '接口唯一标识符', 'identifier', '16', 'hidden', '40', '1', '1', '2', '1', '1', '2', '2', '2', '2', '', '0', '', '', '', '', '', '', '', '', '1634290209', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '开启AccessToken验证', 'tokencheck', '16', 'radio', '39', '1', '1', '2', '2', '2', '2', '2', '2', '1', '1', '0', '', '', '', '', 'a:2:{i:1;s:3:\"是\";i:-1;s:3:\"否\";}', '', '', '', '1634533907', '2', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
-(null, '组名', 'groupname', '17', 'text', '50', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1631945783', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '所属表单ID', 'formid', '17', 'int', '49', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '用于同步表单开放前端接口', '', '', '', '', '', '', '', '1631945887', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '字段名称', 'name', '18', 'text', '50', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1632293307', '2', '', '', 'varchar', '50.0000', '1', '3', '1', ''),
-(null, '类型', 'types', '18', 'select', '49', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', 'a:8:{i:1;s:6:\"string\";i:2;s:3:\"int\";i:3;s:5:\"array\";i:4;s:5:\"float\";i:5;s:4:\"date\";i:6;s:3:\"URL\";i:7;s:3:\"tel\";i:8;s:5:\"price\";}', '', '', '', '1632294023', '2', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
-(null, '是否必填', 'ismust', '18', 'radio', '48', '1', '1', '2', '2', '2', '2', '2', '1', '1', '-1', '0', '', '', '', '', 'a:2:{i:-1;s:9:\"不必填\";i:1;s:6:\"必填\";}', '', '', '', '1632294113', '2', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
-(null, '说明', 'intro', '18', 'text', '47', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1632294151', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '所属接口', 'apiid', '18', 'select', '46', '1', '1', '2', '2', '1', '2', '2', '1', '1', '', '0', '', '', '', '', 'a:1:{s:7:\"apilist\";s:71:\"{&quot;name&quot;:&quot;apiname&quot;,&quot;value&quot;:&quot;id&quot;}\";}', '', '', '', '1632295178', '2', '', '', 'int', '10.0000', '1', '3', '1', ''),
-(null, '字段ID', 'fieldid', '18', 'hidden', '46', '1', '1', '2', '2', '1', '2', '2', '2', '2', '', '0', '表单生成接口对应的字段ID，自定义接口忽略此参数', '', '', '', '', '', '', '', '1632731474', '2', '', '', 'int', '10.0000', '1', '3', '1', ''),
-(null, '默认值', 'default', '18', 'text', '47', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1632296051', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '类型', 'types', '19', 'select', '49', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', 'a:8:{i:1;s:6:\"string\";i:2;s:3:\"int\";i:3;s:5:\"array\";i:4;s:5:\"float\";i:5;s:4:\"date\";i:6;s:3:\"URL\";i:7;s:3:\"tel\";i:8;s:5:\"price\";}', '', '', '', '1632296550', '2', '', '', 'tinyint', '1.0000', '1', '3', '1', ''),
-(null, '字段名称', 'name', '19', 'text', '50', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1632296381', '2', '', '', 'varchar', '50.0000', '1', '3', '1', ''),
-(null, '说明', 'intro', '19', 'text', '48', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1632296651', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '所属接口', 'apiid', '19', 'select', '47', '1', '1', '2', '2', '1', '2', '2', '1', '1', '', '0', '', '', '', '', 'a:1:{s:7:\"apilist\";s:71:\"{&quot;name&quot;:&quot;apiname&quot;,&quot;value&quot;:&quot;id&quot;}\";}', '', '', '', '1632296703', '2', '', '', 'int', '10.0000', '1', '3', '1', ''),
-(null, '字段ID', 'fieldid', '19', 'hidden', '46', '1', '1', '2', '2', '1', '2', '2', '2', '1', '', '0', '表单生成接口对应的字段ID，自定义接口忽略此参数', '', '', '', '', '', '', '', '1632821467', '2', '', '', 'int', '10.0000', '1', '3', '1', ''),
-(null, 'accessToken', 'accesstoken', '20', 'text', '44', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1634288716', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '应用id', 'appid', '20', 'readonly', '50', '1', '1', '2', '2', '1', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634273109', '2', '', '', 'varchar', '50.0000', '1', '3', '1', ''),
-(null, '应用密码', 'appsecret', '20', 'readonly', '49', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634273150', '2', '', '', 'varchar', '50.0000', '1', '3', '1', ''),
-(null, '允许请求的API接口', 'appapi', '20', 'checkbox', '47', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', 'a:1:{s:7:\"apilist\";s:71:\"{&quot;name&quot;:&quot;apiname&quot;,&quot;value&quot;:&quot;id&quot;}\";}', '', '', '', '1634273314', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '应用名称', 'appname', '20', 'text', '48', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634273178', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '上次调用时间', 'lasttime', '20', 'datetime', '46', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634285675', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '上次调用IP', 'lastip', '20', 'text', '45', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634285706', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '应用ID', 'appid', '21', 'text', '50', '1', '1', '2', '2', '1', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634287354', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '调用方式', 'method', '21', 'text', '49', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634287409', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '请求地址', 'query', '21', 'text', '48', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634287496', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, '路由地址', 'route', '21', 'text', '47', '1', '1', '2', '2', '2', '2', '2', '1', '1', '', '0', '', '', '', '', '', '', '', '', '1634287519', '2', '', '', '', '0.0000', '1', '3', '1', ''),
-(null, 'POST信息', 'postinfo', '21', 'multitext', '46', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', '', '', '', '', '1634287535', '2', '', '', '', '0.0000', '1', '3', '1', '');
+(null, '开放前端WEB功能', 'openweb', '1', 'checkbox', '41', '1', '1', '2', '2', '2', '2', '2', '2', '1', '', '0', '', '', '', '', 'a:7:{i:1;s:6:\"列表\";i:2;s:6:\"展示\";i:3;s:12:\"添加修改\";i:4;s:6:\"删除\";i:5;s:6:\"导出\";i:6;s:12:\"表单结构\";i:7;s:6:\"审核\";}', '', '', '', '1608181821', '2', '', '', '', '0.0000', '1', '3', '1', '');
 
 DROP TABLE IF EXISTS `#@#sysconfig`;
 CREATE TABLE `#@#sysconfig` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `varname` varchar(250) NOT NULL DEFAULT '' COMMENT '参数标识符',
   `info` varchar(250) NOT NULL DEFAULT '' COMMENT '参数说明',
-  `groupid` varchar(250) NOT NULL DEFAULT '' COMMENT '分组(1=站点设置,2=附件设置,3=接口设置,4=微信支付,5=支付宝支付,6=水印设置)',
+  `groupid` varchar(250) NOT NULL DEFAULT '' COMMENT '分组(1=站点设置,2=附件设置,4=微信支付,5=支付宝支付,6=水印设置)',
   `type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '类型(1=文本,2=多行文本,5=富文本,3=判断,4=附件)',
   `value` text NOT NULL COMMENT '值',
   `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
@@ -359,17 +309,12 @@ INSERT INTO `#@#sysconfig` VALUES
 (null, 'urlEncrypt', 'URL加密&#040;关闭伪静态时生效&#041;', '1', '3', '0', '2', '1574668593', ''),
 (null, 'rewriteUrl', '是否开启伪静态', '1', '3', '0', '2', '1574668623', ''),
 (null, 'waterMark', '是否开启水印', '6', '3', '0', '2', '1574668623', ''),
-(null, 'tokenTTL', 'TOKEN有效时长', '3', '1', '86400', '2', '1574668623', ''),
 (null, 'whitePicUrl', '允许保存远程图片URL白名单', '2', '2', '/uploads/\r\nhttp://wx.qlogo.cn\r\nhttps://wx.qlogo.cn\r\nhttp://thirdwx.qlogo.cn\r\nhttps://thirdwx.qlogo.cn\r\nhttp://q.qlogo.cn\r\nhttps://q.qlogo.cn\r\nhttp://thirdqq.qlogo.cn\r\nhttps://thirdqq.qlogo.cn', '2', '1586847400', ''),
 (null, 'picWidth', '显示图片默认宽度', '2', '1', '800', '2', '1574668500', ''),
 (null, 'picHeight', '显示图片默认高度', '2', '1', '800', '2', '1574668500', ''),
 (null, 'jpgQuality', 'jpg图片画质', '2', '1', '95', '2', '1574668500', ''),
 (null, 'entryFileName', '入口文件名称', '1', '1', 'index.php', '2', '1574665793', ''),
 (null, 'attachmentHost', '附件域名', '2', '1', '', '2', '1574665793', ''),
-(null, 'appid', '微信APPID', '3', '1', '', '2', '1607323849', ''),
-(null, 'appsecret', '微信APPSECRET', '3', '1', '', '2', '1607323886', ''),
-(null, 'refererWhite', '来路白名单', '3', '2', '', '2', '1607327378', ''),
-(null, 'tokenCheck', '是否开启token校验', '3', '3', '0', '2', '1607327445', ''),
 (null, 'mchid', '商户号', '4', '1', '', '2', '1607937944', ''),
 (null, 'wxkey', '商户支付密钥', '4', '1', '', '2', '1607937966', ''),
 (null, 'sslcert_path', '商户证书&#040;cert&#041;', '4', '4', '', '2', '1607938055', ''),
@@ -438,160 +383,29 @@ CREATE TABLE `#@#wxusers` (
   `headimgurl` varchar(250) NOT NULL DEFAULT '' COMMENT '头像',
   PRIMARY KEY (`id`),
   KEY `openid` (`openid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='微信用户名';
 
-DROP TABLE IF EXISTS `#@#apigroup`;
-CREATE TABLE `#@#apigroup` (
+DROP TABLE IF EXISTS `#@#plugins`;
+CREATE TABLE `#@#plugins` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
   `createtime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `ip` varchar(20) NOT NULL DEFAULT '' COMMENT '创建IP',
-  `groupname` varchar(250) NOT NULL DEFAULT '' COMMENT '组名',
-  `formid` int(11) NOT NULL DEFAULT '0' COMMENT '所属表单ID',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
-INSERT INTO `#@#apigroup` VALUES ('1', '2', '1631945920', '', '默认分组', '0');
-
-DROP TABLE IF EXISTS `#@#apilist`;
-CREATE TABLE `#@#apilist` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
-  `createtime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `ip` varchar(20) NOT NULL DEFAULT '' COMMENT '创建IP',
-  `apiname` varchar(50) NOT NULL DEFAULT '' COMMENT '接口名称',
-  `path` varchar(250) NOT NULL DEFAULT '' COMMENT '接口路由地址',
-  `groupid` tinyint(2) NOT NULL DEFAULT '1' COMMENT '接口分组(apigroup={&quot;name&quot;:&quot;groupname&quot;,&quot;value&quot;:&quot;id&quot;})',
-  `method` tinyint(1) NOT NULL DEFAULT '0' COMMENT '请求方式(1=POST,2=GET)',
-  `formid` int(10) NOT NULL DEFAULT '0' COMMENT '所属表单(forms={&quot;condition&quot;:&quot;openapi&lt;&gt;&#039;&#039;&quot;,&quot;name&quot;:&quot;name&quot;,&quot;value&quot;:&quot;id&quot;})',
-  `openapiid` tinyint(1) NOT NULL DEFAULT '0' COMMENT '开放前端接口ID(1=列表,2=展示,3=添加修改,4=删除,5=导出,6=表单结构,7=审核,8=统计)',
-  `result` text NOT NULL COMMENT '返回结果',
-  `intro` text NOT NULL COMMENT '接口说明',
-  `identifier` varchar(250) NOT NULL COMMENT '接口唯一标识符',
-  `tokencheck` tinyint(1) NOT NULL DEFAULT '1' COMMENT '开启AccessToken验证(1=是,-1=否)',
+  `name` varchar(250) NOT NULL DEFAULT '' COMMENT '插件名称',
+  `identifier` varchar(250) NOT NULL DEFAULT '' COMMENT '标识符',
+  `description` text NOT NULL COMMENT '描述',
+  `version` varchar(250) NOT NULL DEFAULT '' COMMENT '版本号',
+  `available` tinyint(1) NOT NULL DEFAULT '-1' COMMENT '是否可用(-1=否,1=是)',
+  `isinstall` tinyint(1) NOT NULL DEFAULT '-1' COMMENT '是否安装(-1=否,1=是)',
+  `author` varchar(250) NOT NULL DEFAULT '' COMMENT '作者',
+  `menu` text NOT NULL COMMENT '管理',
+  `permission` text NOT NULL COMMENT '权限',
+  `signature` varchar(250) NOT NULL DEFAULT '' COMMENT '签名',
   PRIMARY KEY (`id`),
-  KEY `groupid` (`groupid`),
-  KEY `formid` (`formid`),
-  KEY `identifier` (`identifier`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  KEY `available` (`available`),
+  KEY `isinstall` (`isinstall`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件表';
 
-INSERT INTO `#@#apilist` VALUES
-('77', '1', '1634527066', '', '获取accessToken', 'api/getAccessToken', '1', '2', '0', '0', '{\r\n    \"code\": 200,\r\n    \"msg\": \"操作成功\",\r\n    \"data\": {\r\n        \"accessToken\": \"abiLJ0CuB3Nn8v6PqZwitWsLrzr1emBiX14WtN3jMMJgXhVwzYUGJBatXsuS17kG2Z3TsYnc2V2djvTPDC3V4A==\"\r\n    }\r\n}', '如果后台开启了accessToken校验，获取accessToken是调用API接口的第一步，相当于创建了一个登录凭证，其它的业务API接口，都需要依赖于accessToken来鉴权调用者身份。\r\naccessToken的有效期后台系统设置里设置，默认7200秒（2小时），过期后，开发者应实现accessToken失效时重新获取的逻辑。', 'c4466b3f51715045899b0b8bd142b23c', '-1'),
-('78', '1', '1634534347', '', '获取OPENID', 'api/getOpenid', '1', '2', '0', '0', '{\r\n    \"code\": 200,\r\n    \"msg\": \"操作成功\",\r\n    \"data\": {\r\n         \"openid\":\"oGkXvstoDtZiRmHtOtzG7ek6ywzg\",\r\n         \"session_key\":\"kJtdi6RF+Dv67QkbLlPGjw==\",\r\n      },\r\n}', '调用此接口前，请先确保在系统设置中配置了appid和appsecret，否则会报21003', 'fc44afeb5b1da70839bf9dc50714b238', '1'),
-('79', '1', '1634534913', '', '解密用户信息', 'api/decryptData', '1', '2', '0', '0', '{\r\n    \"code\": 200,\r\n    \"msg\": \"操作成功\",\r\n    \"data\": {\r\n         \"openid\":\"oGkXvstoDtZiRmHtOtzG7ek6ywzg\",\r\n         \"nickname\":\"slimCMS\",\r\n         \"headimgurl\":\"https://wx.qlogo.cn/mmopen/vi_32/IPe7xc4hO8nIIW54z75QEpKD3Tcu9HCKfiaU4N8ERicOuicIJHt0iaqfUpmPt3lxdaW1Kg85KibRVbUpoxpH3wXa0y1/132\",\r\n    }\r\n}', '调用此接口前，请先确保在系统设置中配置了appid和appsecret，否则会报21003', '75ecf10b5d8b9ceb46f8ca4e2da9970e', '1'),
-('80', '1', '1634535704', '', '上传图片', 'api/uploadFile', '1', '1', '0', '0', '{\r\n    \"code\": 200,\r\n    \"msg\": \"操作成功\",\r\n      \"data\": {\r\n         \"pic\":\"/uploads/2021/09/497b3f3fd9ba6155103520cde098849138.jpg\"\r\n    }\r\n}', '', '80b9e70f10d1ae8ec0c71c482aeba580', '1'),
-('81', '1', '1634536149', '', '生成小程序二维码', 'api/qrcode', '1', '2', '0', '0', '', '返回二维码图片URL', '6eceb3861de35ad3b3569844ca666e0b', '1'),
-('82', '1', '1634630585', '', '发送小程序订阅消息', 'api/sendTemplateMessage', '1', '2', '0', '0', '{\r\n    \"code\": 200,\r\n    \"msg\": \"操作成功\",\r\n    \"data\": {},\r\n}', '', 'c882101d02f0f3446378ab092d1f6d5b', '1'),
-('83', '1', '1634631045', '', '获取公众号CODE', 'api/getCode', '1', '2', '0', '0', '', '跳转到回调地址&#040;redirect传的URL&#041;并带上code值', 'c54f50cae210d9f318e0136ad92e8f32', '1'),
-('84', '1', '1634631554', '', '获取微信用户信息', 'api/getUserInfo', '1', '2', '0', '0', '{\r\n    \"code\": 200,\r\n    \"msg\": \"操作成功\",\r\n    \"data\": {\r\n        \"wxuser\":{\r\n          \"openid\":\"oGkXvstoDtZiRmHtOtzG7ek6ywzg\",\r\n          \"nickname\":\"test\",\r\n          \"sex\": 1,\r\n          \"province\":\"jiangsu\",\r\n          \"city\":\"suzhou\",\r\n          \"country\":\"CN\",\r\n          \"headimgurl\":\"https://thirdwx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx6iaFqAc56vxLSUfpb6n5WKSYVY0ChQKkiaJSgQ1dZuTOgvLLrhJbERQQ4eMsv84eavHiaiceqxibJxCfHe/46\",\r\n          \"privilege\":[\"PRIVILEGE1\",\"PRIVILEGE2\"],\r\n          \"unionid\":\"o6_bmasdasdsad6_2sgVt7hMZOPfL\"\r\n        }\r\n    }\r\n}', '获取公众号CODE时如果传的是base，获取的是基本信息，只有openid等参数，如果是userinfo，获取的是用户微信昵称、头像等更多信息', 'd4c4a837a3889d11480a776b09699ca5', '1'),
-('85', '1', '1634632504', '', '生成微信分享签名', 'api/wxJsapiConfig', '1', '2', '0', '0', '{\r\n    \"code\": 200,\r\n    \"msg\": \"操作成功\",\r\n    \"data\": {},\r\n}', '', '77bed2b2ded0093491b445dfa88c96f7', '1');
-
-DROP TABLE IF EXISTS `#@#apirequest`;
-CREATE TABLE `#@#apirequest` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
-  `createtime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `ip` varchar(20) NOT NULL DEFAULT '' COMMENT '创建IP',
-  `name` varchar(50) NOT NULL DEFAULT '' COMMENT '字段名称',
-  `types` tinyint(1) NOT NULL DEFAULT '0' COMMENT '类型(1=string,2=int,3=array,4=float,5=date,6=URL,7=tel,8=price)',
-  `ismust` tinyint(1) NOT NULL DEFAULT '-1' COMMENT '是否必填(-1=不必填,1=必填)',
-  `intro` varchar(250) NOT NULL DEFAULT '' COMMENT '说明',
-  `apiid` int(10) NOT NULL DEFAULT '0' COMMENT '所属接口(apilist={&quot;name&quot;:&quot;apiname&quot;,&quot;value&quot;:&quot;id&quot;})',
-  `default` varchar(250) NOT NULL DEFAULT '' COMMENT '默认值',
-  `fieldid` int(10) NOT NULL COMMENT '字段ID',
-  PRIMARY KEY (`id`),
-  KEY `fieldid` (`fieldid`),
-  KEY `apiid` (`apiid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
-INSERT INTO `#@#apirequest` VALUES
-(null, '2', '1634532964', '', 'appsecret', '1', '1', '应用secret', '77', '', '0'),
-(null, '2', '1634534706', '', 'code', '1', '1', '微信返回的CODE', '78', '', '0'),
-(null, '2', '1634535258', '', 'sessionkey', '1', '1', 'sessionkey值', '79', '', '0'),
-(null, '2', '1634535279', '', 'encrypteddata', '1', '1', 'encrypteddata值', '79', '', '0'),
-(null, '2', '1634535293', '', 'iv', '1', '1', 'iv值', '79', '', '0'),
-(null, '2', '1634535951', '', 'name', '1', '1', '上传图片', '80', '', '0'),
-(null, '2', '1634536343', '', 'scene', '1', '1', '只能字母或数据', '81', '', '0'),
-(null, '2', '1634536398', '', 'width', '2', '-1', '宽度', '81', '430', '0'),
-(null, '2', '1634536436', '', 'page', '1', '-1', '小程序跳转地址', '81', '', '0'),
-(null, '2', '1634630854', '', 'touser', '1', '1', '', '82', '接收者的openid', '0'),
-(null, '2', '1634630876', '', 'template_id', '1', '1', '订阅模板id', '82', '', '0'),
-(null, '2', '1634630908', '', 'data', '1', '1', '模板内容，格式形如{&quot;key1&quot;:&quot;any&quot;,&quot;key2&quot;:&quot;any&quot;}', '82', '', '0'),
-(null, '2', '1634630921', '', 'page', '1', '-1', '跳转页面', '82', '', '0'),
-(null, '2', '1634631290', '', 'scope', '1', '-1', '基本信息固定值:base，详细信息固定值:userinfo', '83', 'userinfo', '0'),
-(null, '2', '1634631329', '', 'redirect', '6', '1', '跳转地址', '83', '', '0'),
-(null, '2', '1634632082', '', 'code', '1', '1', '通过getCode接口获取的code值', '84', '', '0'),
-(null, '2', '1634632589', '', 'url', '6', '1', '链接地址', '85', '', '0'),
-(null, '2', '1634532944', '', 'appid', '1', '1', '应用ID', '77', '', '0');
-
-DROP TABLE IF EXISTS `#@#apiresponse`;
-CREATE TABLE `#@#apiresponse` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
-  `createtime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `ip` varchar(20) NOT NULL DEFAULT '' COMMENT '创建IP',
-  `name` varchar(50) NOT NULL DEFAULT '' COMMENT '字段名称',
-  `types` tinyint(1) NOT NULL DEFAULT '0' COMMENT '类型(1=string,2=int,3=array,4=float,5=date,6=URL,7=tel,8=price)',
-  `intro` varchar(250) NOT NULL DEFAULT '' COMMENT '说明',
-  `apiid` int(10) NOT NULL DEFAULT '0' COMMENT '所属接口(apilist={&quot;name&quot;:&quot;apiname&quot;,&quot;value&quot;:&quot;id&quot;})',
-  `fieldid` int(10) NOT NULL COMMENT '字段ID',
-  PRIMARY KEY (`id`),
-  KEY `apiid` (`apiid`),
-  KEY `fieldid` (`fieldid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
-INSERT INTO `#@#apiresponse` VALUES
-(null, '2', '1634535333', '', 'openid', '1', '微信openid', '79', '0'),
-(null, '2', '1634532797', '', 'accessToken', '1', '获取到的接口调用凭证', '77', '0'),
-(null, '2', '1634534668', '', 'openid', '1', '微信openid', '78', '0'),
-(null, '2', '1634534751', '', 'session_key', '1', 'session_key值', '78', '0'),
-(null, '2', '1634535997', '', 'pic', '1', '图片URL', '80', '0'),
-(null, '2', '1634632118', '', 'openid', '1', '微信用户的唯一标识', '84', '0'),
-(null, '2', '1634632131', '', 'nickname', '1', '用户昵称', '84', '0'),
-(null, '2', '1634535348', '', 'nickname', '1', '微信昵称', '79', '0'),
-(null, '2', '1634535366', '', 'headimgurl', '6', '微信头像', '79', '0'),
-(null, '2', '1634632147', '', 'sex', '2', '用户的性别，值为1时是男性，值为2时是女性，值为0时是未知', '84', '0'),
-(null, '2', '1634632161', '', 'province', '1', '用户个人资料填写的省份', '84', '0'),
-(null, '2', '1634632175', '', 'city', '1', '普通用户个人资料填写的城市', '84', '0'),
-(null, '2', '1634632188', '', 'country', '1', '国家，如中国为CN', '84', '0'),
-(null, '2', '1634632230', '', 'headimgurl', '6', '用户头像，最后一个数值代表正方形头像大小（有0、46、64、96、132数值可选，0代表640&#042,640正方形头像），用户没有头像时该项为空。若用户更换头像，原有头像URL将失效。', '84', '0'),
-(null, '2', '1634632247', '', 'privilege', '1', '用户特权信息，json 数组，如微信沃卡用户为（chinaunicom）', '84', '0'),
-(null, '2', '1634632261', '', 'unionid', '1', '只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段。', '84', '0'),
-(null, '2', '1634632832', '', 'appid', '1', '应用ID', '85', '0'),
-(null, '2', '1634632878', '', 'ticket', '1', '微信jsapi_ticket', '85', '0'),
-(null, '2', '1634632892', '', 'noncestr', '1', '随机数', '85', '0'),
-(null, '2', '1634632906', '', 'timestamp', '2', '时间戳', '85', '0'),
-(null, '2', '1634632920', '', 'url', '6', '链接地址', '85', '0'),
-(null, '2', '1634632934', '', 'signature', '1', '生成的签名', '85', '0');
-
-DROP TABLE IF EXISTS `#@#applog`;
-CREATE TABLE `#@#applog` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
-  `createtime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `ip` varchar(20) NOT NULL DEFAULT '' COMMENT '创建IP',
-  `appid` varchar(250) NOT NULL DEFAULT '' COMMENT '应用ID',
-  `method` varchar(250) NOT NULL DEFAULT '' COMMENT '调用方式',
-  `query` varchar(250) NOT NULL DEFAULT '' COMMENT '请求地址',
-  `route` varchar(250) NOT NULL DEFAULT '' COMMENT '路由地址',
-  `postinfo` text NOT NULL COMMENT 'POST信息',
-  PRIMARY KEY (`id`),
-  KEY `appid` (`appid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `#@#apps`;
-CREATE TABLE `#@#apps` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
-  `createtime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `ip` varchar(20) NOT NULL DEFAULT '' COMMENT '创建IP',
-  `appid` varchar(50) NOT NULL DEFAULT '' COMMENT '应用id',
-  `appsecret` varchar(50) NOT NULL DEFAULT '' COMMENT '应用密码',
-  `appname` varchar(250) NOT NULL DEFAULT '' COMMENT '应用名称',
-  `appapi` varchar(250) NOT NULL DEFAULT '' COMMENT '允许请求的API接口(apilist={&quot;name&quot;:&quot;apiname&quot;,&quot;value&quot;:&quot;id&quot;})',
-  `lasttime` int(11) NOT NULL DEFAULT '0' COMMENT '上次调用时间',
-  `lastip` varchar(250) NOT NULL DEFAULT '' COMMENT '上次调用IP',
-  `accesstoken` varchar(250) NOT NULL DEFAULT '' COMMENT 'accessToken',
-  PRIMARY KEY (`id`),
-  KEY `appid` (`appid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+INSERT INTO `#@#plugins` VALUES
+(null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', '0b405bba602162e9371b6fab71e49807'),
+(null, '2', '1648188930', '', '文件安全校验', 'fileverify', '防止app、template、vender三个文件夹中文件被篡改。安装启用后点文件校验按钮初始化（默认当前文件都是正常文件），<br>所有文件会显示为新增，再点一下文件校验按钮后，所有文件将变成正常，后续如果有增删改操作，点文件校验按钮后将会显示出来', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"?p=plugin/fileverify/dataList\">文件校验</a>', 'a:2:{i:0;a:2:{s:4:\"name\";s:12:\"文件校验\";s:7:\"purview\";s:28:\"plugin/fileverify/fileVerify\";}i:1;a:2:{s:4:\"name\";s:21:\"更新文件校验KEY\";s:7:\"purview\";s:33:\"plugin/fileverify/updateVerifyKey\";}}', 'bdcee55c5cc05a47032689c93c49e8ce');
