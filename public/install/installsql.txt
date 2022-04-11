@@ -388,5 +388,5 @@ CREATE TABLE `#@#plugins` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件表';
 
 INSERT INTO `#@#plugins` VALUES
-(null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', 'cd4fe623edc0dff4a8e197bb949d5964'),
+(null, '2', '1648188930', '', 'API接口', 'api', '供外部调用的api管理及调用的插件', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"./?p=plugin/api/doc\" target=\"_blank\">接口文档</a> | <a href=\"?p=plugin/api/setConfig\">接口设置</a>', 'a:1:{i:0;a:2:{s:4:\"name\";s:12:\"参数设置\";s:7:\"purview\";s:20:\"plugin/api/setConfig\";}}', '4d6101f269a24eeec88ed9a8d23caa6c'),
 (null, '2', '1648188930', '', '文件安全校验', 'fileverify', '防止app、template、vender三个文件夹中文件被篡改。安装启用后点文件校验按钮初始化（默认当前文件都是正常文件），<br>所有文件会显示为新增，再点一下文件校验按钮后，所有文件将变成正常，后续如果有增删改操作，点文件校验按钮后将会显示出来', '1.0.0', '-1', '-1', 'zhucy', '<a href=\"?p=plugin/fileverify/dataList\">文件校验</a>', 'a:2:{i:0;a:2:{s:4:\"name\";s:12:\"文件校验\";s:7:\"purview\";s:28:\"plugin/fileverify/fileVerify\";}i:1;a:2:{s:4:\"name\";s:21:\"更新文件校验KEY\";s:7:\"purview\";s:33:\"plugin/fileverify/updateVerifyKey\";}}', 'bdcee55c5cc05a47032689c93c49e8ce');
