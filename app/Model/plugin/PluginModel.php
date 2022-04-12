@@ -257,6 +257,7 @@ class PluginModel extends ModelAbstract
             CSAPP . 'Model/plugin/' . $identifier . '/',
             CSTEMPLATE . 'admincp/plugin/' . $identifier . '/',
             CSTEMPLATE . 'main/plugin/' . $identifier . '/',
+            CSPUBLIC . 'resources/plugin/' . $identifier . '/',
         ];
         foreach (self::installTables($identifier) as $v) {
             $id = self::t('forms')->withWhere(['table' => $v])->fetch('id');
