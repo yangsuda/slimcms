@@ -38,9 +38,6 @@
     .cardcontent {
         border-radius: 0 .25rem .25rem .25rem;
     }
-    .search .card-header{
-        background-color: rgba(0,0,0,.0);
-    }
 </style>
 </head>
 <body class="adminbody">
@@ -52,16 +49,26 @@
     <div class="content-page">
         <div class="content">
             <div class="container-fluid">
-                <!--{template navigation_list}-->
                 <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-1 text-center tag active">
+                    <div class="col-xl-12">
+                        <div class="breadcrumb-holder">
+                            <h5 class="float-left" style="line-height: 2.2rem">插件市场</h5>
+                            <ol class="breadcrumb float-right">
+                            </ol>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-1 text-center tag">
                         <div class="card mb-3">
                             <div class="card-header">
                                 <a href="{url ?p=forms/dataList&fid=8}">我的插件</a>
                             </div>
                         </div>
                     </div>
-                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-1 text-center tag">
+                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-1 text-center tag active">
                         <div class="card mb-3">
                             <div class="card-header">
                                 <a href="{url ?p=plugin/market}">插件市场</a>
@@ -71,9 +78,6 @@
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
                         <div class="card mb-3 cardcontent">
                             <div class="card-body">
-                                <div class="search">
-                                    <!--{template search}-->
-                                </div>
                                 <div class="table-responsive">
                                     <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                                         <div class="row">
@@ -81,46 +85,32 @@
                                                 <table id="form$data[fid]" class="table table-hover display dataTable">
                                                     <thead>
                                                     <tr role="row" align="center">
-                                                        <!--{loop $data[listFields] $k $v}-->
-                                                        <!--{if in_array($v[identifier],['isinstall','available','description','version'])}-->
-                                                        <!--{else}-->
-                                                        <th class="{echo in_array($v[id],$data[orderFields])?($data[by]=='asc'?'sorting_asc':'sorting_desc'):''}" data-order="$v[identifier]" aria-controls="form$data[fid]" aria-label="$v[title]">
-                                                            $v[title]
-                                                        </th>
-                                                        <!--{/if}-->
-                                                        <!--{/loop}-->
-                                                        <!--{if  empty($data[admin][purviews]) || in_array('dataSave'.$data[fid],$data[admin][purviews])}-->
+                                                        <th>插件名称</th>
+                                                        <th>标识符</th>
+                                                        <th>作者</th>
+                                                        <th>管理</th>
                                                         <th>操作</th>
-                                                        <!--{/if}-->
+
                                                     </tr>
                                                     </thead>
                                                     <tbody>
                                                     <!--{loop $data[list] $v}-->
                                                     <tr align='center' bgcolor="#FFFFFF">
-                                                        <!--{loop $data[listFields] $f_v}-->
-                                                        <!--{if in_array($f_v[identifier],['isinstall','available','description','version'])}-->
-                                                        <!--{elseif in_array($f_v[identifier],['name'])}-->
-                                                        <td class="text-dark" style="text-align: left;">$v[_name]($v[version])<br><span class="text-secondary small">$v[_description]</span></td>
-                                                        <!--{elseif $f_v[datatype] == 'img'}-->
-                                                        <td><a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="{echo copyImage($v[$f_v['identifier']],60,60)}" width="60" /></a></td>
-                                                        <!--{elseif $f_v[identifier] == 'menu'}-->
+                                                        <td class="text-dark" style="text-align: left;">$v[title]($v[version])<br><span class="text-secondary small">$v[intro]</span></td>
+                                                        <td class="text-dark">$v[identifier]</td>
+                                                        <td class="text-dark">$v[author]</td>
                                                         <td class="text-dark">
-                                                            <!--{if $v[isinstall]==1 && $v[available]==1}-->
-                                                            <!--{loop unserialize($v[_menu]) $mv}-->
+                                                            <!--{if aval($v,'my/isinstall')==1 && aval($v,'my/available')==1}-->
+                                                            <!--{loop $v[menu] $mv}-->
                                                             <a href="{url $mv[url]}" target="{echo $mv[target]?:''}">$mv[name]</a>
                                                             <!--{/loop}-->
                                                             <!--{/if}-->
                                                         </td>
-                                                        <!--{else}-->
-                                                        <td class="text-dark">{eval $val = aval($v,'_'.$f_v['identifier']);}{echo is_array($val)?aval($v,$f_v['identifier']):aval($v,'_'.$f_v['identifier'])}$f_v[units]</td>
-                                                        <!--{/if}-->
-                                                        <!--{/loop}-->
-
                                                         <td>
-                                                            <!--{if $v[isinstall]==-1}-->
+                                                            <!--{if !$v[my]}-->
                                                             <a class="btn btn-success btn-sm btn-install" href="javascript:void(0)" data-identifier="$v[identifier]">安装</a>
                                                             <!--{else}-->
-                                                            <!--{if $v[available]==1}-->
+                                                            <!--{if $v[my][available]==1}-->
                                                             <a class="btn btn-secondary btn-sm btn-switch" href="javascript:void(0)" data-open="-1" data-identifier="$v[identifier]">关闭</a>
                                                             <!--{else}-->
                                                             <a class="btn btn-danger btn-sm btn-switch" href="javascript:void(0)" data-open="1" data-identifier="$v[identifier]">开启</a>
@@ -134,13 +124,6 @@
                                                 </table>
                                             </div>
                                         </div>
-                                        <!--{if !empty($data[mult])}-->
-                                        <div class="row">
-                                            <div class="col-sm-12 col-md-12">
-                                                <div class="dataTables_paginate paging_simple_numbers" id="paginate">$data[mult]</div>
-                                            </div>
-                                        </div>
-                                        <!--{/if}-->
                                     </div>
 
                                 </div>

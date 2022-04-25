@@ -9,9 +9,12 @@ declare(strict_types=1);
 
 namespace App\Model\plugin;
 
+use App\Core\Forms;
 use SlimCMS\Abstracts\ModelAbstract;
 use SlimCMS\Helper\File;
+use SlimCMS\Helper\FileCache;
 use SlimCMS\Helper\Zip;
+use SlimCMS\Helper\Http;
 use SlimCMS\Interfaces\OutputInterface;
 
 class PluginModel extends ModelAbstract
@@ -124,14 +127,23 @@ class PluginModel extends ModelAbstract
             return self::$output->withCode(223025);
         }
         $row = self::t('plugins')->withWhere(['identifier' => $identifier])->fetch();
-        if (empty($row)) {
-            return self::$output->withCode(223027);
+        if (!empty($row)) {
+            return self::$output->withCode(223025);
+        }
+        $plugin = aval(self::_market(), $identifier);
+        if (empty($plugin)) {
+            return self::$output->withCode(223023);
         }
         $installzip = CSDATA . 'plugins/' . $identifier . '.zip';
+
+        //下载压缩包
+        $zipData = file_get_contents($plugin['file']);
+        $zipData && file_put_contents($installzip, $zipData);
+
         if (!is_file($installzip)) {
             return self::$output->withCode(223024);
         }
-        if (md5_file($installzip) != $row['signature']) {
+        if (md5_file($installzip) != $plugin['signature']) {
             return self::$output->withCode(223028);
         }
         Zip::unpack($installzip, CSDATA . 'plugins/');
@@ -141,6 +153,19 @@ class PluginModel extends ModelAbstract
         if ($res->getCode() != 200) {
             return $res;
         }
+
+        //插件安装记录入库
+        $data = [];
+        $data['name'] = $plugin['title'];
+        $data['identifier'] = $plugin['identifier'];
+        $data['description'] = $plugin['intro'];
+        $data['version'] = $plugin['version'];
+        $data['isinstall'] = 1;
+        $data['author'] = $plugin['author'];
+        $data['signature'] = $plugin['signature'];
+        $data['menu'] = serialize($plugin['menu']);
+        $data['permission'] = serialize($plugin['permission']);
+        Forms::dataSave(8, [], $data);
 
         //数据库表安装调整
         $db = self::t()->db();
@@ -185,8 +210,6 @@ class PluginModel extends ModelAbstract
 
         //生成安装锁定文件
         file_put_contents($pluginDir . 'install.lock', TIMESTAMP);
-
-        self::t('plugins')->withWhere($row['id'])->update(['isinstall' => 1]);
 
         if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
             $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
@@ -285,7 +308,9 @@ class PluginModel extends ModelAbstract
         if (is_file(CSDATA . 'plugins/' . $identifier . '/config.php')) {
             unlink(CSDATA . 'plugins/' . $identifier . '/config.php');
         }
-        return self::$output->withCode(200);
+
+        //删除插件
+        return self::delete($identifier);
     }
 
     /**
@@ -338,7 +363,7 @@ class PluginModel extends ModelAbstract
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function delete(string $identifier): OutputInterface
+    private static function delete(string $identifier): OutputInterface
     {
         if (empty($identifier)) {
             return self::$output->withCode(21002);
@@ -362,5 +387,40 @@ class PluginModel extends ModelAbstract
             }
         }
         return self::$output->withCode(200);
+    }
+
+    /**
+     * 插件市场
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function market()
+    {
+        $plugins = self::_market();
+        foreach ($plugins as &$v) {
+            $v['my'] = self::t('plugins')->withWhere(['identifier' => $v['identifier']])->fetch();
+        }
+        return self::$output->withCode(200)->withData(['list' => $plugins, 'fid' => 8]);
+    }
+
+    /**
+     * 插件市场
+     * @return array|null
+     */
+    private static function _market()
+    {
+        $cachekey = get_class() . __FUNCTION__;
+        $plugins = FileCache::get($cachekey);
+        if (empty($plugins)) {
+            $url = Http::curlGet('https://gitee.com/919579/plugin/raw/master/url.txt');
+            $url = Http::curlGet(trim($url));
+            $list = json_decode($url, true);
+            $plugins = [];
+            foreach ($list as &$v) {
+                $plugins[$v['identifier']] = $v;
+            }
+            FileCache::set($cachekey, $plugins, 3600);
+        }
+        return $plugins;
     }
 }

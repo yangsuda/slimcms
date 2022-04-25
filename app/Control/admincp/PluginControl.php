@@ -52,15 +52,14 @@ class PluginControl extends AdmincpControl
     }
 
     /**
-     * 删除插件
+     * 插件市场
      * @return array|\Psr\Http\Message\ResponseInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public function delete()
+    public function market()
     {
         $this->checkAllow();
-        $identifier = self::inputString('identifier');
-        $res = PluginModel::delete($identifier);
-        return $this->json($res);
+        $res = PluginModel::market();
+        return $this->view($res);
     }
 }
