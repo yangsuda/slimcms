@@ -172,10 +172,12 @@
             }
 
             $('.btn-install').click(function () {
-                $(this).text('安装中...');
+                var that = $(this);
+                that.text('安装中...');
                 var identifier = $(this).data('identifier');
                 $.getJSON('{url ?p=plugin/install&identifier='+identifier+'}',function (res) {
                     resultMsg(res.msg,res.code);
+                    that.text('安装');
                     if(res.code==200){
                         setTimeout(function () {
                             location = res.referer;
