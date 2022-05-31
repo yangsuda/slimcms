@@ -191,8 +191,8 @@ composer require aliyuncs/oss-sdk-php
 RewriteEngine On
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)/(.*) - [L]
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)(.*) - [L]
-RewriteRule ^(.*)/XXX/([\w\/]+)/([\w-.%`]+).html?$ $1/MQ5qCU.php?p=$2&q=$3 [QSA,L]
-RewriteRule ^(.*)/XXX/([\w\/]+)(/)?$ $1/MQ5qCU.php?p=$2 [QSA,L]
+RewriteRule ^(.*)/XXX/([\w\/]+)/([\w-.%`]+).html?$ $1/XXX.php?p=$2&q=$3 [QSA,L]
+RewriteRule ^(.*)/XXX/([\w\/]+)(/)?$ $1/XXX.php?p=$2 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5&q=$6 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4&q=$5 [QSA,L]
