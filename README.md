@@ -1,7 +1,7 @@
 ### 预览
-| 登陆     | 列表    | 添加编辑  |
+| 列表     | 添加编辑    | 接口文档  |
 | ------------- |:-------------:| --------------:|
-| ![alt tag](https://www.cs090.com/uploads/userup/a/7004/2021/1625A0649-954Y12.png) | ![alt tag](https://www.cs090.com/uploads/userup/a/7004/2021/1625A0D9-a36203.png) | ![alt tag](https://www.cs090.com/uploads/userup/a/7004/2021/1625A0H3-Y13508.png) |
+| ![alt tag](https://www.cs090.com/uploads/userup/a/7004/2022/1A40FA0-96292c.jpg) | ![alt tag](https://www.cs090.com/uploads/userup/a/7004/2021/1625A0H3-Y13508.png) | ![alt tag](https://www.cs090.com/uploads/userup/a/7004/2022/1A40FJ4-19CI9.jpg) |
 
 # 说明
 
@@ -191,8 +191,8 @@ composer require aliyuncs/oss-sdk-php
 RewriteEngine On
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)/(.*) - [L]
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)(.*) - [L]
-RewriteRule ^(.*)/XXX/([\w\/]+)/([\w-.%`]+).html?$ $1/MQ5qCU.php?p=$2&q=$3 [QSA,L]
-RewriteRule ^(.*)/XXX/([\w\/]+)(/)?$ $1/MQ5qCU.php?p=$2 [QSA,L]
+RewriteRule ^(.*)/XXX/([\w\/]+)/([\w-.%`]+).html?$ $1/XXX.php?p=$2&q=$3 [QSA,L]
+RewriteRule ^(.*)/XXX/([\w\/]+)(/)?$ $1/XXX.php?p=$2 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5&q=$6 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4&q=$5 [QSA,L]
