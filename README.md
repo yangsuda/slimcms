@@ -93,10 +93,18 @@ Model层数据统一以Output对象形式返回，
 
 5、self::response(),根据请求的content-type返回相应的数据类型
 
+## 功能插件
+
+框架本身只提供基础构建，一些具体功能通过插件化实现，目前有接口插件、文件管理插件、文件安全校验插件三个插件，后期会根据实际需要增加更多插件。
+
+通过在插件市场下载安装，对于已经下载的插件可开启或关闭，卸载插件时会提示是否删除安装时添加的相应表，如果不删除相应表，再次安装时将会提示安装失败
+
 ## 数据接口
 
-接口文档和数据接口通过后台表单开放接口权限控制，分“列表、展示、添加修改、删除、导出、表单结构、审核、统计”8种权限，
-如不能满足需求，可自定义接口，数据统一以json格式返回，状态码200为正常，其它为错误
+需要先安装接口插件，接口文档和数据接口通过后台表单开放接口权限控制，分“列表、展示、添加修改、删除、导出、表单结构、审核、统计”8种权限，
+如不能满足需求，可自定义接口。
+
+数据统一以json格式返回，状态码200为正常，其它为错误
 
 ```bash
 {
@@ -185,6 +193,35 @@ composer require aliyuncs/oss-sdk-php
 3、修改加载的上传类：app/Core/settings.php
 
 将new Upload()改成new AliOss(),注意相应的引用要改一下
+
+## 数据库分表
+
+对于像日志类的表如果长时间积累可能会导致表数据非常庞大，影响执行效率，所以可以考虑分表操作。
+
+具体操作：
+
+在app/Table/文件夹中创建相应表的类文件，文件名称格式：表名+'Table.php'(表名第一个字母大写)，如:AdminlogTable.php
+
+在构造函数中增加$this->subtable($tableName, $extendName);
+
+如：
+```bash
+public function __construct(Request $request, string $tableName, string $extendName = null)
+{
+        //根据年份进行分表
+        if (!isset($extendName)) {
+            $extendName = date('Y');
+            $this->subtable($tableName, $extendName);
+        }
+        parent::__construct($request, $tableName, $extendName);
+}
+```
+
+以示例为例
+
+数据库中将自动创建表adminlog2022
+
+数据调用方式:self::t('adminlog')->...（默认调用当前年份数据），如需调用2021数据，:self::t('adminlog','2021')->...
 
 ## apache伪静态规则
 ```bash
