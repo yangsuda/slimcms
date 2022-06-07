@@ -73,9 +73,10 @@ CREATE TABLE `#@#adminpermission` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 INSERT INTO `#@#adminpermission` VALUES
-(null, '0', '1600398324', '', '数据恢复', 'main/recovery'),
-(null, '0', '1603941564', '', '删除附件图片', 'main/delImg'),
+(null, '2', '1600398324', '', '数据恢复', 'main/recovery'),
+(null, '2', '1603941564', '', '删除附件图片', 'main/delImg'),
 (null, '2', '1606901999', '', '超大附件上传', 'main/superFileUpload'),
+(null, '2', '1606901999', '', '修改密码', 'main/updatePwd'),
 (null, '2', '1648708128', '', '安装插件', 'plugin/install'),
 (null, '2', '1648708147', '', '卸载插件', 'plugin/unstall'),
 (null, '2', '1648708162', '', '插件启用开关', 'plugin/switch'),

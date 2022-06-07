@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace App\Control\admincp;
 
+use App\Core\Forms;
+use App\Model\admincp\LoginModel;
 use App\Model\admincp\MainModel;
 use SlimCMS\Interfaces\UploadInterface;
 
@@ -20,7 +22,7 @@ class MainControl extends AdmincpControl
     public function index()
     {
         $apiName = substr(md5(self::$setting['security']['authkey']), -8);
-        self::$output = self::$output->withData(['apiName'=>$apiName]);
+        self::$output = self::$output->withData(['apiName' => $apiName]);
         return $this->view(self::$output);
     }
 
@@ -56,11 +58,34 @@ class MainControl extends AdmincpControl
      */
     public function superFileUpload()
     {
+        $this->checkAllow();
         $file = aval($_FILES, 'file');
         $index = self::inputInt('index');
         $filename = self::inputString('filename');
         $upload = self::$container->get(UploadInterface::class);
         $res = $upload->superFileUpload($file, $index, $filename);
         return $this->json($res);
+    }
+
+    /**
+     * 修改密码
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public function updatePwd()
+    {
+        $this->checkAllow();
+        $formhash = self::input('formhash');
+        if ($formhash) {
+            $res = Forms::submitCheck($formhash);
+            if ($res->getCode() != 200) {
+                return $this->directTo($res);
+            }
+            $oldpwd = self::inputString('oldpwd');
+            $newpwd = self::inputString('newpwd');
+            $res = LoginModel::updatePwd(self::$admin['userid'], $oldpwd, $newpwd);
+            return $this->directTo($res);
+        }
+        return $this->view(self::$output);
     }
 }
