@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace App\Model\admincp;
 
+use App\Core\Forms;
 use SlimCMS\Abstracts\ModelAbstract;
 use SlimCMS\Helper\Crypt;
 use SlimCMS\Helper\Ipdata;
@@ -149,5 +150,25 @@ class LoginModel extends ModelAbstract
             self::t('adminlog')->insert($data);
         }
         return self::$output->withCode(200);
+    }
+
+    /**
+     * 修改密码
+     * @param $userid 帐号
+     * @param $pwd 原密码
+     * @param $newpwd 新密码
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function updatePwd($userid, $pwd, $newpwd): OutputInterface
+    {
+        $res = self::loginCheck($userid, $pwd);
+        if ($res->getCode() != 200) {
+            return $res;
+        }
+        $id = $res->getData()['id'];
+        $newpwd = Crypt::pwd($newpwd);
+        self::t('admin')->withWhere($id)->update(['pwd' => $newpwd]);
+        return self::$output->withCode(200)->withReferer(Forms::url('?p=login/logout'));
     }
 }

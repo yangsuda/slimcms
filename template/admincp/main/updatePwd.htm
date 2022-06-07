@@ -1,0 +1,79 @@
+<!--{template html_head}-->
+<link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css" />
+<script src="$cfg[resourceUrl]validform/js/Validform_min.js"></script>
+<link rel="stylesheet" href="$cfg[resourceUrl]validform/css/validform.css" />
+</head>
+<body class="adminbody">
+
+<div id="main">
+    <!--{template head}-->
+    <!--{template leftMenu}-->
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="breadcrumb-holder">
+                            <h5 class="float-left" style="line-height: 2.2rem;font-size: 1rem">修改密码</h5>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="card mb-3">
+                            <div class="card-body m-4">
+                                <form name="form1" action="{url &}" enctype="multipart/form-data" method="post" class="validform">
+                                    <input type="hidden" name="formhash" value="$data[formhash]" />
+                                    <div class="form-group row formgroup-pwd">
+                                        <label for="oldpwd" class="col-sm-2 col-form-label">原密码：</label>
+                                        <div class="col-sm-6 ">
+                                            <input type="password"  sucmsg=""  class="form-control " id="oldpwd" name="oldpwd" value="" >
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="col-sm-4 text-muted"></div>
+                                    </div>
+                                    <div class="form-group row formgroup-pwd">
+                                        <label for="newpwd" class="col-sm-2 col-form-label">新密码：</label>
+                                        <div class="col-sm-6 ">
+                                            <input type="password"  sucmsg=""  class="form-control " id="newpwd" name="newpwd" value="" >
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="col-sm-4 text-muted"></div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label"></label>
+                                        <div class="col-sm-10">
+                                            <button type="submit" class="btn btn-success">提　交</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--{template modal_msg}-->
+
+</div>
+<!--{template footer}-->
+
+<script>
+    $(function () {
+        $(".validform").Validform({
+            tiptype: function(msg, o) {
+                if (!o.obj.is("form")) {
+                    var objtip = o.obj.parents(".form-group").find(".invalid-feedback");
+                    objtip.text(msg);
+                }
+            },
+            showAllError: true,
+        });
+    })
+</script>
+</body>
+</html>
