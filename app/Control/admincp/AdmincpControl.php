@@ -63,7 +63,7 @@ class AdmincpControl extends ControlAbstract
             if (self::$response->determineContentType() == 'application/json') {
                 $res = self::$output->withCode(21048)->withReferer('')->jsonSerialize();
                 echo json_encode($res);
-            }else{
+            } else {
                 header('location:' . $url);
             }
             exit;
@@ -79,7 +79,7 @@ class AdmincpControl extends ControlAbstract
         $output = $output ?? self::$output;
         $data = [];
         $data['leftMenu'] = $this->leftMenu();
-        if(empty($output->getData()['admin'])){
+        if (empty($output->getData()['admin'])) {
             $data['admin'] = self::$admin;
         }
         $output = $output->withData($data);
@@ -88,7 +88,8 @@ class AdmincpControl extends ControlAbstract
 
     private function leftMenu()
     {
-        $purviews = explode(',', aval(self::$admin, '_groupid/purviews'));
+        $purviews = aval(self::$admin, '_groupid/purviews');
+        $purviews = $purviews ? explode(',', $purviews) : [];
         $param = ['fid' => 1, 'ischeck' => 1, 'pagesize' => 200, 'inlistField' => 'inlistcp', 'cacheTime' => 600, 'order' => 'weight', 'noinput' => 1];
         $res = Forms::dataList($param)->getData();
         $arr = [];
