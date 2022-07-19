@@ -63,7 +63,7 @@ class MainControl extends AdmincpControl
         $index = self::inputInt('index');
         $filename = self::inputString('filename');
         $upload = self::$container->get(UploadInterface::class);
-        $res = $upload->superFileUpload($file, $index, $filename);
+        $res = $upload->superFileUpload($file, $index, $filename, 'superFile');
         return $this->json($res);
     }
 
