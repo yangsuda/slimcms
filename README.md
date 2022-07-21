@@ -1,3 +1,5 @@
+[![Latest Stable Version](http://poser.pugx.org/yangsuda/slimcms/v)](https://packagist.org/packages/yangsuda/slimcms) [![Total Downloads](http://poser.pugx.org/yangsuda/slimcms/downloads)](https://packagist.org/packages/yangsuda/slimcms) [![Latest Unstable Version](http://poser.pugx.org/yangsuda/slimcms/v/unstable)](https://packagist.org/packages/yangsuda/slimcms) [![PHP Version Require](http://poser.pugx.org/yangsuda/slimcms/require/php)](https://packagist.org/packages/yangsuda/slimcms)
+
 ### 预览
 | 列表     | 添加编辑    | 接口文档  |
 | ------------- |:-------------:| --------------:|
