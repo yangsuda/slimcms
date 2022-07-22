@@ -21,12 +21,6 @@
         "php": "^7.3",
         "yangsuda/framework": "^2.1"
     },
-    "repositories": {
-        "packagist": {
-            "type": "composer",
-            "url": "https://mirrors.aliyun.com/composer/"
-        }
-    },
     "config": {
         "process-timeout": 0,
         "sort-packages": true
