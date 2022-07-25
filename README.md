@@ -16,6 +16,7 @@ debug默认是开启的，生产环境下CORE_DEBUG建议改成false
 数据库连接默认通过“mysql:host=XXX:XXX;”方式连接，有些情况下会连接不成功，可改成“mysql:host=XXX;port=XXX;”试试，
 操作方式：将config/settings.php中的connecttype参数置为空
 
+CORE_DEBUG关闭情况下，系统配置默认会生成文件：/data/CompiledContainer.php，在部分情况下更新系统配置时，此文件不会更新，遇到此问题时，可将此文件直接删除，系统会重新再次生成，或将init.php中的$containerBuilder->enableCompilation(CSDATA);注释掉
 
 ## 开发版下载
 
