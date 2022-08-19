@@ -13,7 +13,7 @@
             <!--{if aval($data,'data/id') && $v[forbidedit]==2}-->
             <input type="hidden" name="$v[identifier]" id="$v[identifier]" value="$data[data][$v[identifier]]" />
             <!--{if $v[datatype]=='img'}-->
-            <img src="$data[data]['_'.$v[identifier]]" width="100">
+            <a href="$data[data]['_'.$v[identifier]]" target="_blank"><img src="$data[data]['_'.$v[identifier]]" width="100"></a>
             <!--{else}-->
             <!--{if $v[forbidedit]=='2' && $v[datatype]=='serialize' && !empty($data[data]['_'.$v[identifier]])}-->
             {echo nl2br(str_replace(["array (\n", "),\n", ")"], '', var_export($data[data]['_'.$v[identifier]], true)))}
