@@ -123,6 +123,7 @@ class PluginModel extends ModelAbstract
             return self::$output->withCode(21002);
         }
         $pluginDir = CSDATA . 'plugins/' . $identifier . '/';
+        File::mkdir($pluginDir);
         if (is_file($pluginDir . 'install.lock')) {
             return self::$output->withCode(223025);
         }
