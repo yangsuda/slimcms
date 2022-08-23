@@ -133,16 +133,6 @@ EOT;
     $config = "<?php\n\r" . 'return ' . var_export($_config, true) . ';';
     file_put_contents('../../config/settings.php', $config) or exit('配置文件创建失败，请检查../../config/目录是否可写入！');
 
-    //接口入口
-    $apifilename = substr(md5($settings['security']['authkey']), -8);
-    $code = <<<EOT
-<?php
-declare(strict_types=1);
-define('CURSCRIPT', 'api');
-require __DIR__ . '/../app/init.php';
-EOT;
-    file_put_contents('../'.$apifilename . '.php', $code);
-
     //创建数据表
     $content = file_get_contents( './installsql.txt');
     $content = str_replace('#@#', $dbprefix, $content);

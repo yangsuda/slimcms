@@ -13,13 +13,24 @@
             <!--{if aval($data,'data/id') && $v[forbidedit]==2}-->
             <input type="hidden" name="$v[identifier]" id="$v[identifier]" value="$data[data][$v[identifier]]" />
             <!--{if $v[datatype]=='img'}-->
-            <img src="$data[data]['_'.$v[identifier]]" width="100">
-            <!--{else}-->
-            <!--{if $v[forbidedit]=='2' && $v[datatype]=='serialize' && !empty($data[data]['_'.$v[identifier]])}-->
+            <a href="$data[data]['_'.$v[identifier]]" target="_blank"><img src="$data[data]['_'.$v[identifier]]" width="100"></a>
+            <!--{elseif $v[forbidedit]=='2' && $v[datatype]=='serialize' && !empty($data[data]['_'.$v[identifier]])}-->
             {echo nl2br(str_replace(["array (\n", "),\n", ")"], '', var_export($data[data]['_'.$v[identifier]], true)))}
+            <!--{elseif $v[datatype]=='imgs' && !empty($data[data]['_'.$v[identifier]])}-->
+            <link rel="stylesheet" href="$cfg[resourceUrl]plugins/webuploader/image-upload/css/css.css" />
+            <div class="mod_list_photo">
+                <ul>
+                    <!--{loop $data[data]['_'.$v[identifier]] $val}-->
+                    <li class="libtn" id='oldpic$ik'>
+                        <div class="box_photo">
+                            <em><a href="{echo copyImage($val[img], 2000, 2000)}" target="_blank" title="查看"><i></i><img src="{echo copyImage($val[img], 160, 160)}" /></a></em>
+                        </div>
+                    </li>
+                    <!--{/loop}-->
+                </ul>
+            </div>
             <!--{else}-->
             $data[data]['_'.$v[identifier]]
-            <!--{/if}-->
             <!--{/if}-->
             <!--{else}-->
             $v[field]
