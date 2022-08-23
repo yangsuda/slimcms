@@ -25,6 +25,7 @@ class FormsControl extends AdmincpControl
         $fid = (int)aval($param, 'fid');
         $this->checkAllow('dataList' . $fid);
         $param['inlistField'] = 'inlistcp';
+        $param['admin'] = self::$admin;
         $res = Forms::dataList($param);
         if ($res->getCode() != 200) {
             return self::directTo($res);
@@ -74,10 +75,10 @@ class FormsControl extends AdmincpControl
             }
             $referer = self::input('referer', 'url');
             $referer = $referer ?: self::url('&p=forms/dataList&id=');
-            $res = Forms::dataSave($fid, $id)->withReferer($referer);
+            $res = Forms::dataSave($fid, $id, [], ['admin' => self::$admin])->withReferer($referer);
             return $this->directTo($res);
         }
-        $options = ['cacheTime' => 300, 'ueditorType' => 'admin'];
+        $options = ['cacheTime' => 300, 'ueditorType' => 'admin', 'admin' => self::$admin];
         $res = Forms::dataFormHtml($fid, $id, $options);
         if ($res->getCode() != 200) {
             return self::directTo($res);
@@ -100,7 +101,7 @@ class FormsControl extends AdmincpControl
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : '');
         $ischeck = self::inputInt('ischeck');
         $this->checkAllow('dataCheck' . $fid);
-        $res = Forms::dataCheck($fid, $ids, $ischeck);
+        $res = Forms::dataCheck($fid, $ids, $ischeck, ['admin' => self::$admin]);
         return self::response($res);
     }
 
@@ -115,7 +116,7 @@ class FormsControl extends AdmincpControl
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : '');
         $this->checkAllow('dataDel' . $fid);
         $referer = self::url('&p=forms/dataList&ids=');
-        $res = Forms::dataDel($fid, $ids)->withReferer($referer);
+        $res = Forms::dataDel($fid, $ids, ['admin' => self::$admin])->withReferer($referer);
         return $this->directTo($res);
     }
 
@@ -126,6 +127,7 @@ class FormsControl extends AdmincpControl
     {
         $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int']);
         $this->checkAllow('dataExport' . $param['fid']);
+        $param['admin'] = self::$admin;
         $res = Forms::dataExport($param);
         $data = $res->getData();
         $response = self::$response->getResponse();
