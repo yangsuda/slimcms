@@ -80,6 +80,7 @@ return [
                             ],
                         'dlikehex' => 1,
                         'afullnote' => '0',
+                        'exceptFunction'=>'concat|distinct',
                     ],
             ],
     ]
