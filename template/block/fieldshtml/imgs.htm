@@ -37,7 +37,7 @@
             var index = $(this).data('index');
             $("#"+field+'_'+index).val("");
             var img = $(this).data('img');
-            $.get('{$cfg[basehost]}{$cfg[entryFileName]}?p=image/webuploadImageDel&pic='+img+'&id=data[row][id]&field='+field+'&fid=$data[fid]');
+            $.get('{$cfg[basehost]}{$cfg[scriptname]}?p=image/webuploadImageDel&pic='+img+'&id=$data[row][id]&field='+field+'&fid=$data[fid]');
         })
     });
     function handleFiles(obj) {
