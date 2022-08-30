@@ -34,6 +34,8 @@ class AdmincpControl extends ControlAbstract
                 }
                 self::$admin = $res->getData()['admin'];
                 self::$admin['adminAuth'] = $adminAuth;
+                //后台伪静态强制不开启
+                self::$config['rewriteUrl'] = false;
             }
         }
         if (empty(self::$admin['id'])) {
