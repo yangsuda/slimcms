@@ -231,8 +231,6 @@ public function __construct(Request $request, string $tableName, string $extendN
 RewriteEngine On
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)/(.*) - [L]
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)(.*) - [L]
-RewriteRule ^(.*)/XXX/([\w\/]+)/([\w-.%`]+).html?$ $1/XXX.php?p=$2&q=$3 [QSA,L]
-RewriteRule ^(.*)/XXX/([\w\/]+)(/)?$ $1/XXX.php?p=$2 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5&q=$6 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4&q=$5 [QSA,L]
@@ -243,6 +241,6 @@ RewriteRule ^(.*)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2&q=$3 [QSA,L]
 RewriteRule ^(.*)/([\w]+)(/)?$ $1/index.php?p=$2 [QSA,L]
 ```
 
-注：“XXX”为后台入口文件名称，请自行修改，此规则是在将根目录指向到“public/”目录的情况下的规则.
+注：此规则是在将根目录指向到“public/”目录的情况下的规则.
 
 另外，如果想开启URL加密，请先关闭伪静态开启状态
