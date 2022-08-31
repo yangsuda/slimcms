@@ -27,6 +27,18 @@ class MainControl extends AdmincpControl
     }
 
     /**
+     * 联动菜单数据
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public function enumsData()
+    {
+        $egroup = self::input('egroup');
+        $res = Forms::enumsData($egroup);
+        return self::response($res);
+    }
+
+    /**
      * 恢复数据
      * @return array
      */
