@@ -4,10 +4,11 @@
 <div class="card-header">
     <form name='form3' action='{url &page=&ids=}' method='post' class="form-inline">
         <!--{loop $data[searchFields] $k $v}-->
-        <!--{if in_array($v[datatype],array('select','radio','checkbox')) || $v[rules]}-->
+        <!--{if $v[rules]}-->
+        <!--{eval $isloadSelect2=1;}-->
         <div class="form-group mr-3 mb-1">
             <label>$v[title]：</label>
-            <select name="$v[identifier]" class="custom-select">
+            <select name="$v[identifier]" class="custom-select {echo count(unserialize($v[rules]))>10?'select2':''}">
                 <option value=''>--全部--</option>
                 <!--{loop unserialize($v[rules]) $r_k $r_v}-->
                 <option value='$r_k' {echo aval($data,'get/'.$v[identifier])==$r_k?'selected':''}>$r_v</option>
@@ -67,4 +68,13 @@
 
     </form>
 </div>
+<!--{if !empty($isloadSelect2)}-->
+<link href="$cfg[resourceUrl]assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>
+<script src="$cfg[resourceUrl]assets/plugins/select2/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+</script>
+<!--{/if}-->
 <!--{/if}-->
