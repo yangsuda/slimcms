@@ -67,7 +67,7 @@ class LoginControl extends ControlAbstract
     {
         isset($_SESSION) ? '' : session_start();
         unset($_SESSION['adminAuth']);
-        $referer = self::url('?p=login&referer=' . urlencode(self::$config['referer']));
+        $referer = '?p=login&referer=' . urlencode(self::$config['referer']);
         $output = self::$output->withCode(200, 21047)->withReferer($referer);
         return self::directTo($output);
     }
@@ -87,6 +87,18 @@ class LoginControl extends ControlAbstract
         $img->num_lines = 0;
         $img->noise_level = 1;
         return $img->show();
+    }
+
+    /**
+     * 获取FORMHASH
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    public function formHash()
+    {
+        $data = [];
+        $data['formHash'] = self::$request->getFormHash();
+        $output = self::$output->withData($data);
+        return self::response($output);
     }
 
 }

@@ -15,7 +15,7 @@
             <h4 class="card-header">登陆</h4>
 
             <div class="card-body">
-                <form name="form1" action="{url ?p=login}" method="post" class="validform">
+                <form name="form1" action="?p=login" method="post" class="validform">
                     <input type="hidden" name="formhash" value="$data[formhash]"/>
                     <input type="hidden" name="referer" value="$data[referer]"/>
                     <div class="row">
@@ -53,8 +53,8 @@
                                     <span class="input-group-prepend"><span class="input-group-text"><i
                                             class="fa-1x mr-1 fas fa-check" aria-hidden="true"></i></span></span>
                                     <img id="vdimgck" align="absmiddle"
-                                         onClick="this.src='{url ?p=login/captcha}#'+Math.random()" alt="看不清？点击更换"
-                                         src="{url ?p=login/captcha}"
+                                         onClick="this.src='?p=login/captcha#'+Math.random()" alt="看不清？点击更换"
+                                         src="?p=login/captcha"
                                          style="cursor: pointer; position:absolute; right:10px; top:5px;height: 30px; z-index:1000;"/>
                                     <input type="text" id="ccode" class="form-control" placeholder="请填写验证码"
                                            nullmsg="请填写验证码" name="ccode" required/>
@@ -101,9 +101,9 @@
             ajaxPost: true,
             callback: function (res) {
                 if (res.code != 200) {
-                    $('#vdimgck').prop('src', '{url ?p=login/captcha}#' + Math.random());
+                    $('#vdimgck').prop('src', '?p=login/captcha#' + Math.random());
                     $('.msg').addClass('Validform_wrong').html(res.msg);
-                    $.getJSON(basehost+'p=main/formHash',function (result) {
+                    $.getJSON('?p=login/formHash',function (result) {
                         $('input[name=formhash]').val(result.data.formHash)
                     });
                 } else {
