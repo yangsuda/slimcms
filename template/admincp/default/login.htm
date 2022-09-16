@@ -101,7 +101,7 @@
             ajaxPost: true,
             callback: function (res) {
                 if (res.code != 200) {
-                    $('#vdimgck').prop('src', '{url ?p=login/captcha}#' + Math.random());
+                    $('#vdimgck').prop('src', '?p=login/captcha#' + Math.random());
                     $('.msg').addClass('Validform_wrong').html(res.msg);
                     $.getJSON('?p=login/formHash',function (result) {
                         $('input[name=formhash]').val(result.data.formHash)
