@@ -43,7 +43,7 @@
                                             <div class="row">
                                                 <div class="col-sm-12 form-inline">
                                                     <!--{loop $v2 $k1 $v1}-->
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' id="purviews$k1" type='checkbox' class='custom-control-input' value='$v1[purview]' {if !empty($data[data][_purviews]) && in_array($v1[purview],$data[data][_purviews])} checked {/if}><label for="purviews$k1" class="custom-control-label">$v1[name]<font color='#070'>($v1[purview])</font></label></span>
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' id="purviews$v1[id]" type='checkbox' class='custom-control-input' value='$v1[purview]' {if !empty($data[data][_purviews]) && in_array($v1[purview],$data[data][_purviews])} checked {/if}><label for="purviews$v1[id]" class="custom-control-label">$v1[name]<font color='#070'>($v1[purview])</font></label></span>
                                                     <!--{/loop}-->
                                                 </div>
                                             </div>
