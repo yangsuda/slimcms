@@ -166,6 +166,12 @@ class LoginModel extends ModelAbstract
         if ($res->getCode() != 200) {
             return $res;
         }
+        if (empty($newpwd)) {
+            return self::$output->withCode(21002);
+        }
+        if (!preg_match('/^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,32}$/i', $newpwd)) {
+            return self::$output->withCode(223032);
+        }
         $id = $res->getData()['id'];
         $newpwd = Crypt::pwd($newpwd);
         self::t('admin')->withWhere($id)->update(['pwd' => $newpwd]);
