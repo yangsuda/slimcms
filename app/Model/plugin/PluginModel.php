@@ -96,7 +96,7 @@ class PluginModel extends ModelAbstract
         $list = self::t('plugins')->withWhere(['available' => 1, 'isinstall' => 1])->fetchList();
         foreach ($list as $v) {
             $class = '\App\Model\plugin\\' . $v['identifier'] . '\\' . ucfirst($v['identifier']) . 'Model';
-            if (class_exists($class) && is_callable([$class, 'hook'])) {
+            if (!empty($param[0]) && !empty($param[1]) && class_exists($class) && is_callable([$class, 'hook'])) {
                 $key = $param[0] . '\\' . $param[1];
                 unset($param[0], $param[1]);
                 $hooks = $class::hook($param);
