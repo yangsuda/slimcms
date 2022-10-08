@@ -155,6 +155,15 @@ class PluginModel extends ModelAbstract
             return $res;
         }
 
+        if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
+            $arr = require_once CSDATA . 'plugins/' . $identifier . '/install.php';
+            if (!empty($arr['installCheck'])) {
+                if ($arr['installCheck']()->getCode() != 200) {
+                    return $res;
+                }
+            }
+        }
+
         //插件安装记录入库
         $data = [];
         $data['name'] = $plugin['title'];
@@ -213,7 +222,7 @@ class PluginModel extends ModelAbstract
         file_put_contents($pluginDir . 'install.lock', TIMESTAMP);
 
         if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
+            $arr = require_once CSDATA . 'plugins/' . $identifier . '/install.php';
             if (!empty($arr['install'])) {
                 $arr['install']();
             }
