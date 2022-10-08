@@ -158,7 +158,8 @@ class PluginModel extends ModelAbstract
         if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
             $arr = require_once CSDATA . 'plugins/' . $identifier . '/install.php';
             if (!empty($arr['installCheck'])) {
-                if ($arr['installCheck']()->getCode() != 200) {
+                $res = $arr['installCheck']();
+                if ($res->getCode() != 200) {
                     return $res;
                 }
             }
