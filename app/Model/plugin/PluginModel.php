@@ -286,7 +286,9 @@ class PluginModel extends ModelAbstract
         //删除文件
         $dirs = [
             CSAPP . 'Control/admincp/plugin/' . ucfirst($identifier) . 'Control.php',
+            CSAPP . 'Control/admincp/plugin/' . $identifier . '/',
             CSAPP . 'Control/main/plugin/' . ucfirst($identifier) . 'Control.php',
+            CSAPP . 'Control/main/plugin/' . $identifier . '/',
             CSAPP . 'Model/plugin/' . $identifier . '/',
             CSTEMPLATE . 'admincp/plugin/' . $identifier . '/',
             CSTEMPLATE . 'main/plugin/' . $identifier . '/',
