@@ -156,7 +156,7 @@ class PluginModel extends ModelAbstract
         }
 
         if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require_once CSDATA . 'plugins/' . $identifier . '/install.php';
+            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
             if (!empty($arr['installCheck'])) {
                 $res = $arr['installCheck']();
                 if ($res->getCode() != 200) {
@@ -223,7 +223,7 @@ class PluginModel extends ModelAbstract
         file_put_contents($pluginDir . 'install.lock', TIMESTAMP);
 
         if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require_once CSDATA . 'plugins/' . $identifier . '/install.php';
+            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
             if (!empty($arr['install'])) {
                 $arr['install']();
             }
