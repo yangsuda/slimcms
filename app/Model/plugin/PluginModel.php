@@ -96,7 +96,7 @@ class PluginModel extends ModelAbstract
         $list = self::t('plugins')->withWhere(['available' => 1, 'isinstall' => 1])->fetchList();
         foreach ($list as $v) {
             $class = '\App\Model\plugin\\' . $v['identifier'] . '\\' . ucfirst($v['identifier']) . 'Model';
-            if (class_exists($class) && is_callable([$class, 'hook'])) {
+            if (!empty($param[0]) && !empty($param[1]) && class_exists($class) && is_callable([$class, 'hook'])) {
                 $key = $param[0] . '\\' . $param[1];
                 unset($param[0], $param[1]);
                 $hooks = $class::hook($param);
@@ -153,6 +153,16 @@ class PluginModel extends ModelAbstract
         $res = self::writeCheck($pluginDir . 'files', CSDATA . 'plugins/');
         if ($res->getCode() != 200) {
             return $res;
+        }
+
+        if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
+            $arr = require_once CSDATA . 'plugins/' . $identifier . '/install.php';
+            if (!empty($arr['installCheck'])) {
+                $res = $arr['installCheck']();
+                if ($res->getCode() != 200) {
+                    return $res;
+                }
+            }
         }
 
         //插件安装记录入库
@@ -213,7 +223,7 @@ class PluginModel extends ModelAbstract
         file_put_contents($pluginDir . 'install.lock', TIMESTAMP);
 
         if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
+            $arr = require_once CSDATA . 'plugins/' . $identifier . '/install.php';
             if (!empty($arr['install'])) {
                 $arr['install']();
             }
@@ -277,7 +287,9 @@ class PluginModel extends ModelAbstract
         //删除文件
         $dirs = [
             CSAPP . 'Control/admincp/plugin/' . ucfirst($identifier) . 'Control.php',
+            CSAPP . 'Control/admincp/plugin/' . $identifier . '/',
             CSAPP . 'Control/main/plugin/' . ucfirst($identifier) . 'Control.php',
+            CSAPP . 'Control/main/plugin/' . $identifier . '/',
             CSAPP . 'Model/plugin/' . $identifier . '/',
             CSTEMPLATE . 'admincp/plugin/' . $identifier . '/',
             CSTEMPLATE . 'main/plugin/' . $identifier . '/',
