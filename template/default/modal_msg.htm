@@ -14,7 +14,7 @@
 </style>
 <div class="modal fade" id="alertMsg" tabindex="-1" role="dialog" aria-labelledby="alertMsg" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 500px;">
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="margin-left:10%;width: 80%;">
             <span class="msg"></span>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">×</span>
@@ -26,7 +26,7 @@
 <!-- Modal -->
 <div class="modal fade" id="confirmMsg" tabindex="-1" role="dialog" aria-labelledby="confirmMsg" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="width: 500px;">
+        <div class="modal-content" style="margin-left:10%;width: 80%;">
             <div class="modal-body">
                 <div class="row">
                     <div class="col-sm-3 col-md-3 text-right">
@@ -47,7 +47,7 @@
 <!-- Modal -->
 <div class="modal fade" id="resultMsg" tabindex="-1" role="dialog" aria-labelledby="resultMsg" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="width: 500px;">
+        <div class="modal-content" style="margin-left:10%;width: 80%;">
             <div>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin:0.7rem 1rem">
                     <span aria-hidden="true">&times;</span>
@@ -64,7 +64,7 @@
 
 <script>
     function confirmMsg(msg, callback) {
-        $('#confirmMsg .msg').text(msg);
+        $('#confirmMsg .msg').html(msg);
         $('#confirmMsg').modal();
         $('#confirmMsg .btn-submit').unbind('click').click(function () {
             typeof callback === 'function' && callback();
@@ -72,7 +72,7 @@
     }
 
     function alertMsg(msg, ttl = 2000) {
-        $('#alertMsg .msg').text(msg);
+        $('#alertMsg .msg').html(msg);
         $('#alertMsg').modal();
         setTimeout(function () {
             $('#alertMsg').modal('hide');
@@ -85,7 +85,7 @@
         }else{
             $('#resultMsg i').prop('class','fa-2x mr-2 far fa-times-circle bigfonts text-danger');
         }
-        $('#resultMsg .msg').text(msg);
+        $('#resultMsg .msg').html(msg);
         $('#resultMsg').modal();
         setTimeout(function () {
             if(referer){
