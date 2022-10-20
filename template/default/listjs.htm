@@ -61,7 +61,7 @@
             <!--{if $cfg[urlEncrypt]}-->
             location = '?p=forms/dataDel&fid=$data[fid]&ids='+nid;
             <!--{else}-->
-            location = '{url &p=forms/dataDel&ids='+nid+'}';
+            location = '{url &p=forms/dataDel&fid=$data[fid]&ids='+nid+'}';
             <!--{/if}-->
         })
     }
