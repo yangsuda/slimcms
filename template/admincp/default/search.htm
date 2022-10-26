@@ -15,6 +15,17 @@
                 <!--{/loop}-->
             </select>
         </div>
+        <!--{elseif $v[datatype]=='month'}-->
+        <div class="form-group mr-3 mb-1">
+            <input placeholder="$v[title]" type='text' name='$v[identifier]' id='$v[identifier]' value="{echo aval($data,'get/'.$v[identifier])}" class="form-control" />
+            <script>
+                $(document).ready(function() {
+                    laydate.render({
+                        elem: '#$v[identifier]',type: '$v[datatype]'
+                    });
+                });
+            </script>
+        </div>
         <!--{elseif in_array($v[datatype],array('date','datetime'))}-->
         <div class="form-group mr-3 mb-1">
             <input placeholder="$v[title]" type='text' name='$v[identifier]_s' id='$v[identifier]_s' value="{echo aval($data,'get/'.$v[identifier].'_s')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />

@@ -1,0 +1,21 @@
+<!--{if $cfg[clienttype] > 0}-->
+<input type="date" $data[validform] class="form-control $data[css]" id="$data[identifier]" name="$data[identifier]" value="$data[default]" $data[maxlength]/>
+<!--{else}-->
+<!--{if $data[isLoadDatetimepicker]==1}-->
+<script src="$cfg[resourceUrl]plugins/laydate/laydate.js"></script>
+<!--{/if}-->
+<div class="am-input-group">
+        <span class="am-input-group-label">
+            <span class="am-icon-calendar"></span>
+        </span>
+    <input type="text" $data[validform] name="$data[identifier]" id="$data[identifier]" class="form-control $data[css]" value="$data[default]" $data[maxlength]/>
+</div>
+<script>
+    $(document).ready(function() {
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#{$data[identifier]}',type: 'month'
+        });
+    });
+</script>
+<!--{/if}-->
