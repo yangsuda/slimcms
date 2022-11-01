@@ -87,6 +87,7 @@
                                                     <tr role="row" align="center">
                                                         <th>插件名称</th>
                                                         <th>标识符</th>
+                                                        <th>类型</th>
                                                         <th>作者</th>
                                                         <th>管理</th>
                                                         <th>操作</th>
@@ -98,6 +99,7 @@
                                                     <tr align='center' bgcolor="#FFFFFF">
                                                         <td class="text-dark" style="text-align: left;">$v[title]($v[version])<br><span class="text-secondary small">$v[intro]</span></td>
                                                         <td class="text-dark">$v[identifier]</td>
+                                                        <td class="text-dark">$v[versiontype]</td>
                                                         <td class="text-dark">$v[author]</td>
                                                         <td class="text-dark">
                                                             <!--{if aval($v,'my/isinstall')==1 && aval($v,'my/available')==1}-->
@@ -108,7 +110,11 @@
                                                         </td>
                                                         <td>
                                                             <!--{if !$v[my]}-->
+                                                            <!--{if $v[versiontype]=='voucher'}-->
+                                                            <a class="btn btn-success btn-sm btn-installbox" href="javascript:void(0)" data-identifier="$v[identifier]">安装</a>
+                                                            <!--{else}-->
                                                             <a class="btn btn-success btn-sm btn-install" href="javascript:void(0)" data-identifier="$v[identifier]">安装</a>
+                                                            <!--{/if}-->
                                                             <!--{else}-->
                                                             <!--{if $v[my][available]==1}-->
                                                             <a class="btn btn-secondary btn-sm btn-switch" href="javascript:void(0)" data-open="-1" data-identifier="$v[identifier]">关闭</a>
@@ -162,8 +168,51 @@
         </div>
     </div>
 
+    <div class="modal fade" id="btn-installbox" tabindex="-1" role="dialog" aria-labelledby="btn-installbox" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="width: 500px;">
+                <div class="modal-body">
+                    <div class="form-group row formgroup-title">
+                        <label for="voucher" class="col-sm-3 col-form-label text-xl-right"><sapn style="color: red">*</sapn>兑换码：</label>
+                        <div class="col-sm-5 ">
+                            <input type="hidden" id="identifier">
+                            <input type="text" datatype="*" nullmsg="请输入兑换码" placeholder="请输入兑换码" class="form-control" id="voucher">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-sm-4 text-muted"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success btn-installsubmit">安装</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(function () {
+            $('.btn-installbox').click(function () {
+                $('#btn-installbox').modal();
+                $('#identifier').val($(this).data('identifier'));
+            })
+
+            $('.btn-installsubmit').click(function () {
+                var that = $(this);
+                that.text('安装中...');
+                var identifier = $('#identifier').val();
+                var voucher = $('#voucher').val();
+                $('#btn-installbox').modal('hide');
+                $.getJSON('{url ?p=plugin/install&identifier='+identifier+'&voucher='+voucher+'}',function (res) {
+                    resultMsg(res.msg,res.code);
+                    that.text('安装');
+                    if(res.code==200){
+                        setTimeout(function () {
+                            location = res.referer;
+                        }, 2000);
+                    }
+                })
+            })
+
             function confirmUnstall(callback) {
                 $('#confirmUnstall').modal();
                 $('#confirmUnstall .btn-submit').unbind('click').click(function () {

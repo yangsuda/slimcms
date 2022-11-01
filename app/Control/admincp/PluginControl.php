@@ -20,7 +20,8 @@ class PluginControl extends AdmincpControl
     {
         $this->checkAllow();
         $identifier = self::inputString('identifier');
-        $res = PluginModel::install($identifier);
+        $voucher = self::inputString('voucher');
+        $res = PluginModel::install($identifier, $voucher);
         return $this->json($res);
     }
 
