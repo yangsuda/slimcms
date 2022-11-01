@@ -117,7 +117,7 @@ class PluginModel extends ModelAbstract
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function install(string $identifier): OutputInterface
+    public static function install(string $identifier, string $voucher = ''): OutputInterface
     {
         if (empty($identifier)) {
             return self::$output->withCode(21002);
@@ -138,8 +138,22 @@ class PluginModel extends ModelAbstract
         $installzip = CSDATA . 'plugins/' . $identifier . '.zip';
 
         //下载压缩包
-        $zipData = file_get_contents($plugin['file']);
-        $zipData && file_put_contents($installzip, $zipData);
+        //兼容老的下载方式
+        if (strpos($plugin['file'], '.zip')) {
+            $zipData = file_get_contents($plugin['file']);
+            $zipData && file_put_contents($installzip, $zipData);
+        } else {
+            $fileurl = $plugin['file'];
+            if($plugin['versiontype']=='voucher'){
+                $fileurl .= '&voucher='.$voucher;
+            }
+            $res = json_decode(file_get_contents($fileurl), true);
+            if ($res['code'] != 200) {
+                return self::$output->withCode(21000, ['msg' => $res['msg']]);
+            }
+            file_put_contents($installzip, urldecode($res['data']['zip']));
+        }
+
 
         if (!is_file($installzip)) {
             return self::$output->withCode(223024);
