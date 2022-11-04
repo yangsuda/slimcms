@@ -1,0 +1,35 @@
+div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+  justify-content: flex-end !important;
+}
+.card-header {
+  border-bottom:none;
+}
+.mb-3, .my-3 {
+  margin-bottom: 0rem !important;
+}
+.tag {
+  position:relative;
+  top: 2px;
+  padding: 0 1px;
+  left: 9px;
+}
+.tag a {
+  color: #000000;
+}
+.tag .card {
+  border: 1px solid rgba(0,0,0,.125);
+  border-radius: .25rem .25rem 0 0;
+}
+.active {
+  z-index: 10;
+}
+.active .card {
+  border-bottom: none !important;
+}
+.active .card-header {
+  background-color: rgba(255,255,255,1);
+  font-weight: bold;
+}
+.cardcontent {
+  border-radius: 0 .25rem .25rem .25rem;
+}
