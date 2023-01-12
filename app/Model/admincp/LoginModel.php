@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 登陆模型类
+ * 登录模型类
  * @author zhucy
  */
 
@@ -18,7 +18,7 @@ use SlimCMS\Interfaces\OutputInterface;
 class LoginModel extends ModelAbstract
 {
     /**
-     * 登陆操作
+     * 登录操作
      * @param string $userid
      * @param string $pwd
      * @return OutputInterface
@@ -55,7 +55,7 @@ class LoginModel extends ModelAbstract
     }
 
     /**
-     * 登陆信息
+     * 登录信息
      * @param int $adminid
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
