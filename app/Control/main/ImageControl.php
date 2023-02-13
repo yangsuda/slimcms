@@ -11,10 +11,35 @@ namespace App\Control\main;
 
 use App\Core\Forms;
 use SlimCMS\Abstracts\ControlAbstract;
+use SlimCMS\Helper\Crypt;
 use SlimCMS\Interfaces\UploadInterface;
 
 class ImageControl extends ControlAbstract
 {
+    /**
+     * 图片动态加载
+     */
+    public function dynamicImage()
+    {
+        header('Content-type: image/jpeg');
+        $key = self::inputString('key');//由pic、time参数组成的加密数组
+        $arr = Crypt::decrypt($key);
+        //图片生命周期5秒，防止链接复制出去被人访问
+        if (
+            !empty($arr['pic'])
+            && !empty($arr['time'])
+            && is_file(CSPUBLIC . $arr['pic'])
+            && !empty($arr['pic'])
+            && $arr['time'] + 5 > TIMESTAMP
+        ) {
+            $pic = parse_url(copyImage($arr['pic']),PHP_URL_PATH);
+            $str = file_get_contents(CSPUBLIC . $pic);
+        } else {
+            $str = file_get_contents(CSPUBLIC . 'resources/global/images/nopic/nopic.jpg');
+        }
+        exit($str);
+    }
+
     /**
      * 图片上传组件传图
      */
