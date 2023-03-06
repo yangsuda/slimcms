@@ -36,7 +36,11 @@
             $v[field]
             <!--{/if}-->
             <!--{if $v[units]}-->
+            <!--{if aval($data,'data/id') && $v[forbidedit]==2}-->
+            $v[units]
+            <!--{else}-->
             <span class="input-group-append"><span tabindex="0" class="input-group-text">$v[units]</span></span>
+            <!--{/if}-->
         </div>
         <!--{/if}-->
         <div class="invalid-feedback"></div>
