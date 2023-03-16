@@ -18,8 +18,8 @@
         }
     ],
     "require": {
-        "php": "^7.3",
-        "yangsuda/framework": "^2.1"
+        "php": "^7.3 || ^8.0",
+        "yangsuda/framework": "^3.0"
     },
     "repositories": {
         "packagist": {
