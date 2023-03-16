@@ -2,10 +2,6 @@
 define('SLIMCMSINSTALL', str_replace("\\", '/', dirname(__FILE__)));
 define('SLIMCMSROOT', str_replace("\\", '/', substr(SLIMCMSINSTALL, 0, -7)));
 
-if (version_compare(PHP_VERSION, '7.2.0') < 0) {
-    exit('PHP版本必须大于7.2');
-}
-
 function writeTest($dir)
 {
     $tfile = $dir . 'mtext.txt';
