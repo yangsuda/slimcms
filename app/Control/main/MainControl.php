@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Control\main;
 
 use App\Core\Forms;
+use App\Model\main\ImageCode;
 use SlimCMS\Abstracts\ControlAbstract;
 
 class MainControl extends ControlAbstract
@@ -38,15 +39,6 @@ class MainControl extends ControlAbstract
      */
     public function captcha()
     {
-        $img = new \Securimage();
-        $img->code_length = 4;
-        $img->image_width = 80;
-        $img->image_height = 40;
-        $img->ttf_file = CSDATA . 'fonts/INDUBITA.TTF';
-        $img->text_color = new \Securimage_Color('#009D41');
-        $img->charset = '0123456789';
-        $img->num_lines = 0;
-        $img->noise_level = 1;
-        return $img->show();
+        ImageCode::doimg();
     }
 }
