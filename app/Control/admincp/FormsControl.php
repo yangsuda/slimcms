@@ -11,6 +11,7 @@ namespace App\Control\admincp;
 use App\Core\Forms;
 use App\Core\Page;
 use App\Model\plugin\PluginModel;
+use SlimCMS\Helper\ImageCode;
 
 class FormsControl extends AdmincpControl
 {
@@ -64,8 +65,7 @@ class FormsControl extends AdmincpControl
             //如启用验证码，对验证码验证
             if (self::$config['ccode'] == '1') {
                 $ccode = self::inputString('ccode');
-                $img = new \Securimage();
-                if (!$img->check($ccode)) {
+                if (ImageCode::checkCode($ccode) === false) {
                     $output = self::$output->withCode(24023);
                     return $this->directTo($output);
                 }
