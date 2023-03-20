@@ -37,4 +37,17 @@ class AdminTable extends Table
         }
         return 200;
     }
+
+    /**
+     * 列表数据获取之前的自定义处理
+     * @param $param
+     * @return array
+     */
+    public function dataListInit(&$param)
+    {
+        $where = [];
+        $where[] = 'id>1';
+        $param['where'] = $where;
+        return 200;
+    }
 }
