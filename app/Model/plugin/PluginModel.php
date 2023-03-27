@@ -87,28 +87,26 @@ class PluginModel extends ModelAbstract
 
     /**
      * 非插件中调用插件的勾子
-     * @param mixed ...$param
+     * @param $plugin
+     * @param $method
+     * @param $param
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function hook(...$param): OutputInterface
+    public static function hook($plugin, $method, $param): OutputInterface
     {
-        $list = self::t('plugins')->withWhere(['available' => 1, 'isinstall' => 1])->fetchList();
-        foreach ($list as $v) {
-            $class = '\App\Model\plugin\\' . $v['identifier'] . '\\' . ucfirst($v['identifier']) . 'Model';
-            if (!empty($param[0]) && !empty($param[1]) && class_exists($class) && is_callable([$class, 'hook'])) {
-                $key = $param[0] . '\\' . $param[1];
-                unset($param[0], $param[1]);
-                $hooks = $class::hook($param);
-                if (!empty($hooks[$key])) {
-                    $res = $hooks[$key](array_values($param));
-                    if ($res->getCode() != 200) {
-                        return $res;
-                    }
-                }
-            }
+        if (empty($plugin) || empty($method)) {
+            return self::$output->withCode(21003);
         }
-        return self::$output->withCode(200);
+        $res = self::getPlugin($plugin);
+        if ($res->getCode() != 200) {
+            return $res;
+        }
+        $class = '\App\Model\plugin\\' . $plugin . '\\' . ucfirst($plugin) . 'Model';
+        if (class_exists($class) && is_callable([$class, $method])) {
+            return $class::$method($param);
+        }
+        return self::$output->withCode(21009);
     }
 
     /**
@@ -144,8 +142,8 @@ class PluginModel extends ModelAbstract
             $zipData && file_put_contents($installzip, $zipData);
         } else {
             $fileurl = $plugin['file'];
-            if($plugin['versiontype']=='voucher'){
-                $fileurl .= '&voucher='.$voucher;
+            if ($plugin['versiontype'] == 'voucher') {
+                $fileurl .= '&voucher=' . $voucher;
             }
             $res = json_decode(file_get_contents($fileurl), true);
             if ($res['code'] != 200) {
