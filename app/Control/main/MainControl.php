@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Control\main;
 
 use App\Core\Forms;
-use App\Model\main\ImageCode;
+use SlimCMS\Helper\ImageCode;
 use SlimCMS\Abstracts\ControlAbstract;
 
 class MainControl extends ControlAbstract
