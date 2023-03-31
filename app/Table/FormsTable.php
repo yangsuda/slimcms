@@ -46,7 +46,7 @@ class FormsTable extends Table
     public function dataSaveAfter($data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
-            PluginModel::hook('api', 'apiManage', $data['id']);
+            PluginModel::hook('api', 'apiManage', (int)$data['id']);
         }
         return 200;
     }
