@@ -78,7 +78,7 @@ class FormsControl extends AdmincpControl
             $referer = $referer ?: self::url('&p=forms/dataList&id=');
             $res = Forms::dataSave($fid, $id, [], ['admin' => self::$admin])->withReferer($referer);
             //插件勾子调用,用于更新接口文档
-            $fid == 2 && PluginModel::hook('api', 'apiUpdate', ['formid' => $fid, 'fieldid' => $id]);
+            $fid == 2 && PluginModel::hook('api', 'apiUpdate', ['formid' => $fid, 'fieldid' => aval($res->getData(), 'id')]);
             return $this->directTo($res);
         }
         $options = ['cacheTime' => 300, 'ueditorType' => 'admin', 'admin' => self::$admin];
