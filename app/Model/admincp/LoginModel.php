@@ -63,14 +63,14 @@ class LoginModel extends ModelAbstract
     public static function loginInfo(int $adminid): OutputInterface
     {
         if (empty($adminid)) {
-            return self::$output->withCode(21002)->withReferer(self::url('?p=login'));
+            return self::$output->withCode(21002)->withReferer('?p=login');
         }
         $cachekey = self::cacheKey(__FUNCTION__, $adminid);
         $row = self::$redis->get($cachekey);
         if (empty($row)) {
             $row = self::t('admin')->withWhere($adminid)->fetch();
             if (empty($row)) {
-                return self::$output->withCode(21001)->withReferer(self::url('?p=login'));
+                return self::$output->withCode(21001)->withReferer('?p=login');
             }
             if ($row['status'] == 2) {
                 return self::$output->withCode(21061);
@@ -175,6 +175,6 @@ class LoginModel extends ModelAbstract
         $id = $res->getData()['id'];
         $newpwd = Crypt::pwd($newpwd);
         self::t('admin')->withWhere($id)->update(['pwd' => $newpwd]);
-        return self::$output->withCode(200)->withReferer(Forms::url('?p=login/logout'));
+        return self::$output->withCode(200)->withReferer('?p=login/logout');
     }
 }

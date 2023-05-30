@@ -36,7 +36,7 @@ class LoginControl extends ControlAbstract
                 isset($_SESSION) ? '' : session_start();
                 $_SESSION['adminAuth'] = Crypt::encrypt($res->getData()['id']);
                 $referer = self::input('referer', 'url');
-                $referer = $referer ?: self::url('?p=main/index');
+                $referer = $referer ?: '?p=main/index';
                 $res = $res->withReferer($referer);
             }
             return $this->response($res);
@@ -46,7 +46,7 @@ class LoginControl extends ControlAbstract
         $adminAuth = (string)aval($_SESSION, 'adminAuth');
         $auth = Crypt::decrypt($adminAuth);
         if (is_numeric($auth)) {
-            self::directTo(self::$output->withReferer(self::url('?p=main/index')));
+            self::directTo(self::$output->withReferer('?p=main/index'));
         }
 
         //防止安装完后点登录，成功后又退回安装页面

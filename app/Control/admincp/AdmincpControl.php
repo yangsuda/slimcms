@@ -39,7 +39,7 @@ class AdmincpControl extends ControlAbstract
             }
         }
         if (empty(self::$admin['id'])) {
-            $url = self::url('?p=login&referer=' . urlencode(self::url()));
+            $url = '?p=login&referer=' . urlencode(self::url());
             if (self::$response->determineContentType() == 'application/json') {
                 $res = self::$output->withCode(24071)->withReferer($url)->jsonSerialize();
                 echo json_encode($res);
@@ -61,7 +61,7 @@ class AdmincpControl extends ControlAbstract
         $res = LoginModel::checkAllow(self::$admin, $auth);
         if ($res->getCode() != 200) {
             $this->directTo($res);
-            $url = $res->getReferer() ?: self::url('?p=main/index');
+            $url = $res->getReferer() ?: '?p=main/index';
             if (self::$response->determineContentType() == 'application/json') {
                 $res = self::$output->withCode(21048)->withReferer('')->jsonSerialize();
                 echo json_encode($res);
