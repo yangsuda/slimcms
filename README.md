@@ -117,6 +117,92 @@ Model层数据统一以Output对象形式返回，
 }  
 ```
 
+
+## 默认增删改查定制化
+可通过在/app/Table文件夹中创建对应表的类文件来实现数据输入输出的定制化，格式为“表名Table.php”，（注：第一个字母要大写），如admin表，在文件夹中创建AdminTable.php文件
+
+数据列表（forms/dataList）
+
+可在上面的类文件中定义 dataListInit、dataListBefore、dataListAfter 方法来实现列表的前、中、后三个阶段的数据输入输出控制，（注：状态码返回200为成功，其它为报错），具体参见Forms.php文件，如：
+```bash
+public function dataListBefore(&$param): int
+{
+    return 200;
+} 
+```
+
+
+数据保存（forms/dataSave）
+
+可在上面的类文件中定义 dataSaveInit、dataSaveBefore、dataSaveAfter 方法来实现数据保存的前、中、后三个阶段的数据输入输出控制，（注：状态码返回200为成功，其它为报错），具体参见Forms.php文件，如：
+```bash
+public function dataSaveBefore(&$data, $row = [], $options = []): int
+{
+    return 200;
+}
+```
+
+数据详细（forms/dataView）
+
+可在上面的类文件中定义 dataViewBefore、dataViewAfter 方法来实现数据详细的前、后两个阶段的数据输入输出控制，（注：状态码返回200为成功，其它为报错），具体参见Forms.php文件，如：
+```bash
+public function dataViewAfter(&$data): int
+{
+    return 200;
+}
+```
+
+数据删除（forms/dataDel）
+
+可在上面的类文件中定义 dataDelBefore、dataDelAfter 方法来实现数据删除的前、后两个阶段的数据输入输出控制，（注：状态码返回200为成功，其它为报错），具体参见Forms.php文件，如：
+```bash
+public function dataDelBefore($data, $options = []): int
+{
+    return 200;
+}
+```
+
+数据审核（forms/dataCheck）
+
+可在上面的类文件中定义 dataCheckBefore、dataCheckAfter 方法来实现数据审核的前、后两个阶段的数据输入输出控制，（注：状态码返回200为成功，其它为报错），具体参见Forms.php文件，如：
+```bash
+public function dataCheckBefore($ids, $ischeck, $options): int
+{
+    return 200;
+}
+```
+
+数据统计（forms/dataCount）
+
+可在上面的类文件中定义 dataCountBefore 方法来实现数据统计的前的数据输入控制，（注：状态码返回200为成功，其它为报错），具体参见Forms.php文件，如：
+```bash
+public function dataCountBefore($param)
+{
+    return 200;
+}
+```
+
+生成的表单HTML（forms/dataFormHtml）
+
+可在上面的类文件中定义 getFormHtmlBefore、getFormHtmlAfter 方法来实现生成的表单HTML的前、后两个阶段的数据输入输出控制，（注：状态码返回200为成功，其它为报错），具体参见Forms.php文件，如：
+```bash
+public function getFormHtmlBefore($fields, $row, $form, $options)
+{
+    return 200;
+}
+```
+
+数据导出（forms/dataExport）
+
+可在上面的类文件中定义 dataExportBefore、dataExportAfter 方法来实现数据导出的前、后两个阶段的数据输入输出控制，（注：状态码返回200为成功，其它为报错），具体参见Forms.php文件，如：
+```bash
+public function dataExportBefore($condition, $result)
+{
+    return 200;
+}
+```
+
+
 ## 前端web页面
 
 前端web页面默认根据后台表单开放前端WEB功能权限控制显示，分“列表、展示、添加修改、删除、导出、表单结构、审核”7种权限，
