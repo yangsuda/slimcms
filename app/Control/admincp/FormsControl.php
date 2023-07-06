@@ -11,6 +11,7 @@ namespace App\Control\admincp;
 use App\Core\Forms;
 use App\Core\Page;
 use App\Model\plugin\PluginModel;
+use SlimCMS\Error\TextException;
 use SlimCMS\Helper\ImageCode;
 
 class FormsControl extends AdmincpControl
@@ -30,7 +31,11 @@ class FormsControl extends AdmincpControl
         $param['admin'] = self::$admin;
         $res = Forms::dataList($param);
         if ($res->getCode() != 200) {
-            return self::directTo($res);
+            try {
+                return self::directTo($res);
+            }catch (TextException $e){
+                return self::directTo($res->withReferer(Forms::url('?p=main/index')));
+            }
         }
         $data = $res->getData();
         $data['admin'] = self::$admin;
@@ -67,24 +72,32 @@ class FormsControl extends AdmincpControl
                 $ccode = self::inputString('ccode');
                 if (ImageCode::checkCode($ccode) === false) {
                     $output = self::$output->withCode(24023);
-                    return $this->directTo($output);
+                    return self::directTo($output);
                 }
             }
             $res = Forms::submitCheck($formhash);
             if ($res->getCode() != 200) {
-                return $this->directTo($res);
+                try {
+                    return self::directTo($res);
+                }catch (TextException $e){
+                    return self::directTo($res->withReferer(Forms::url('?p=main/index')));
+                }
             }
             $referer = self::input('referer', 'url');
             $referer = $referer ?: self::url('&p=forms/dataList&id=');
             $res = Forms::dataSave($fid, $id, [], ['admin' => self::$admin])->withReferer($referer);
             //插件勾子调用,用于更新接口文档
             $fid == 2 && PluginModel::hook('api', 'apiUpdate', ['formid' => $fid, 'fieldid' => aval($res->getData(), 'id')]);
-            return $this->directTo($res);
+            return self::directTo($res);
         }
         $options = ['cacheTime' => 300, 'ueditorType' => 'admin', 'admin' => self::$admin];
         $res = Forms::dataFormHtml($fid, $id, $options);
         if ($res->getCode() != 200) {
-            return self::directTo($res);
+            try {
+                return self::directTo($res);
+            }catch (TextException $e){
+                return self::directTo($res->withReferer(Forms::url('?p=main/index')));
+            }
         }
         $template = '';
         if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
