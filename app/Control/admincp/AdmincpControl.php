@@ -92,7 +92,7 @@ class AdmincpControl extends ControlAbstract
     {
         $purviews = aval(self::$admin, '_groupid/purviews');
         $purviews = $purviews ? explode(',', $purviews) : [];
-        $param = ['fid' => 1, 'ischeck' => 1, 'pagesize' => 200, 'inlistField' => 'inlistcp', 'cacheTime' => 600, 'order' => 'weight', 'noinput' => 1];
+        $param = ['fid' => 1, 'ischeck' => 1, 'pagesize' => 200, 'inlistField' => 'inlistcp', 'cacheTime' => 60, 'order' => 'weight', 'noinput' => 1];
         $res = Forms::dataList($param)->getData();
         $arr = [];
         $weight = [];
