@@ -154,13 +154,13 @@ class LoginModel extends ModelAbstract
 
     /**
      * 修改密码
-     * @param $userid 帐号
-     * @param $pwd 原密码
-     * @param $newpwd 新密码
+     * @param string $userid 帐号
+     * @param string $pwd 原密码
+     * @param string $newpwd 新密码
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function updatePwd($userid, $pwd, $newpwd): OutputInterface
+    public static function updatePwd(string $userid, string $pwd, string $newpwd): OutputInterface
     {
         $res = self::loginCheck($userid, $pwd);
         if ($res->getCode() != 200) {
