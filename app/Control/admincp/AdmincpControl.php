@@ -23,6 +23,8 @@ class AdmincpControl extends ControlAbstract
     public function __construct(Request $request, Response $response)
     {
         parent::__construct($request, $response);
+        self::$config['rewriteUrl'] = false;//后台伪静态强制不开启
+        self::$config['urlEncrypt'] = false;//后台URL加密不开启
         if (empty(self::$admin)) {
             isset($_SESSION) ? '' : session_start();
             $adminAuth = (string)aval($_SESSION, 'adminAuth');
@@ -34,8 +36,6 @@ class AdmincpControl extends ControlAbstract
                 }
                 self::$admin = $res->getData()['admin'];
                 self::$admin['adminAuth'] = $adminAuth;
-                self::$config['rewriteUrl'] = false;//后台伪静态强制不开启
-                self::$config['urlEncrypt'] = false;//后台URL加密不开启
             }
         }
         if (empty(self::$admin['id'])) {
