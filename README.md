@@ -317,6 +317,8 @@ public function __construct(Request $request, string $tableName, string $extendN
 RewriteEngine On
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)/(.*) - [L]
 RewriteRule ^(.*)/(ueditor|resources|uploads|install)(.*) - [L]
+RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5/$6&q=$7 [QSA,L]
+RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5/$6 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5&q=$6 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4&q=$5 [QSA,L]
@@ -325,6 +327,26 @@ RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3&q=$4 [
 RewriteRule ^(.*)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3 [QSA,L]
 RewriteRule ^(.*)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2&q=$3 [QSA,L]
 RewriteRule ^(.*)/([\w]+)(/)?$ $1/index.php?p=$2 [QSA,L]
+```
+
+## nginx伪静态规则
+```bash
+location ~* /(ueditor|resources|uploads|install)/(.*){
+	break;
+}
+
+if (!-e $request_filename) {
+	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5/$6&q=$7&$args last;
+	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5/$6&$args last;
+	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5&q=$6&$args last;
+	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5&$args last;
+	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4&q=$5&$args last;
+	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4&$args last;
+	rewrite ^(.*)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3&q=$4&$args last;
+	rewrite ^(.*)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3&$args last;
+	rewrite ^(.*)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2&q=$3&$args last;
+	rewrite ^(.*)/([\w]+)(/)?$ $1/index.php?p=$2&$args last;
+}
 ```
 
 注：此规则是在将根目录指向到“public/”目录的情况下的规则.
