@@ -331,10 +331,6 @@ RewriteRule ^(.*)/([\w]+)(/)?$ $1/index.php?p=$2 [QSA,L]
 
 ## nginx伪静态规则
 ```bash
-location ~* /(ueditor|resources|uploads|install)/(.*){
-	break;
-}
-
 if (!-e $request_filename) {
 	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5/$6&q=$7&$args last;
 	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5/$6&$args last;
