@@ -20,7 +20,7 @@ define('CSVENDOR', CSROOT . 'vendor/');
 define('CORE_DEBUG', true); //生产环境下设置false
 define('TIMESTAMP', time());
 define('MICROTIME', microtime(true));
-define('VERSION', '2.0.0');
+define('VERSION', '3.0.1');
 
 require_once CSROOT . 'vendor/autoload.php';
 
