@@ -64,4 +64,46 @@ class MainModel extends ModelAbstract
         $rules = unserialize($rules);
         return self::$output->withCode(200)->withData(['rules' => $rules]);
     }
+
+    /**
+     * 设置封面
+     * @param array $param
+     * @return OutputInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function setCover(array $param): OutputInterface
+    {
+        if (empty($param['id']) || empty($param['fid']) || empty($param['pic'])) {
+            return self::$output->withCode(21002);
+        }
+        $form = self::t('forms')->withWhere($param['fid'])->fetch();
+        if (empty($form)) {
+            return self::$output->withCode(21001);
+        }
+        $row = self::t($form['table'])->withWhere($param['id'])->fetch();
+        if (empty($row)) {
+            return self::$output->withCode(21001);
+        }
+        $fieldname = self::t('forms_fields')->withWhere(['formid' => $param['fid'], 'datatype' => 'imgs'])->fetch('identifier');
+        if (empty($fieldname)) {
+            return self::$output->withCode(21001);
+        }
+        $key = md5($param['pic']);
+        $pics = unserialize($row[$fieldname]);
+        if (empty($pics[$key])) {
+            return self::$output->withCode(21001);
+        }
+        foreach ($pics as $k => $v) {
+            if (isset($v['iscover'])) {
+                unset($v['iscover']);
+            }
+            $pics[$k] = $v;
+        }
+        $pics[$key]['iscover'] = 1;
+        $data = [
+            $fieldname => serialize($pics),
+        ];
+        self::t($form['table'])->withWhere($row['id'])->update($data);
+        return self::$output->withCode(200);
+    }
 }
