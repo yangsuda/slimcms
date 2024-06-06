@@ -114,7 +114,8 @@ class Forms_fieldsTable extends Table
                 $list = self::t('forms_fields')
                     ->withWhere(['formid' => $data['formid']])
                     ->withLimit(1)
-                    ->fetchList('displayorder');
+                    ->withOrderby('displayorder','asc')
+                    ->fetchList('id,displayorder');
                 if (!empty($list[0]['displayorder'])) {
                     $data['displayorder'] = $list[0]['displayorder'] - 1;
                 }
