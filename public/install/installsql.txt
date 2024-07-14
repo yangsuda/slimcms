@@ -16,7 +16,7 @@ CREATE TABLE `#@#admin` (
   KEY `groupid` (`groupid`),
   KEY `status` (`status`),
   KEY `realname` (`realname`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='管理员表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='管理员表';
 
 DROP TABLE IF EXISTS `#@#admingroup`;
 CREATE TABLE `#@#admingroup` (
@@ -27,7 +27,7 @@ CREATE TABLE `#@#admingroup` (
   `ip` varchar(50) NOT NULL DEFAULT '',
   `createtime` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='管理员用户组表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='管理员用户组表';
 
 INSERT INTO `#@#admingroup` VALUES (null, '超级管理员', 'admin_AllowAll', '0', '', '0');
 
@@ -47,7 +47,7 @@ CREATE TABLE `#@#adminlog` (
   KEY `adminid` (`adminid`),
   KEY `query` (`query`),
   KEY `method` (`method`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 DELAY_KEY_WRITE=1 COMMENT='后台操作日志表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 DELAY_KEY_WRITE=1 COMMENT='后台操作日志表';
 
 DROP TABLE IF EXISTS `#@#adminloginlog`;
 CREATE TABLE `#@#adminloginlog` (
@@ -59,7 +59,7 @@ CREATE TABLE `#@#adminloginlog` (
   `pwd` varchar(250) NOT NULL DEFAULT '' COMMENT '登录密码',
   PRIMARY KEY (`id`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `#@#adminpermission`;
 CREATE TABLE `#@#adminpermission` (
@@ -70,7 +70,7 @@ CREATE TABLE `#@#adminpermission` (
   `name` varchar(250) NOT NULL DEFAULT '' COMMENT '权限名称',
   `purview` varchar(250) NOT NULL DEFAULT '' COMMENT '权限标识',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `#@#adminpermission` VALUES
 (null, '2', '1600398324', '', '数据恢复', 'main/recovery'),
@@ -93,7 +93,7 @@ CREATE TABLE `#@#archivedata` (
   `createtime` int(11) NOT NULL DEFAULT '0',
   `ip` varchar(20) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='已删除文档数据表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='已删除文档数据表';
 
 DROP TABLE IF EXISTS `#@#forms`;
 CREATE TABLE `#@#forms` (
@@ -114,7 +114,7 @@ CREATE TABLE `#@#forms` (
   `jumpurl` varchar(250) NOT NULL DEFAULT '' COMMENT '跳转链接',
   PRIMARY KEY (`id`),
   KEY `table` (`table`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='自定义表单';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='自定义表单';
 
 INSERT INTO `#@#forms` VALUES
 ('1', '自定义表单', 'forms', '2', '1', '2', '1569318020', '1', '', '1', '0', 'fas fa-cog', '1', '',''),
@@ -169,7 +169,7 @@ CREATE TABLE `#@#forms_fields` (
   `egroup` varchar(250) NOT NULL COMMENT '联动数据',
   PRIMARY KEY (`id`),
   KEY `formid` (`formid`) USING BTREE
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='自定义表单字段管理表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='自定义表单字段管理表';
 
 INSERT INTO `#@#forms_fields` VALUES
 (null, '权重', 'weight', '1', 'int', '40', '1', '1', '2', '2', '2', '1', '1', '1', '1', '', '0', '数值越大越靠前', '', '', '', '', '', '', '', '1588224083', '1', '', '', '', '0.0000', '1', '3', '1', ''),
@@ -279,7 +279,7 @@ CREATE TABLE `#@#sysconfig` (
   PRIMARY KEY (`id`),
   KEY `groupid` (`groupid`),
   KEY `varname` (`varname`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='系统设置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统设置';
 
 
 INSERT INTO `#@#sysconfig` VALUES
@@ -331,7 +331,7 @@ CREATE TABLE `#@#sysenum` (
   PRIMARY KEY (`id`),
   KEY `reid` (`reid`),
   KEY `egroup` (`egroup`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='联动菜单';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='联动菜单';
 
 DROP TABLE IF EXISTS `#@#uploads`;
 CREATE TABLE `#@#uploads` (
@@ -347,7 +347,7 @@ CREATE TABLE `#@#uploads` (
   `ip` varchar(20) DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `isfirst` (`isfirst`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='上传附件记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='上传附件记录表';
 
 DROP TABLE IF EXISTS `#@#plugins`;
 CREATE TABLE `#@#plugins` (
@@ -368,4 +368,4 @@ CREATE TABLE `#@#plugins` (
   PRIMARY KEY (`id`),
   KEY `available` (`available`),
   KEY `isinstall` (`isinstall`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='插件表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='插件表';
