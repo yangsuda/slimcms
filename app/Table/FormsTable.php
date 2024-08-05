@@ -37,21 +37,6 @@ class FormsTable extends Table
     }
 
     /**
-     * 数据保存后的自定义处理
-     * @param $data
-     * @param array $row
-     * @return int
-     * @throws \SlimCMS\Error\TextException
-     */
-    public function dataSaveAfter($data, $row = [], $options = []): int
-    {
-        if (defined('MANAGE') && MANAGE == 1) {
-            PluginModel::hook('api', 'apiManage', (int)$data['id']);
-        }
-        return 200;
-    }
-
-    /**
      * 数据删除后的自定义处理
      * @param $data
      * @return int
@@ -64,6 +49,19 @@ class FormsTable extends Table
                 self::t('forms_fields')->withWhere(['formid' => $data['id']])->delete();
             }
         }
+        return 200;
+    }
+
+    /**
+     * 列表数据获取之前的自定义处理
+     * @param $param
+     * @return array
+     */
+    public function dataListInit(&$param)
+    {
+        $where = [];
+        !empty($param['export']) && $where['export'] = $param['export'];
+        $param['where'] = $where;
         return 200;
     }
 }
