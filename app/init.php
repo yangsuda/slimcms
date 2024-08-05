@@ -4,7 +4,6 @@ use DI\ContainerBuilder;
 use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
 use Slim\Factory\ServerRequestCreatorFactory;
-use Slim\ResponseEmitter;
 use SlimCMS\Handlers\HttpErrorHandler;
 use SlimCMS\Handlers\ShutdownHandler;
 use SlimCMS\Interfaces\RouteInterface;
@@ -67,6 +66,7 @@ $errorMiddleware->setDefaultErrorHandler($errorHandler);
 $shutdownHandler = new ShutdownHandler($request, $errorHandler, CORE_DEBUG);
 register_shutdown_function($shutdownHandler);
 
-$response = $app->handle($request);
-$responseEmitter = new ResponseEmitter();
-$responseEmitter->emit($response);
+//cors middleware
+$app->add(\App\MiddleWare\CorsMiddleWare::class);
+
+$app->run($request);
