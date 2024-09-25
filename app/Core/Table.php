@@ -33,13 +33,15 @@ class Table extends \SlimCMS\Core\Table
                 return false;
             }
             //防止新生成的表单自增ID不连续
-            if ($db->fetch("SHOW TABLES LIKE '" . $tablepre . $subTableName . ($index - 1) . "'")) {
+            if ($db->fetch("SHOW TABLES LIKE '" . $tablepre . $tableName . ($index - 1) . "'")) {
                 $sql = "show create table " . $tablepre . $tableName . ($index - 1);
+                $search = $tablepre . $tableName . ($index - 1);
             } else {
                 $sql = "show create table " . $tablepre . $tableName;
+                $search = $tablepre . $tableName;
             }
             $row = $db->fetch($sql);
-            $sql = str_replace($tablepre . $tableName, $tablepre . $subTableName, $row['Create Table']);
+            $sql = str_replace($search, $tablepre . $subTableName, $row['Create Table']);
             $query = $db->query($sql);
             $db->affectedRows($query);
             FileCache::set($cachekey, 1, 864000000);
