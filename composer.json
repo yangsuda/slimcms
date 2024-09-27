@@ -19,12 +19,15 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
+        "ext-json": "*",
+        "ext-redis": "*",
+        "ext-curl": "*",
         "yangsuda/framework": "^3.0"
     },
     "repositories": {
         "packagist": {
             "type": "composer",
-            "url": "https://mirrors.aliyun.com/composer/"
+            "url": "https://mirrors.cloud.tencent.com/composer/"
         }
     },
     "config": {
