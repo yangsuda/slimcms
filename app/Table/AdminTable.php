@@ -47,7 +47,7 @@ class AdminTable extends Table
     {
         $where = [];
         $where[] = 'id>1';
-        $param['where'] = $where;
+        $param['where'] = !empty($param['where']) ? array_merge($param['where'], $where) : $where;
         return 200;
     }
 }
