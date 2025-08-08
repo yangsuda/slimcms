@@ -1,20 +1,27 @@
 <!--{template html_head}-->
 <link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css" />
+<!--{pluginHook list_1_1}-->
 </head>
 <body class="adminbody">
-
+<!--{pluginHook list_1_2}-->
 <div id="main">
+    <!--{pluginHook list_1_3}-->
     <!--{template head}-->
+    <!--{pluginHook list_1_4}-->
     <!--{template leftMenu}-->
-
+    <!--{pluginHook list_1_5}-->
     <div class="content-page">
         <div class="content">
             <div class="container-fluid">
+                <!--{pluginHook list_1_6}-->
                 <!--{template navigation_list}-->
+                <!--{pluginHook list_1_7}-->
                 <div class="row">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
                         <div class="card mb-3">
+                            <!--{pluginHook list_1_8}-->
                             <!--{template search}-->
+                            <!--{pluginHook list_1_9}-->
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
@@ -39,6 +46,7 @@
                                                         <th width="80">审核状态</th>
                                                         <!--{/if}-->
                                                         <th width="155">操作</th>
+                                                        <!--{pluginHook list_1_10}-->
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -76,7 +84,9 @@
                                                             <a href="{url ?p=forms/dataList&fid=2&formid=$v[id]}">字段</a> <span class="text-info">|</span>
                                                             <a href="{url ?p=forms/dataList&page=&id=&fid=$v[id]}">数据查看</a>
                                                             <!--{/if}-->
+                                                            <!--{pluginHook list_1_11}-->
                                                         </td>
+                                                        <!--{pluginHook list_1_12}-->
                                                     </tr>
                                                     <!--{/loop}-->
                                                     <!--{if $data[form][cpcheck]==1||$data[form][cpdel]==1}-->
@@ -90,9 +100,11 @@
                                                             <!--{if $data[form][cpdel]==1}-->
                                                             <span onClick="DelSel()" style="line-height:1" class="btn btn-dark btn-sm">删除</span>
                                                             <!--{/if}-->
+                                                            <!--{pluginHook list_1_13}-->
                                                         </td>
                                                     </tr>
                                                     <!--{/if}-->
+                                                    <!--{pluginHook list_1_14}-->
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -104,22 +116,27 @@
                                             </div>
                                         </div>
                                         <!--{/if}-->
+                                        <!--{pluginHook list_1_15}-->
                                     </div>
 
                                 </div>
                             </div>
+                            <!--{pluginHook list_1_16}-->
                         </div>
                     </div>
                 </div>
+                <!--{pluginHook list_1_17}-->
             </div>
         </div>
     </div>
-
+    <!--{pluginHook list_1_18}-->
     <!--{template modal_msg}-->
     <!--{template listjs}-->
 
 
 </div>
+<!--{pluginHook list_1_19}-->
 <!--{template footer}-->
+<!--{pluginHook list_1_20}-->
 </body>
 </html>

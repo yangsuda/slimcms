@@ -21,19 +21,4 @@ class Admin extends RepositoryAbstract
         !empty($param['groupid']) && $where['groupid'] = explode(',', (string)$param['groupid']);
         return $where;
     }
-
-    /**
-     * 添加
-     * @param array $param
-     * @throws \SlimCMS\Error\TextException
-     */
-    public static function add(array $param)
-    {
-        // TODO: Implement edit() method.
-    }
-
-    public static function edit(int $id, array $param)
-    {
-        // TODO: Implement edit() method.
-    }
 }
