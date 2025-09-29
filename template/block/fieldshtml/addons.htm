@@ -1,0 +1,28 @@
+<style type="text/css">
+    .am-form-file input[type="file"] {position: absolute;left: 0;z-index: 1;opacity: 0;cursor: pointer;}
+</style>
+<div class="am-form-file">
+    <button type="button" class="btn btn-secondary btn-sm"><i class="fa-1x fas fa-cloud-upload-alt"></i> 多选上传</button>
+    <input type="file" name="{$data[identifier]}[]" multiple onChange="handle{$data[identifier]}(this)" />
+</div>
+<div id="{$data[identifier]}_html" class="m-1">
+    <!--{if $data[default]}-->
+    <!--{loop unserialize($data[default]) $v}-->
+    <div><a href="$v[url]">$v[text]</a></div>
+    <!--{/loop}-->
+    <!--{/if}-->
+</div>
+
+<script>
+    function handle{$data[identifier]}(input) {
+        if (input.files && input.files.length > 0) {
+            const fileNames = [];
+            // 遍历所有选择的文件
+            for (let i = 0; i < input.files.length; i++) {
+                fileNames.push(input.files[i].name);
+            }
+            const fileNameString = fileNames.join(', ');
+            $('#{$data[identifier]}_html').html(fileNameString);
+        }
+    }
+</script>
