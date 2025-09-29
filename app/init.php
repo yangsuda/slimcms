@@ -8,9 +8,8 @@ use SlimCMS\Handlers\HttpErrorHandler;
 use SlimCMS\Handlers\ShutdownHandler;
 use SlimCMS\Interfaces\RouteInterface;
 
-error_reporting(0);
-define('CSINC', str_replace("\\", '/', dirname(__FILE__)).'/');
-define('CSROOT', dirname(CSINC).'/');
+define('CSINC', str_replace("\\", '/', dirname(__FILE__)) . '/');
+define('CSROOT', dirname(CSINC) . '/');
 define('CSAPP', CSROOT . 'app/');
 define('CSDATA', CSROOT . 'data/');
 define('CSPUBLIC', CSROOT . 'public/');
@@ -20,6 +19,7 @@ define('CORE_DEBUG', true); //生产环境下设置false
 define('TIMESTAMP', time());
 define('MICROTIME', microtime(true));
 define('VERSION', '3.0.1');
+error_reporting(CORE_DEBUG ? E_ALL : 0);
 
 require_once CSROOT . 'vendor/autoload.php';
 
@@ -56,7 +56,7 @@ $request = $serverRequestCreator->createServerRequestFromGlobals();
 $logger = $container->get(LoggerInterface::class);
 $callableResolver = $app->getCallableResolver();
 $responseFactory = $app->getResponseFactory();
-$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory,$logger);
+$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory, $logger);
 
 // Add Error Middleware
 $errorMiddleware = $app->addErrorMiddleware(CORE_DEBUG, true, true);
