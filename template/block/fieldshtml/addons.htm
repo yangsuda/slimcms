@@ -8,11 +8,13 @@
 <div id="{$data[identifier]}_html" class="m-1">
     <!--{if $data[default]}-->
     <!--{loop unserialize($data[default]) $v}-->
-    <div><a href="$v[url]">$v[text]</a></div>
+    <div class="row">
+        <div class="col-sm-1 fa fa-times text-danger text-center delFromAddons" style="line-height: 25px;cursor: pointer" data-url="$v[url]"></div>
+        <div class="col-sm-11" style="line-height: 25px;"><a href="$v[url]" TARGET="_blank">$v[text]</a></div>
+    </div>
     <!--{/loop}-->
     <!--{/if}-->
 </div>
-
 <script>
     function handle{$data[identifier]}(input) {
         if (input.files && input.files.length > 0) {
@@ -25,4 +27,16 @@
             $('#{$data[identifier]}_html').html(fileNameString);
         }
     }
+    $('.delFromAddons').click(function () {
+        var that = $(this);
+        var url = that.data('url');
+        var id = "{echo (int)aval($_GET,'id')}";
+        $.getJSON('{url ?p=main/delFromAddons&identifier=$data[identifier]&id='+id+'&fid=$data[formid]&url='+url+'}',function (res) {
+            if(res.code!=200){
+                alert(res.msg);
+            }else{
+                that.parent('.row').hide();
+            }
+        });
+    })
 </script>

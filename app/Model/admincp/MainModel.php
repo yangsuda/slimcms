@@ -106,4 +106,35 @@ class MainModel extends ModelAbstract
         self::t($form['table'])->withWhere($row['id'])->update($data);
         return self::$output->withCode(200);
     }
+
+    /**
+     * 多附件删除
+     * @param array $param
+     * @return OutputInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     * @throws \SlimCMS\Error\TextException
+     */
+    public static function delFromAddons(array $param): OutputInterface
+    {
+        if (empty($param['fid']) || empty($param['id']) || empty($param['identifier']) || empty($param['url'])) {
+            return self::$output->withCode(21002);
+        }
+        $tableName = self::t('forms')->withWhere($param['fid'])->fetch('table');
+        $row = self::t($tableName)->withWhere($param['id'])->fetch();
+        if (empty($row[$param['identifier']])) {
+            return self::$output->withCode(21001);
+        }
+        $upload = self::$container->get(UploadInterface::class);
+        $upload->uploadDel($param['url']);
+        $arr = unserialize($row[$param['identifier']]);
+        foreach ($arr as $k=>$v){
+            if($v['url'] == $param['url']){
+                unset($arr[$k]);
+            }
+        }
+        $addons = $arr ? serialize($arr) : '';
+        self::t($tableName)->withWhere($param['id'])->update([$param['identifier'] => $addons]);
+        return self::$output->withCode(200);
+    }
 }

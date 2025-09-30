@@ -100,4 +100,16 @@ class MainControl extends AdmincpControl
         }
         return $this->view(self::$output);
     }
+
+    /**
+     * 多附件删除
+     * @return array|\Psr\Http\Message\ResponseInterface
+     */
+    public function delFromAddons()
+    {
+        $this->checkAllow();
+        $param = self::input(['fid' => 'int', 'id' => 'int', 'identifier' => 'string', 'url' => 'string']);
+        $res = MainModel::delFromAddons($param);
+        return self::response($res);
+    }
 }
