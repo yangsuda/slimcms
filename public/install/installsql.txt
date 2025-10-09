@@ -77,6 +77,7 @@ INSERT INTO `#@#adminpermission` VALUES
 (null, '2', '1603941564', '', '删除附件图片', 'main/delImg'),
 (null, '2', '1606901999', '', '超大附件上传', 'main/superFileUpload'),
 (null, '2', '1606901999', '', '修改密码', 'main/updatePwd'),
+(null, '2', '1606901999', '', '多附件删除', 'main/delFromAddons'),
 (null, '2', '1648708128', '', '安装插件', 'plugin/install'),
 (null, '2', '1648708147', '', '卸载插件', 'plugin/unstall'),
 (null, '2', '1648708162', '', '插件启用开关', 'plugin/switch'),
