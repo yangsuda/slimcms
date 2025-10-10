@@ -19,15 +19,16 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
+        "ext-curl": "*",
         "ext-json": "*",
         "ext-redis": "*",
-        "ext-curl": "*",
+        "respect/validation": "^2.2",
         "yangsuda/framework": "^3.0"
     },
     "repositories": {
         "packagist": {
             "type": "composer",
-            "url": "https://mirrors.cloud.tencent.com/composer/"
+            "url": "https://repo.packagist.org"
         }
     },
     "config": {
