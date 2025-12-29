@@ -23,7 +23,7 @@
         "ext-json": "*",
         "ext-redis": "*",
         "respect/validation": "^2.2",
-        "yangsuda/framework": "^3.0"
+        "yangsuda/framework": "^4.0"
     },
     "repositories": {
         "packagist": {

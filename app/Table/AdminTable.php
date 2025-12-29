@@ -41,7 +41,7 @@ class AdminTable extends Table
     /**
      * 列表数据获取之前的自定义处理
      * @param $param
-     * @return array
+     * @return int
      */
     public function dataListInit(&$param)
     {
