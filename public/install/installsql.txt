@@ -3,7 +3,7 @@ CREATE TABLE `#@#admin` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `groupid` int(10) NOT NULL DEFAULT '0' COMMENT '所属岗位ID',
   `userid` varchar(250) NOT NULL DEFAULT '' COMMENT '用户名',
-  `pwd` varchar(250) NOT NULL DEFAULT '' COMMENT '密码',
+  `pwd` varchar(255) NOT NULL DEFAULT '' COMMENT '密码',
   `logintime` bigint(11) NOT NULL DEFAULT '0' COMMENT '上次登录时间',
   `loginip` varchar(250) NOT NULL DEFAULT '' COMMENT '上次登录IP',
   `ischeck` tinyint(1) NOT NULL DEFAULT '2' COMMENT '是否审核(1=已审核，2=未审核)',
