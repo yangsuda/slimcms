@@ -34,6 +34,7 @@
                 <div class="card-body m-4">
                     <form name="form1" action="{url &}" enctype="multipart/form-data" method="post" class="validform">
                         <input type="hidden" name="formhash" value="$data[formhash]" />
+                        <input type="hidden" name="csrf_token" value="$data[csrfToken]"/>
                         <!--{if aval($data,'data/id')}-->
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">ID：</label>

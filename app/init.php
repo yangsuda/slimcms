@@ -44,6 +44,7 @@ $app = AppFactory::create();
 
 //中间件设置
 $app->add(\App\MiddleWare\MiddleWare::class);
+$app->add(\App\MiddleWare\CsrfMiddleware::class);
 
 //注册路由
 $routes = $container->get(RouteInterface::class);

@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace App\Control\admincp;
 
+use App\Core\Csrf;
 use App\Core\Forms;
 use App\Core\Page;
 use App\Model\plugin\PluginModel;
@@ -33,7 +34,7 @@ class FormsControl extends AdmincpControl
         if ($res->getCode() != 200) {
             try {
                 return self::directTo($res);
-            }catch (TextException $e){
+            } catch (TextException $e) {
                 return self::directTo($res->withReferer(Forms::url('?p=main/index')));
             }
         }
@@ -47,6 +48,7 @@ class FormsControl extends AdmincpControl
         $res = Forms::searchFields($fid)->withData($res->getData());
         //参与排序
         $output = Forms::orderFields($fid)->withData($res->getData());
+        $output = $output->withData(['csrfToken' => Csrf::getToken()]);
 
         $template = '';
         if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
@@ -79,7 +81,7 @@ class FormsControl extends AdmincpControl
             if ($res->getCode() != 200) {
                 try {
                     return self::directTo($res);
-                }catch (TextException $e){
+                } catch (TextException $e) {
                     return self::directTo($res->withReferer(Forms::url('?p=main/index')));
                 }
             }
@@ -93,10 +95,11 @@ class FormsControl extends AdmincpControl
         if ($res->getCode() != 200) {
             try {
                 return self::directTo($res);
-            }catch (TextException $e){
+            } catch (TextException $e) {
                 return self::directTo($res->withReferer(Forms::url('?p=main/index')));
             }
         }
+        $res = $res->withData(['csrfToken' => Csrf::getToken()]);
         $template = '';
         if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
             $template = $this->p . '/' . $fid;

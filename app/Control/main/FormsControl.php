@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace App\Control\main;
 
+use App\Core\Csrf;
 use App\Core\Forms;
 use App\Core\Page;
 use App\Model\admincp\MainModel;
@@ -68,6 +69,7 @@ class FormsControl extends ControlAbstract
         $res = Forms::searchFields($fid)->withData($res->getData());
         //参与排序
         $output = Forms::orderFields($fid)->withData($res->getData());
+        $output = $output->withData(['csrfToken' => Csrf::getToken()]);
 
         $template = '';
         if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
@@ -120,6 +122,7 @@ class FormsControl extends ControlAbstract
         if ($res->getCode() != 200) {
             return self::response($res);
         }
+        $res = $res->withData(['csrfToken' => Csrf::getToken()]);
         $template = '';
         if (is_file(CSTEMPLATE . CURSCRIPT . '/' . $this->p . '/' . $fid . '.htm')) {
             $template = $this->p . '/' . $fid;
