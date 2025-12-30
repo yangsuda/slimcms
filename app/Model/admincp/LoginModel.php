@@ -13,6 +13,7 @@ use App\Core\Forms;
 use SlimCMS\Abstracts\ModelAbstract;
 use SlimCMS\Helper\Crypt;
 use SlimCMS\Helper\Ipdata;
+use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\OutputInterface;
 
 class LoginModel extends ModelAbstract
@@ -135,7 +136,7 @@ class LoginModel extends ModelAbstract
             $method = aval($server, 'REQUEST_METHOD');
             $query = $query ?: file_get_contents('php://input');
             $query = substr($query, 0, 200);
-            $postinfo = $_POST ? serialize($_POST) : '';
+            $postinfo = $_POST ? serialize(Str::addslashes($_POST)) : '';
             $postinfo = substr($postinfo, 0, 5000);
             $data = [
                 'adminid' => aval($user, 'id'),

@@ -21,17 +21,19 @@ class Output extends \SlimCMS\Core\Output
         if ($res->getCode() != 200) {
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
             $file = !empty($backtrace[0]['file']) ? $backtrace[0]['file'] . ':' . $backtrace[0]['line'] : '';
-            $p = aval($_POST, 'p') ?: aval($_GET, 'p');
-            $appid = aval($_POST, 'appid') ?: aval($_GET, 'appid');
+            $post = Str::htmlspecialchars($_POST);
+            $get = Str::htmlspecialchars($_GET);
+            $p = aval($post, 'p') ?: aval($get, 'p');
+            $appid = aval($post, 'appid') ?: aval($get, 'appid');
             File::log('errorCode/' . date('Y') . '/' . date('m'))
                 ->info('报错信息', [
                     'code' => $res->getCode(),
                     'msg' => $res->getMsg(),
-                    'path' => Str::htmlspecialchars($p),
+                    'path' => $p,
                     'file' => $file,
                     'appid' => $appid ? Crypt::decrypt($appid) : '',
-                    'post' => $_POST,
-                    'get' => $_GET,
+                    'post' => $post,
+                    'get' => $get,
                     'ip' => Ipdata::getip(),
                     'user_agent' => aval($_SERVER, 'HTTP_USER_AGENT'),
                 ]);
