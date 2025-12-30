@@ -22,6 +22,8 @@ class Table extends \SlimCMS\Core\Table
      */
     protected function subtable(string $tableName, string $index): bool
     {
+        $tableName = preg_replace('/[^a-zA-Z0-9_]/', '', $tableName);
+        $index = preg_replace('/[^a-zA-Z0-9_]/', '', $index);
         $subTableName = $tableName . $index;
         $cachekey = __FUNCTION__ . '_' . $subTableName;
         $data = FileCache::get($cachekey);
