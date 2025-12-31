@@ -53,10 +53,10 @@ class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
         }
         
         // 验证 token 是否过期（可选，1小时过期）
-        $tokenTime = $_SESSION['csrf_token_time'] ?? 0;
+        /*$tokenTime = $_SESSION['csrf_token_time'] ?? 0;
         if (time() - $tokenTime > 3600) {
             throw new TextException(403, 'CSRF token 已过期');
-        }
+        }*/
     }
     
     /**
