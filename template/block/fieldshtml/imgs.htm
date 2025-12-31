@@ -114,6 +114,7 @@
 <script src="$cfg[resourceUrl]plugins/webuploader/image-upload/js/upload.js"></script>
 <script>
     var _setText = '1';
+    var csrf_token = '{echo \App\Core\Csrf::getToken()}'
 </script>
 <style>
     .pc_area,.pc_area *{ box-sizing:border-box !important; }

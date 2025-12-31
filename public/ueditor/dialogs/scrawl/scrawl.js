@@ -657,6 +657,7 @@ function exec(scrawlObj) {
                     dialog.close();
                 }
             };
+            options['csrf_token'] = editor.getOpt('csrf_token');
             options[editor.getOpt('scrawlFieldName')] = base64;
 
             var actionUrl = editor.getActionUrl(editor.getOpt('scrawlActionName')),

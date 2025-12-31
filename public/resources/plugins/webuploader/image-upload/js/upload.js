@@ -147,7 +147,8 @@ basehost = typeof basehost=='undefined'?'index.php?':basehost;
                 label: '点击选择图片'
             },
             formData: {
-                uid: 123
+                uid: 123,
+                csrf_token:csrf_token
             },
             dnd: '#dndArea',
             paste: '#uploader',

@@ -372,6 +372,9 @@
                     extensions: acceptExtensions,
                     mimeTypes: 'image/*'
                 },
+                formData: {
+                    csrf_token:editor.getOpt('csrf_token'),
+                },
                 swf: '../../third-party/webuploader/Uploader.swf',
                 server: actionUrl,
                 fileVal: editor.getOpt('imageFieldName'),

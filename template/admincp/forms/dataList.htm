@@ -59,7 +59,11 @@
                                                         <td class="text-dark">$v[id]</td>
                                                         <!--{loop $data[listFields] $f_v}-->
                                                         <!--{if $f_v[datatype] == 'img'}-->
-                                                        <td><a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="{echo copyImage($v[$f_v['identifier']],60,60)}" width="60" /></a></td>
+                                                        <td>
+                                                            <!--{if !empty($v[$f_v['identifier']])}-->
+                                                            <a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="{echo copyImage($v[$f_v['identifier']],60,60)}" width="60" /></a>
+                                                            <!--{/if}-->
+                                                        </td>
                                                         <!--{elseif $f_v[datatype] == 'imgs'}-->
                                                         <td class="text-dark">
                                                             <!--{if count($v['_'.$f_v['identifier']])}-->
