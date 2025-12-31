@@ -30,14 +30,16 @@ return function (ContainerBuilder $containerBuilder) {
     $cfg = getConfig();
 
     //Session跨域设置,为方便调试，debug开启时不设置
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => '/',
-        'domain' => '.' . $cfg['cfg']['domain'],
-        'secure' => !CORE_DEBUG,  // 生产环境启用
-        'httponly' => true,
-        'samesite' => 'Strict'
-    ]);
+    if (CORE_DEBUG === false) {
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '.' . $cfg['cfg']['domain'],
+            'secure' => true,  // 生产环境启用
+            'httponly' => true,
+            'samesite' => 'Strict'
+        ]);
+    }
 
     //时区设置
     @date_default_timezone_set('Etc/GMT-8');
@@ -73,6 +75,7 @@ return function (ContainerBuilder $containerBuilder) {
             return $redis->selectDB();
         },
         UploadInterface::class => function (ContainerInterface $c) {
+            //return new \App\Model\aliyun\AliOss();
             return new Upload();
         },
     ]);
