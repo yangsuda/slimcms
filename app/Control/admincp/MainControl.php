@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace App\Control\admincp;
 
+use App\Core\Csrf;
 use App\Core\Forms;
 use App\Model\admincp\LoginModel;
 use App\Model\admincp\MainModel;
@@ -98,6 +99,7 @@ class MainControl extends AdmincpControl
             $res = LoginModel::updatePwd(self::$admin['userid'], $oldpwd, $newpwd);
             return $this->directTo($res);
         }
+        self::$output = self::$output->withData(['csrfToken' => Csrf::getToken()]);
         return $this->view(self::$output);
     }
 

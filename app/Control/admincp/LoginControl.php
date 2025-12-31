@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace App\Control\admincp;
 
+use App\Core\Csrf;
 use App\Core\Forms;
 use App\Model\admincp\LoginModel;
 use SlimCMS\Helper\ImageCode;
@@ -55,7 +56,7 @@ class LoginControl extends ControlAbstract
         if (preg_match('/(install\/index.php)$/', $referer)) {
             $referer = '';
         }
-        $res = self::$output->withCode(200)->withData(['referer' => $referer]);
+        $res = self::$output->withCode(200)->withData(['referer' => $referer,'csrfToken'=>Csrf::getToken()]);
         return $this->view($res);
     }
 

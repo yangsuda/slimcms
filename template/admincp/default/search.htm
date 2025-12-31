@@ -3,6 +3,7 @@
 <script src="$cfg[resourceUrl]plugins/laydate/laydate.js"></script>
 <div class="card-header">
     <form name='form3' action='{url &page=&ids=}' method='post' class="form-inline">
+        <input type="hidden" name="csrf_token" value="$data[csrfToken]"/>
         <!--{loop $data[searchFields] $k $v}-->
         <!--{if $v[rules]}-->
         <!--{eval $isloadSelect2=1;}-->

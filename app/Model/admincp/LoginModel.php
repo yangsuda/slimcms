@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace App\Model\admincp;
 
-use App\Core\Forms;
 use SlimCMS\Abstracts\ModelAbstract;
 use SlimCMS\Helper\Crypt;
 use SlimCMS\Helper\Ipdata;
@@ -30,8 +29,6 @@ class LoginModel extends ModelAbstract
         if (empty($userid) || empty($pwd)) {
             return self::$output->withCode(21002);
         }
-        $pwd1 = $pwd;
-        $pwd = Crypt::pwd($pwd);
         $row = self::t('admin')->withWhere(['userid' => $userid])->fetch();
         if (empty($row)) {
             return self::$output->withCode(21001);
@@ -44,8 +41,8 @@ class LoginModel extends ModelAbstract
             return self::$output->withCode(223014);
         }
         $ip = Ipdata::getip();
-        if ($pwd != $row['pwd']) {
-            $data = ['userid' => $userid, 'pwd' => $pwd1, 'createtime' => TIMESTAMP, 'ip' => $ip];
+        if (!Crypt::pwdVerify($pwd, $row['pwd'])) {
+            $data = ['userid' => $userid, 'pwd' => $pwd, 'createtime' => TIMESTAMP, 'ip' => $ip];
             self::t('adminloginlog')->insert($data);
             return self::$output->withCode(211032);
         }

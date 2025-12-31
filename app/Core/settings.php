@@ -49,6 +49,16 @@ return function (ContainerBuilder $containerBuilder) {
         LoggerInterface::class => DI\factory(function (ContainerInterface $c) {
             return File::log();
         }),
+        'csrf.token' => DI\factory(function () {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            if (!isset($_SESSION['csrf_token'])) {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+                $_SESSION['csrf_token_time'] = time();
+            }
+            return $_SESSION['csrf_token'];
+        }),
         RouteInterface::class => autowire(Routes::class),
         CookieInterface::class => function (ContainerInterface $c) {
             return new Cookie($c);
