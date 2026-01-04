@@ -1,21 +1,22 @@
 <?php
 
 /**
- * 登录模型类
+ * 认证业务实现
  * @author zhucy
  */
 
 declare(strict_types=1);
 
-namespace App\Model\admincp;
+namespace App\Service\admincp;
 
-use SlimCMS\Abstracts\ModelAbstract;
+use App\Service\table\AdminloginlogService;
+use App\Service\table\AdminService;
+use SlimCMS\Abstracts\ServiceAbstract;
 use SlimCMS\Helper\Crypt;
 use SlimCMS\Helper\Ipdata;
-use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\OutputInterface;
 
-class LoginModel extends ModelAbstract
+class AuthService extends ServiceAbstract
 {
     /**
      * 登录操作
@@ -24,31 +25,27 @@ class LoginModel extends ModelAbstract
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function loginCheck($userid, $pwd): OutputInterface
+    public function loginCheck($userid, $pwd): OutputInterface
     {
         if (empty($userid) || empty($pwd)) {
             return self::$output->withCode(21002);
         }
-        $row = self::t('admin')->withWhere(['userid' => $userid])->fetch();
+        $row = AdminService::instance()
+            ->withWhere(['userid' => $userid, 'status' => 1])
+            ->withRespExtraRowFields('_groupid')->fetch('id,pwd,groupid,userid,logintime,loginip,realname');
         if (empty($row)) {
             return self::$output->withCode(21001);
         }
-        if ($row['status'] == 2) {
-            return self::$output->withCode(21061);
-        }
-        $where = ['userid' => $userid, self::t()->field('createtime', (TIMESTAMP - 3600), '>')];
-        if (self::t('adminloginlog')->withWhere($where)->count() >= 3) {
+        if (AdminloginlogService::instance()->withWhere(['userid' => $userid, 'start' => TIMESTAMP - 3600])->count() >= 3) {
             return self::$output->withCode(223014);
         }
         $ip = Ipdata::getip();
         if (!Crypt::pwdVerify($pwd, $row['pwd'])) {
-            $data = ['userid' => $userid, 'pwd' => $pwd, 'createtime' => TIMESTAMP, 'ip' => $ip];
-            self::t('adminloginlog')->insert($data);
+            AdminloginlogService::instance()->add(['userid' => $userid, 'pwd' => $pwd, 'createtime' => TIMESTAMP, 'ip' => $ip]);
             return self::$output->withCode(211032);
         }
-        $row['_groupid'] = self::t('admingroup')->withWhere($row['groupid'])->fetch();
-        $row['purviews'] = $row['_groupid']['purviews'];
-        self::t('admin')->withWhere($row['id'])->update(['loginip' => $ip, 'logintime' => TIMESTAMP]);
+        AdminService::instance()->update((int)$row['id'], ['loginip' => $ip, 'logintime' => TIMESTAMP]);
+        unset($row['pwd']);
         return self::$output->withCode(200, 24070)->withData($row);
     }
 
@@ -58,7 +55,7 @@ class LoginModel extends ModelAbstract
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function loginInfo(int $adminid): OutputInterface
+    public function loginInfo(int $adminid): OutputInterface
     {
         if (empty($adminid)) {
             return self::$output->withCode(21002)->withReferer('?p=login');
@@ -66,14 +63,12 @@ class LoginModel extends ModelAbstract
         $cachekey = self::cacheKey(__FUNCTION__, $adminid);
         $row = self::$redis->get($cachekey);
         if (empty($row)) {
-            $row = self::t('admin')->withWhere($adminid)->fetch();
+            $row = AdminService::instance()
+                ->withWhere(['ids' => $adminid, 'status' => 1])
+                ->withRespExtraRowFields('_groupid')->fetch('id,groupid,userid,logintime,loginip,realname');
             if (empty($row)) {
                 return self::$output->withCode(21001)->withReferer('?p=login');
             }
-            if ($row['status'] == 2) {
-                return self::$output->withCode(21061);
-            }
-            $row['_groupid'] = self::t('admingroup')->withWhere($row['groupid'])->fetch();
             self::$redis->set($cachekey, $row, 60);
         }
         return self::$output->withCode(200)->withData(['admin' => $row]);
@@ -85,7 +80,7 @@ class LoginModel extends ModelAbstract
      * @param string $n
      * @return bool
      */
-    private static function allow(array $user, string $n = ''): bool
+    private function allow(array $user, string $n = ''): bool
     {
         $purviews = empty($user['_groupid']['purviews']) ? '' : $user['_groupid']['purviews'];
         if (empty($n) || preg_match('/admin_AllowAll/i', $purviews)) {
@@ -111,41 +106,11 @@ class LoginModel extends ModelAbstract
      * @param string $n
      * @return OutputInterface
      */
-    public static function checkAllow(array $user, string $n): OutputInterface
+    public function checkAllow(array $user, string $n): OutputInterface
     {
-        $isallow = self::allow($user, $n);
+        $isallow = $this->allow($user, $n);
         if (!$isallow) {
             return self::$output->withCode(21048);
-        }
-        return self::$output->withCode(200);
-    }
-
-    /**
-     * 后台操作日志
-     * @param array $user
-     * @return OutputInterface
-     */
-    public static function logSave(array $user): OutputInterface
-    {
-        if (!empty(self::$config['adminLog'])) {
-            $query = self::$request->getRequest()->getUri()->getQuery();
-            $server = self::$request->getRequest()->getServerParams();
-            $method = aval($server, 'REQUEST_METHOD');
-            $query = $query ?: file_get_contents('php://input');
-            $query = substr($query, 0, 200);
-            $postinfo = $_POST ? serialize(Str::addslashes($_POST)) : '';
-            $postinfo = substr($postinfo, 0, 5000);
-            $data = [
-                'adminid' => aval($user, 'id'),
-                'adminname' => aval($user, 'userid'),
-                'method' => $method,
-                'query' => $query,
-                'ip' => Ipdata::getip(),
-                'createtime' => TIMESTAMP,
-                'postinfo' => $postinfo,
-                'route' => self::input('p')
-            ];
-            self::t('adminlog')->insert($data);
         }
         return self::$output->withCode(200);
     }
@@ -158,21 +123,19 @@ class LoginModel extends ModelAbstract
      * @return OutputInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public static function updatePwd(string $userid, string $pwd, string $newpwd): OutputInterface
+    public function updatePwd(string $userid, string $pwd, string $newpwd): OutputInterface
     {
-        $res = self::loginCheck($userid, $pwd);
-        if ($res->getCode() != 200) {
-            return $res;
-        }
         if (empty($newpwd)) {
             return self::$output->withCode(21002);
         }
         if (!preg_match('/^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,32}$/i', $newpwd)) {
             return self::$output->withCode(223032);
         }
-        $id = $res->getData()['id'];
-        $newpwd = Crypt::pwd($newpwd);
-        self::t('admin')->withWhere($id)->update(['pwd' => $newpwd]);
+        $res = $this->loginCheck($userid, $pwd);
+        if ($res->getCode() != 200) {
+            return $res;
+        }
+        AdminService::instance()->update((int)$res->getData()['id'], ['pwd' => Crypt::pwd($newpwd)]);
         return self::$output->withCode(200)->withReferer('?p=login/logout');
     }
 }

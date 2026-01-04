@@ -10,7 +10,7 @@ namespace App\Control\admincp;
 
 use App\Core\Csrf;
 use App\Core\Forms;
-use App\Model\admincp\LoginModel;
+use App\Service\admincp\AuthService;
 use SlimCMS\Helper\ImageCode;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Helper\Crypt;
@@ -32,7 +32,7 @@ class LoginControl extends ControlAbstract
             }
             $userid = self::input('userid');
             $pwd = self::input('pwd');
-            $res = LoginModel::loginCheck($userid, $pwd);
+            $res = AuthService::instance()->loginCheck($userid, $pwd);
             if ($res->getCode() == 200) {
                 isset($_SESSION) ? '' : session_start();
                 $_SESSION['adminAuth'] = Crypt::encrypt($res->getData()['id']);

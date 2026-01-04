@@ -20,6 +20,6 @@ class AdminReq extends ReqAbstract
 
     protected function userid(array $param, $words = null): void
     {
-        isset($words) && $this->where[] = self::t()->field('userid', $words, 'like');
+        isset($words) && $this->where['userid'] = $words;
     }
 }

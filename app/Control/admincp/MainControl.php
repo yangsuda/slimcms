@@ -10,8 +10,8 @@ namespace App\Control\admincp;
 
 use App\Core\Csrf;
 use App\Core\Forms;
-use App\Model\admincp\LoginModel;
-use App\Model\admincp\MainModel;
+use App\Service\admincp\AuthService;
+use App\Service\admincp\MainService;
 use SlimCMS\Interfaces\UploadInterface;
 
 class MainControl extends AdmincpControl
@@ -47,7 +47,7 @@ class MainControl extends AdmincpControl
     {
         $this->checkAllow();
         $id = self::inputInt('id');
-        $res = MainModel::recovery($id);
+        $res = MainService::recovery($id);
         return self::response($res);
     }
 
@@ -59,7 +59,7 @@ class MainControl extends AdmincpControl
     {
         $this->checkAllow();
         $param = self::input(['fid' => 'int', 'id' => 'int', 'identifier' => 'string']);
-        $res = MainModel::delImg($param);
+        $res = MainService::delImg($param);
         return self::response($res);
     }
 
@@ -96,7 +96,7 @@ class MainControl extends AdmincpControl
             }
             $oldpwd = self::inputString('oldpwd');
             $newpwd = self::inputString('newpwd');
-            $res = LoginModel::updatePwd(self::$admin['userid'], $oldpwd, $newpwd);
+            $res = AuthService::instance()->updatePwd(self::$admin['userid'], $oldpwd, $newpwd);
             return $this->directTo($res);
         }
         self::$output = self::$output->withData(['csrfToken' => Csrf::getToken()]);
@@ -111,7 +111,7 @@ class MainControl extends AdmincpControl
     {
         $this->checkAllow();
         $param = self::input(['fid' => 'int', 'id' => 'int', 'identifier' => 'string', 'url' => 'string']);
-        $res = MainModel::delFromAddons($param);
+        $res = MainService::delFromAddons($param);
         return self::response($res);
     }
 }

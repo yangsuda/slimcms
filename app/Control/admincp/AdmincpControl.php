@@ -8,12 +8,14 @@ declare(strict_types=1);
 namespace App\Control\admincp;
 
 use App\Core\Forms;
-use App\Model\admincp\LoginModel;
-use SlimCMS\Error\TextException;
+use App\Service\admincp\AuthService;
+use App\Service\table\AdminlogService;
 use SlimCMS\Helper\Crypt;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Core\Request;
 use SlimCMS\Core\Response;
+use SlimCMS\Helper\Ipdata;
+use SlimCMS\Helper\Str;
 use SlimCMS\Interfaces\OutputInterface;
 
 class AdmincpControl extends ControlAbstract
@@ -30,7 +32,7 @@ class AdmincpControl extends ControlAbstract
             $adminAuth = (string)aval($_SESSION, 'adminAuth');
             $auth = Crypt::decrypt($adminAuth);
             if (is_numeric($auth)) {
-                $res = LoginModel::loginInfo((int)$auth);
+                $res = AuthService::instance()->loginInfo((int)$auth);
                 if ($res->getCode() != 200) {
                     return $this->directTo($res);
                 }
@@ -58,7 +60,7 @@ class AdmincpControl extends ControlAbstract
     protected function checkAllow(string $auth = null)
     {
         $auth = $auth ?: $this->p;
-        $res = LoginModel::checkAllow(self::$admin, $auth);
+        $res = AuthService::instance()->checkAllow(self::$admin, $auth);
         if ($res->getCode() != 200) {
             $this->directTo($res);
             $url = $res->getReferer() ?: '?p=main/index';
@@ -70,7 +72,27 @@ class AdmincpControl extends ControlAbstract
             }
             exit;
         }
-        LoginModel::logSave(self::$admin);
+        //日志记录
+        if (!empty(self::$config['adminLog'])) {
+            $query = self::$request->getRequest()->getUri()->getQuery();
+            $server = self::$request->getRequest()->getServerParams();
+            $method = aval($server, 'REQUEST_METHOD');
+            $query = substr($query, 0, 200);
+            $postinfo = self::$request->getRequest()->getParsedBody();
+            $postinfo = $postinfo ? serialize(Str::addslashes($postinfo)) : '';
+            $postinfo = substr($postinfo, 0, 5000);
+            $data = [
+                'adminid' => aval(self::$admin, 'id'),
+                'adminname' => aval(self::$admin, 'userid'),
+                'method' => $method,
+                'query' => $query,
+                'ip' => Ipdata::getip(),
+                'createtime' => TIMESTAMP,
+                'postinfo' => $postinfo,
+                'route' => self::input('p')
+            ];
+            AdminlogService::instance()->add($data);
+        }
     }
 
     /**
