@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Model\admincp;
+namespace App\Service\admincp;
 
+use App\Service\table\ArchivedataService;
+use App\Service\table\FormsService;
 use SlimCMS\Abstracts\ModelAbstract;
 use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Interfaces\UploadInterface;
 
-class MainModel extends ModelAbstract
+class MainService extends ModelAbstract
 {
     /**
      * 恢复数据
@@ -20,14 +22,14 @@ class MainModel extends ModelAbstract
         if (empty($id)) {
             return self::$output->withCode(21002);
         }
-        $row = self::t('archivedata')->withWhere($id)->fetch();
+        $row = ArchivedataService::instance()->withWhere(['ids' => $id])->fetch('*');
         if (empty($row)) {
             return self::$output->withCode(21001);
         }
         $content = unserialize($row['content']);
-        $table = self::t('forms')->withWhere($row['formid'])->fetch('table');
+        $table = FormsService::instance()->withWhere(['ids' => $row['formid']])->fetch('table');
         self::t($table)->insert($content);
-        self::t('archivedata')->withWhere($id)->delete();
+        ArchivedataService::instance()->delete($id);
         return self::$output->withCode(200, 211031);
     }
 
@@ -128,8 +130,8 @@ class MainModel extends ModelAbstract
         $upload = self::$container->get(UploadInterface::class);
         $upload->uploadDel($param['url']);
         $arr = unserialize($row[$param['identifier']]);
-        foreach ($arr as $k=>$v){
-            if($v['url'] == $param['url']){
+        foreach ($arr as $k => $v) {
+            if ($v['url'] == $param['url']) {
                 unset($arr[$k]);
             }
         }

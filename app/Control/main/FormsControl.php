@@ -10,7 +10,7 @@ namespace App\Control\main;
 use App\Core\Csrf;
 use App\Core\Forms;
 use App\Core\Page;
-use App\Model\admincp\MainModel;
+use App\Model\admincp\MainService;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Helper\ImageCode;
 
@@ -36,7 +36,7 @@ class FormsControl extends ControlAbstract
         $form = $res->getData()['form'];
         $arr = !empty($form['openweb']) ? explode(',', $form['openweb']) : [];
         if (empty($arr) || !in_array($type, $arr)) {
-            $rules = MainModel::getOpenWebRule()->getData()['rules'];
+            $rules = MainService::getOpenWebRule()->getData()['rules'];
             return self::$output->withCode(223022,['msg'=>$rules[$type]]);
         }
         return $res;
