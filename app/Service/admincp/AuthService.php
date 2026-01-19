@@ -32,7 +32,7 @@ class AuthService extends ServiceAbstract
         }
         $row = AdminService::instance()
             ->withWhere(['userid' => $userid, 'status' => 1])
-            ->withRespExtraRowFields('_groupid')->fetch('id,pwd,groupid,userid,logintime,loginip,realname');
+            ->withRespExtraRowFields('groupid')->fetch('id,pwd,groupid,userid,logintime,loginip,realname');
         if (empty($row)) {
             return self::$output->withCode(21001);
         }
@@ -65,7 +65,7 @@ class AuthService extends ServiceAbstract
         if (empty($row)) {
             $row = AdminService::instance()
                 ->withWhere(['ids' => $adminid, 'status' => 1])
-                ->withRespExtraRowFields('_groupid')->fetch('id,groupid,userid,logintime,loginip,realname');
+                ->withRespExtraRowFields('groupid')->fetch('id,groupid,userid,logintime,loginip,realname');
             if (empty($row)) {
                 return self::$output->withCode(21001)->withReferer('?p=login');
             }
