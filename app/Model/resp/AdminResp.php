@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Model\resp;
 
 use App\Service\table\AdmingroupService;
+use App\Service\table\AdminService;
 use SlimCMS\Abstracts\RespAbstract;
-use SlimCMS\Abstracts\TableAbstract;
 
 class AdminResp extends RespAbstract
 {
-    protected function groupid(array &$data, TableAbstract $table): void
+    protected function groupid(array &$data, AdminService $table): void
     {
         $field = __FUNCTION__;
         !empty($data[$field]) && $data['_' . $field] = $this->relations[$field][$data[$field]] ?? [];
     }
 
-    protected function groupidRelation(array $data, TableAbstract $table): array
+    protected function groupidRelation(array $data, AdminService $table): array
     {
         $field = str_replace('Relation','',__FUNCTION__);
         return AdmingroupService::instance()
