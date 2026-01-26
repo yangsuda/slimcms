@@ -1,15 +1,12 @@
 <?php
 
-namespace App\Model\vali;
+namespace App\Model\vali\validator;
 
 use Respect\Validation\Rules\AbstractRule;
 
-class ImageVali extends AbstractRule
+class Image extends AbstractRule
 {
     protected $template = '请按照要求规范提交信息';
-
-    // 支持的图片格式
-    private $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
     public function validate($input): bool
     {
@@ -23,7 +20,7 @@ class ImageVali extends AbstractRule
             }
             // 验证以图片扩展名结尾
             $extension = strtolower(pathinfo($v, PATHINFO_EXTENSION));
-            if (!in_array($extension, $this->allowedExtensions)) {
+            if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
                 return false;
             }
         }

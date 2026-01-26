@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Table;
 
 use App\Core\Table;
-use App\Model\admincp\LoginModel;
 
 class AdminTable extends Table
 {
