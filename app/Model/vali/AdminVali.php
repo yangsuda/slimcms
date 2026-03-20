@@ -15,7 +15,7 @@ class AdminVali extends ValiAbstract
         //return v::noWhitespace()->setName($name)->setTemplate('{{name}} 不能包含空格');
         return v::allOf(
             v::noWhitespace()->setName($name)->setTemplate('{{name}} 不能包含空格'),
-            v::length(6, 20)->setName($name)->setTemplate('{{name}} 长度必须在 {{minValue}} 到 {{maxValue}} 个字符之间')
+            v::length(5, 20)->setName($name)->setTemplate('{{name}} 长度必须在 {{minValue}} 到 {{maxValue}} 个字符之间')
         );
     }
 }
