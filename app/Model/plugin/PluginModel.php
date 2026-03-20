@@ -434,7 +434,7 @@ class PluginModel extends ModelAbstract
      */
     private static function _market()
     {
-        $cachekey = get_class() . __FUNCTION__;
+        $cachekey = static::class. __FUNCTION__;
         $plugins = FileCache::get($cachekey);
         if (empty($plugins)) {
             $url = Http::curlGet('https://gitee.com/919579/plugin/raw/master/url.txt');
