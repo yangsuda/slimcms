@@ -57,7 +57,7 @@
                                                 </div>
                                                 <div class="col-sm-9 form-inline">
                                                     <!--{loop $v1[permission] $k2 $v2}-->
-                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="plugin$k2" value='$v2[purview]' {if !empty($data[data][_purviews]) && in_array($v2[purview],$data[data][_purviews])} checked {/if}><label for="plugin$k2" class="custom-control-label">$v2[name]<font color='#070'>($v2[purview])</font></label></span>
+                                                    <span class="custom-control custom-checkbox mr-2"><input name='purviews[]' type='checkbox' class='custom-control-input' id="$v2[purview]" value='$v2[purview]' {if !empty($data[data][_purviews]) && in_array($v2[purview],$data[data][_purviews])} checked {/if}><label for="$v2[purview]" class="custom-control-label">$v2[name]<font color='#070'>($v2[purview])</font></label></span>
                                                     <!--{/loop}-->
                                                 </div>
                                             </div>
