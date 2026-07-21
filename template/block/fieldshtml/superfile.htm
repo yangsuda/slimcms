@@ -45,9 +45,10 @@
             formData{$data[identifier]}.append('file', f{$data[identifier]}.slice(start{$data[identifier]}, end{$data[identifier]}));
             formData{$data[identifier]}.append('filename', f{$data[identifier]}.name);
             formData{$data[identifier]}.append('index', index{$data[identifier]});
+            formData{$data[identifier]}.append('csrf_token', "{echo \App\Core\Csrf::getToken()}");
             xhr{$data[identifier]} = new XMLHttpRequest();
             xhr{$data[identifier]}.onreadystatechange = onchange;
-            xhr{$data[identifier]}.open('POST', '?p=main/superFileUpload');
+            xhr{$data[identifier]}.open('POST', '/admin/image/superFileUpload');
             xhr{$data[identifier]}.send(formData{$data[identifier]});
 
             function onchange() {

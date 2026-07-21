@@ -1,0 +1,93 @@
+
+<!--{if $data[searchFields]||$data[form][export]==1}-->
+<script src="$cfg[resourceUrl]plugins/laydate/laydate.js"></script>
+<div class="card-header">
+    <form name='form3' action='$data[p]?{$data[query]}&page=&ids=' method='post' class="form-inline">
+        <input type="hidden" name="csrf_token" value="$data[csrfToken]"/>
+        <!--{loop $data[searchFields] $k $v}-->
+        <!--{if $v[rules]}-->
+        <!--{eval $isloadSelect2=1;}-->
+        <div class="form-group mr-3 mb-1">
+            <label>$v[title]：</label>
+            <select name="$v[identifier]" class="custom-select {echo count(unserialize($v[rules]))>10?'select2':''}">
+                <option value=''>--全部--</option>
+                <!--{loop unserialize($v[rules]) $r_k $r_v}-->
+                <option value='$r_k' {echo aval($data,'get/'.$v[identifier])==$r_k?'selected':''}>$r_v</option>
+                <!--{/loop}-->
+            </select>
+        </div>
+        <!--{elseif $v[datatype]=='month'}-->
+        <div class="form-group mr-3 mb-1">
+            <input placeholder="$v[title]" type='text' name='$v[identifier]' id='$v[identifier]' value="{echo aval($data,'get/'.$v[identifier])}" class="form-control" />
+            <script>
+                $(document).ready(function() {
+                    laydate.render({
+                        elem: '#$v[identifier]',type: '$v[datatype]'
+                    });
+                });
+            </script>
+        </div>
+        <!--{elseif in_array($v[datatype],array('date','datetime'))}-->
+        <div class="form-group mr-3 mb-1">
+            <input placeholder="$v[title]" type='text' name='$v[identifier]_s' id='$v[identifier]_s' value="{echo aval($data,'get/'.$v[identifier].'_s')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
+            <script>
+                $(document).ready(function() {
+                    laydate.render({
+                        elem: '#$v[identifier]_s',type: '$v[datatype]'
+                    });
+                });
+            </script>
+            <label class=" ml-1 mr-1">至</label>
+            <input placeholder="$v[title]" type='text' name='$v[identifier]_e' id='$v[identifier]_e' value="{echo aval($data,'get/'.$v[identifier].'_e')}" class="form-control {echo $v[datatype]=='date'?'datepick':'datetimepick'}" />
+            <script>
+                $(document).ready(function() {
+                    laydate.render({
+                        elem: '#$v[identifier]_e',type: '$v[datatype]'
+                    });
+                });
+            </script>
+        </div>
+        <!--{elseif in_array($v[datatype],array('multidate'))}-->
+        <!--{elseif in_array($v[datatype],array('stepselect'))}-->
+        <div class="form-group mr-3 mb-1">
+            <label>$v[title]：</label>
+            $v[fieldHtml]
+        </div>
+        <!--{else}-->
+        <div class="form-group mr-3 mb-1">
+            <input placeholder="请输入$v[title]" type='text' name='$v[identifier]' value="{echo aval($data,'get/'.$v[identifier])}" class="form-control" />
+        </div>
+        <!--{/if}-->
+        <!--{/loop}-->
+        <!--{if $data[form][cpcheck]==1}-->
+        <div class="form-group mr-3 mb-1">
+            <label>审核状态：</label>
+            <select name="ischeck" class="custom-select">
+                <option value=''>--全部--</option>
+                <option value='2' {echo aval($data,'get/ischeck')=='2'?'selected':''}>否</option>
+                <option value='1' {echo aval($data,'get/ischeck')=='1'?'selected':''}>是</option>
+            </select>
+        </div>
+        <!--{/if}-->
+        <div class="form-group mb-1">
+            <!--{if $data[searchFields] || $data[form][cpcheck]==1}-->
+            <button type="submit" class="btn btn-success">搜索</button>
+            <!--{/if}-->
+            <!--{if $data[form][export]==1 && (empty($data[admin][purviews]) || in_array('dataExport'.$data[fid],$data[admin][purviews]))}-->
+             <a class="btn btn-success ml-1" href='/admin/forms/dataExport?$data[query]&page=' target='_blank'>导出</a>
+            <!--{/if}-->
+        </div>
+
+    </form>
+</div>
+
+<!--{if !empty($isloadSelect2)}-->
+<link href="$cfg[resourceUrl]assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>
+<script src="$cfg[resourceUrl]assets/plugins/select2/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+</script>
+<!--{/if}-->
+<!--{/if}-->

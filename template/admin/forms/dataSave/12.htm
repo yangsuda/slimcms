@@ -1,0 +1,150 @@
+<!--{template admin/html_head}-->
+<link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css" />
+<script src="$cfg[resourceUrl]validform/js/Validform_min.js"></script>
+<link rel="stylesheet" href="$cfg[resourceUrl]validform/css/validform.css" />
+</head>
+<body class="adminbody">
+
+<div id="main">
+    <!--{template admin/head}-->
+    <!--{template admin/leftMenu}-->
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <!--{template admin/navigation_save}-->
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="card mb-3">
+                            <div class="card-body m-4">
+                                <form name="form1" action="$data[p]?$data[query]" enctype="multipart/form-data" method="post" class="validform">
+                                    <input type="hidden" name="formhash" value="$data[formhash]" />
+                                    <input type="hidden" name="csrf_token" value="$data[csrfToken]"/>
+                                    <!--{if aval($data,'data/id')}-->
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label">ID：</label>
+                                        <div class="col-sm-6">
+                                            $data[data][id]
+                                        </div>
+                                        <div class="col-sm-4 text-muted">
+                                        </div>
+                                    </div>
+                                    <!--{/if}-->
+                                    <!--{loop $data[fieldshtml] $v}-->
+                                    <!--{if $v[forbidedit]=='1'}-->
+                                    <!--{eval !isset($allowedit) && $allowedit=1;}-->
+                                    <!--{/if}-->
+                                    <!--{if $v[datatype]=='hidden'}-->
+                                    $v[field]
+                                    <!--{else}-->
+                                    <!--{template normalfield_save}-->
+                                    <!--{/if}-->
+                                    <!--{/loop}-->
+                                    <div class="form-group row ueditorHtml" style="display: none">
+                                        <label class="col-sm-2 col-form-label">值：</label>
+                                        <div class="col-sm-6">
+                                            $data[data][ueditorHtml]
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="col-sm-4 text-muted"></div>
+                                    </div>
+
+                                    <!--{if $cfg[ccode] == '1'}-->
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label">验证码：</label>
+                                        <div class="col-sm-2">
+                                            <img id="vdimgck" align="absmiddle" onClick="this.src='/admin/captcha#'+Math.random()" alt="看不清？点击更换"
+                                                 src="/admin/captcha" style="cursor: pointer; position:absolute; right:12px; top:5px;height: 30px; z-index:1000;"/>
+                                            <input type="text" id="ccode" class="form-control"   placeholder="请填写验证码" nullmsg="请填写验证码"  name="ccode" required/>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="col-sm-8 text-muted"></div>
+                                    </div>
+                                    <!--{/if}-->
+                                    <!--{if !empty($allowedit)}-->
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label"></label>
+                                        <div class="col-sm-10">
+                                            <button type="submit" class="btn btn-success">提　交</button>
+                                        </div>
+                                    </div>
+                                    <!--{/if}-->
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--{template admin/modal_msg}-->
+
+</div>
+<!--{template footer}-->
+<style type="text/css">
+    .am-form-file input[type="file"] {position: absolute;left: 0;z-index: 1;opacity: 0;cursor: pointer;}
+</style>
+<script>
+    $(function () {
+        function showValueHtml(type){
+            var html = '';
+            if(type==1){
+                html = '<input type="text" class="form-control " id="value" name="value" value="{echo aval($data,'data/value')}" >';
+                $('.formgroup-value .col-sm-6').html(html);
+                $('.ueditorHtml').hide();
+                $('.formgroup-value').show();
+            }
+            else if(type==2){
+                html = '<textarea class="form-control " id="value" name="value" rows="5">{echo aval($data,'data/value')}</textarea>';
+                $('.formgroup-value .col-sm-6').html(html);
+                $('.ueditorHtml').hide();
+                $('.formgroup-value').show();
+            }
+            else if(type==3){
+                html = '<div class="form-inline"><span class="custom-control custom-radio mr-2">\n' +
+                    '        <input type="radio" class="custom-control-input " id="value0" name="value" value="0" {echo aval($data,'data/value')!='1'?'checked':''}/>\n' +
+                '        <label class="custom-control-label" for="value0">否</label>\n' +
+                '    </span>\n' +
+                '            <span class="custom-control custom-radio mr-2">\n' +
+                '        <input type="radio" class="custom-control-input " id="value1" name="value" value="1" {echo aval($data,'data/value')=='1'?'checked':''}/>\n' +
+                '        <label class="custom-control-label" for="value1">是</label>\n' +
+                '    </span></div>';
+                $('.formgroup-value .col-sm-6').html(html);
+                $('.ueditorHtml').hide();
+                $('.formgroup-value').show();
+            }
+            else if(type==4){
+                html = '<div class="am-form-file"> ' +
+                    '<button type="button" class="btn btn-secondary btn-sm"><i class="fa-1x fas fa-cloud-upload-alt"></i> 本地上传</button> ' +
+                    '<input type="file" name="value" onChange="$(\'#value_html\').html(this.value);$(\'#value_hidden\').val(this.value);" /> ' +
+                '<input type="hidden" id="value_hidden" name="value_hidden" value=""  sucmsg=""  /> </div> ' +
+                '<div id="value_html" class="m-1">{echo aval($data,'data/value')}</div>';
+                $('.formgroup-value .col-sm-6').html(html);
+                $('.ueditorHtml').hide();
+                $('.formgroup-value').show();
+            }
+            else if(type==5){
+                $('.ueditorHtml').show();
+                $('.formgroup-value').hide();
+            }
+
+        }
+        showValueHtml({echo aval($data,'data/type',1)});
+        $('#type').change(function () {
+            var type = $(this).val();
+            showValueHtml(type);
+        })
+        $(".validform").Validform({
+            tiptype: function(msg, o) {
+                if (!o.obj.is("form")) {
+                    var objtip = o.obj.parents(".form-group").find(".invalid-feedback");
+                    objtip.text(msg);
+                }
+            },
+            showAllError: true,
+        });
+    })
+</script>
+</body>
+</html>

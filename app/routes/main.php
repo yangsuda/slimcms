@@ -1,0 +1,12 @@
+<?php
+/**
+ * 前台路由配置（ThinkPHP 风格）
+ * @author zhucy
+ */
+declare(strict_types=1);
+
+use App\Core\RouteAction as Route;
+
+Route::get('/', 'main\MainController@index');
+Route::get('/captcha', 'main\MainController@captcha');
+Route::get('/formhash', 'main\MainController@formHash');

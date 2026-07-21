@@ -9,8 +9,6 @@
 
 基于Slim4、PSR-7和PHP-DI容器实现。
 
-debug默认是开启的，生产环境下CORE_DEBUG建议改成false
-
 生产环境下建议opcache扩展开启，本地测试性能会有近10倍的提升
 
 数据库连接默认通过“mysql:host=XXX:XXX;”方式连接，有些情况下会连接不成功，可改成“mysql:host=XXX;port=XXX;”试试，
@@ -33,22 +31,67 @@ composer create-project yangsuda/slimcms [my-app-name] dev-master
 
 ## 路由规则
 
-控制层：app/Control，Control中的文件夹名称由入口文件中CURSCRIPT常量决定，如：默认前端入口对应是main文件夹
+项目采用标准 REST 风格路由，路由配置文件位于 `app/routes/` 目录下：
 
-URL通过?p=CLASS/METHOD方式访问控制层相应的方法，如没在相应类中找到相应方法会在当前文件夹中的DefaultControl.php中寻找，
-如果还没找到，会到上级app/Control/"CURSCRIPT"/DefaultControl中寻找，如还没找到，继续到app/DefaultControl寻找，再找不到就报错
+- `app/routes/main.php` - 前台路由
+- `app/routes/admin.php` - 后台路由
+- `app/routes/plugin/` - 插件路由（可选）
 
-如：访问/?p=view/abc/test
+### 路由注册方式
 
-会先找app/Control/main/view/AbcControl中test方法，如果没找到相应的方法，则会按上面说的一级级去找，如果找不到就报错
+使用 `App\Core\RouteAction` 提供类似 ThinkPHP/Laravel 风格的路由注册：
 
-如：访问/?p=view/test
+```php
+use App\Core\RouteAction as Route;
 
-会先找app/Control/main/ViewControl中test方法，如果没找到相应的方法，则会按上面说的一级级去找，如果找不到就报错
+Route::get('/path', 'Controller@method');    // GET
+Route::post('/path', 'Controller@method');   // POST
+Route::gp('/path', 'Controller@method');     // GET + POST
+Route::any('/path', 'Controller@method');    // 所有方法
 
-如：访问/?p=test
+// 路由分组，支持链式挂载中间件
+Route::group('/admin', function () {
+    Route::get('/index', 'admin\MainController@index');
+    Route::gp('/login', 'admin\LoginController@login');
+    Route::group('', function () {
+        Route::gp('/{path1}/{path2}'); // 动态路由参数
+    })->add(AdminAuthMiddleware::class);
+})->add(SessionMiddleware::class);
+```
 
-会先找app/Control/main/TestControl中test方法，如果没找到相应的方法，则会按上面说的一级级去找，如果找不到就报错
+### 控制器规范
+
+控制器位于 `app/Controller/` 目录下，按模块分子目录：
+
+- `app/Controller/main/` - 前台控制器
+- `app/Controller/admin/` - 后台控制器
+- `app/Controller/plugin/` - 插件控制器
+
+控制器类名以 `Controller` 结尾，如 `MainController`、`LoginController`。路由中使用 `模块\类名Controller@方法名` 格式指定，框架会自动补全完整类名 `App\Controller\`。
+
+### 路由示例
+
+前台路由（`app/routes/main.php`）：
+
+```php
+Route::get('/', 'main\MainController@index');
+Route::get('/captcha', 'main\MainController@captcha');
+```
+
+后台路由（`app/routes/admin.php`）：
+
+```php
+Route::group('/admin', function () {
+    Route::gp('/login', 'admin\LoginController@login');
+    Route::get('/logout', 'admin\LoginController@logout');
+
+    Route::group('', function () {
+        Route::get('/index', 'admin\MainController@index');
+        Route::gp('/updatePwd', 'admin\MainController@updatePwd');
+        Route::gp('/{path1}/{path2}');
+    })->add(AdminAuthMiddleware::class);
+})->add(SessionMiddleware::class);
+```
 
 ## 数据获取
 
@@ -76,11 +119,11 @@ Model层数据统一以Output对象形式返回，
 
 通过getTemplate方法获取模板，如：$output->getTemplate()
 
-通过withTemplate方法设置设置解析的模板，如：$output->withTemplate('main/index')
+通过withTemplate方法设置设置解析的模板，如：$output->withTemplate('/index')
 
 通过getReferer方法获取来路URL，如：$output->getReferer()
 
-通过withReferer方法设置来路URL，如：$output->withReferer('?p=test')
+通过withReferer方法设置来路URL，如：$output->withReferer('/test')
 
 ## 数据输出
 
@@ -92,9 +135,7 @@ Model层数据统一以Output对象形式返回，
 
 3、$this->json(),返回json数据
 
-4、$this->jsonCallback(),用于跨域请求
-
-5、self::response(),根据请求的content-type返回相应的数据类型
+4、self::response(),根据请求的content-type返回相应的数据类型
 
 ## 功能插件
 
@@ -202,17 +243,6 @@ public function dataExportBefore($condition, $result)
 }
 ```
 
-
-## 前端web页面
-
-前端web页面默认根据后台表单开放前端WEB功能权限控制显示，分“列表、展示、添加修改、删除、导出、表单结构、审核”7种权限，
-对应列表、详细、编辑添加三种页面。
-
-默认模板在template/forms/中，如自定义模板，先创建相应的文件夹，再根据表单ID(fid)创建相应的模板。
-
-如：自定义fid为1的列表模板，在template/forms/中创建dataList文件夹，在其中创建1.htm模板，系统会自动加载此模板，
-如不能满足需求，可自行开发
-
 ## 模板标签
 
 模板中可直接加载变量
@@ -311,38 +341,3 @@ public function __construct(Request $request, string $tableName, string $extendN
 数据库中将自动创建表adminlog2022
 
 数据调用方式:self::t('adminlog')->...（默认调用当前年份数据），如需调用2021数据，:self::t('adminlog','2021')->...
-
-## apache伪静态规则
-```bash
-RewriteEngine On
-RewriteRule ^(.*)/(ueditor|resources|uploads|install)/(.*) - [L]
-RewriteRule ^(.*)/(ueditor|resources|uploads|install)(.*) - [L]
-RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5/$6&q=$7 [QSA,L]
-RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5/$6 [QSA,L]
-RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5&q=$6 [QSA,L]
-RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5 [QSA,L]
-RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4&q=$5 [QSA,L]
-RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4 [QSA,L]
-RewriteRule ^(.*)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3&q=$4 [QSA,L]
-RewriteRule ^(.*)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3 [QSA,L]
-RewriteRule ^(.*)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2&q=$3 [QSA,L]
-RewriteRule ^(.*)/([\w]+)(/)?$ $1/index.php?p=$2 [QSA,L]
-```
-
-## nginx伪静态规则
-```bash
-if (!-e $request_filename) {
-	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5/$6&q=$7&$args last;
-	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5/$6&$args last;
-	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4/$5&q=$6&$args last;
-	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4/$5&$args last;
-	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3/$4&q=$5&$args last;
-	rewrite ^(.*)/([\w]+)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3/$4&$args last;
-	rewrite ^(.*)/([\w]+)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2/$3&q=$4&$args last;
-	rewrite ^(.*)/([\w]+)/([\w]+)(/)?$ $1/index.php?p=$2/$3&$args last;
-	rewrite ^(.*)/([\w]+)/([\w-.%`]+).html?$ $1/index.php?p=$2&q=$3&$args last;
-	rewrite ^(.*)/([\w]+)(/)?$ $1/index.php?p=$2&$args last;
-}
-```
-
-注：此规则是在将根目录指向到“public/”目录的情况下的规则.

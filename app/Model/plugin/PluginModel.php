@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace App\Model\plugin;
 
 use App\Core\Forms;
+use App\Service\table\FormsService;
+use App\Service\table\PluginsService;
 use SlimCMS\Abstracts\ModelAbstract;
 use SlimCMS\Helper\File;
 use SlimCMS\Helper\FileCache;
@@ -34,7 +36,7 @@ class PluginModel extends ModelAbstract
         if ($res->getCode() != 200) {
             return $res;
         }
-        $configurl = CSDATA . '/plugins/' . $identifier . '/config.php';
+        $configurl = self::getPluginPath($identifier) . 'config.php';
         $str = "<?php\r\nreturn ";
         $str .= var_export($data, true) . ';';
         file_put_contents($configurl, $str);
@@ -55,7 +57,7 @@ class PluginModel extends ModelAbstract
         if ($res->getCode() != 200) {
             return $res;
         }
-        $configurl = CSDATA . '/plugins/' . $identifier . '/config.php';
+        $configurl = self::getPluginPath($identifier) . 'config.php';
         static $configs = [];
         if (empty($configs[$identifier]) && is_file($configurl)) {
             $configs[$identifier] = require_once $configurl;
@@ -109,6 +111,11 @@ class PluginModel extends ModelAbstract
         return self::$output->withCode(21009);
     }
 
+    private static function getPluginPath(string $identifier)
+    {
+        return CSDATA . 'plugins/' . (int)VERSION . '/' . $identifier . '/';
+    }
+
     /**
      * 安装插件
      * @param string $identifier 插件标识符
@@ -120,7 +127,7 @@ class PluginModel extends ModelAbstract
         if (empty($identifier)) {
             return self::$output->withCode(21002);
         }
-        $pluginDir = CSDATA . 'plugins/' . $identifier . '/';
+        $pluginDir = self::getPluginPath($identifier);
         File::mkdir($pluginDir);
         if (is_file($pluginDir . 'install.lock')) {
             return self::$output->withCode(223025);
@@ -133,7 +140,7 @@ class PluginModel extends ModelAbstract
         if (empty($plugin)) {
             return self::$output->withCode(223023);
         }
-        $installzip = CSDATA . 'plugins/' . $identifier . '.zip';
+        $installzip = $pluginDir . $identifier . '.zip';
 
         //下载压缩包
         //兼容老的下载方式
@@ -159,16 +166,10 @@ class PluginModel extends ModelAbstract
         if (md5_file($installzip) != $plugin['signature']) {
             return self::$output->withCode(223028);
         }
-        Zip::unpack($installzip, CSDATA . 'plugins/');
+        Zip::unpack($installzip, $pluginDir . '../');
 
-        //是否可写检测
-        $res = self::writeCheck($pluginDir . 'files', CSDATA . 'plugins/');
-        if ($res->getCode() != 200) {
-            return $res;
-        }
-
-        if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
+        if (is_file(self::getPluginPath($identifier) . 'install.php')) {
+            $arr = require self::getPluginPath($identifier) . 'install.php';
             if (!empty($arr['installCheck'])) {
                 $res = $arr['installCheck']();
                 if ($res->getCode() != 200) {
@@ -188,7 +189,7 @@ class PluginModel extends ModelAbstract
         $data['signature'] = $plugin['signature'];
         $data['menu'] = serialize($plugin['menu']);
         $data['permission'] = serialize($plugin['permission']);
-        Forms::dataSave(8, [], $data);
+        PluginsService::instance()->add($data);
 
         //数据库表安装调整
         $db = self::t()->db();
@@ -224,48 +225,16 @@ class PluginModel extends ModelAbstract
             self::t('forms_fields')->withWhere(['formid' => $k])->update(['formid' => $id]);
 
             //模板重命名
-            $rename('admincp/forms/dataList/', $k, $id);
-            $rename('admincp/forms/dataSave/', $k, $id);
-            $rename('main/forms/dataList/', $k, $id);
-            $rename('main/forms/dataSave/', $k, $id);
-            $rename('main/forms/dataView/', $k, $id);
+            $rename('admin/forms/dataList/', $k, $id);
+            $rename('admin/forms/dataSave/', $k, $id);
         }
 
         //生成安装锁定文件
         file_put_contents($pluginDir . 'install.lock', TIMESTAMP);
 
-        if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
-            if (!empty($arr['install'])) {
-                $arr['install']();
-            }
+        if (!empty($arr['install'])) {
+            $arr['install']();
         }
-        return self::$output->withCode(200);
-    }
-
-    /**
-     * 插件安装是否可写入校验
-     * @param string $sourceDir 源文件夹
-     * @param string $targetDir 目标文件夹
-     * @return OutputInterface
-     */
-    private static function writeCheck(string $sourceDir, string $targetDir): OutputInterface
-    {
-        if (!is_dir($sourceDir)) {
-            return self::$output->withCode(21002);
-        }
-        $dh = @dir($sourceDir);
-        File::mkdir($targetDir);
-        while (($file = $dh->read()) !== false) {
-            if ($file != "." && $file != ".." && is_dir($targetDir . '/' . $file)) {
-                if (is_writeable($targetDir . '/' . $file)) {
-                    return self::writeCheck($sourceDir . '/' . $file, $targetDir . '/' . $file);
-                } else {
-                    return self::$output->withCode(223029, ['msg' => $file]);
-                }
-            }
-        }
-        $dh->close();
         return self::$output->withCode(200);
     }
 
@@ -298,23 +267,20 @@ class PluginModel extends ModelAbstract
 
         //删除文件
         $dirs = [
-            CSAPP . 'Control/admincp/plugin/' . ucfirst($identifier) . 'Control.php',
-            CSAPP . 'Control/admincp/plugin/' . $identifier . '/',
-            CSAPP . 'Control/main/plugin/' . ucfirst($identifier) . 'Control.php',
-            CSAPP . 'Control/main/plugin/' . $identifier . '/',
+            CSAPP . 'Controller/admin/plugin/' . ucfirst($identifier) . 'Controller.php',
+            CSAPP . 'Controller/admin/plugin/' . $identifier . '/',
+            CSAPP . 'Controller/plugin/' . ucfirst($identifier) . 'Controller.php',
+            CSAPP . 'Controller/plugin/' . $identifier . '/',
             CSAPP . 'Model/plugin/' . $identifier . '/',
-            CSTEMPLATE . 'admincp/plugin/' . $identifier . '/',
-            CSTEMPLATE . 'main/plugin/' . $identifier . '/',
+            CSTEMPLATE . 'admin/plugin/' . $identifier . '/',
+            CSTEMPLATE . 'plugin/' . $identifier . '/',
             CSPUBLIC . 'resources/plugin/' . $identifier . '/',
         ];
         foreach (self::installTables($identifier) as $v) {
             $id = self::t('forms')->withWhere(['table' => $v])->fetch('id');
             $dirs[] = CSAPP . 'Table/' . ucfirst($v) . 'Table.php';
-            $dirs[] = CSTEMPLATE . 'admincp/forms/dataList/' . $id . '.htm';
-            $dirs[] = CSTEMPLATE . 'admincp/forms/dataSave/' . $id . '.htm';
-            $dirs[] = CSTEMPLATE . 'main/forms/dataList/' . $id . '.htm';
-            $dirs[] = CSTEMPLATE . 'main/forms/dataSave/' . $id . '.htm';
-            $dirs[] = CSTEMPLATE . 'main/forms/dataView/' . $id . '.htm';
+            $dirs[] = CSTEMPLATE . 'admin/forms/dataList/' . $id . '.htm';
+            $dirs[] = CSTEMPLATE . 'admin/forms/dataSave/' . $id . '.htm';
 
             self::t('forms')->withWhere($id)->delete();
             self::t('forms_fields')->withWhere(['formid' => $id])->delete();
@@ -322,16 +288,16 @@ class PluginModel extends ModelAbstract
         foreach ($dirs as $v) {
             File::delFiles($v);
         }
-
-        unlink(CSDATA . 'plugins/' . $identifier . '/install.lock');
-        if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
+        $pluginDir = self::getPluginPath($identifier);
+        is_file($pluginDir . 'install.lock') && unlink($pluginDir . 'install.lock');
+        if (is_file($pluginDir . 'install.php')) {
+            $arr = require $pluginDir . 'install.php';
             if (!empty($arr['unstall'])) {
                 $arr['unstall']();
             }
         }
-        if (is_file(CSDATA . 'plugins/' . $identifier . '/config.php')) {
-            unlink(CSDATA . 'plugins/' . $identifier . '/config.php');
+        if (is_file($pluginDir . 'config.php')) {
+            unlink($pluginDir . 'config.php');
         }
 
         //删除插件
@@ -345,8 +311,9 @@ class PluginModel extends ModelAbstract
      */
     private static function installTables(string $identifier): array
     {
-        if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
+        $pluginDir = self::getPluginPath($identifier);
+        if (is_file($pluginDir . 'install.php')) {
+            $arr = require $pluginDir . 'install.php';
             if (!empty($arr['tables'])) {
                 return $arr['tables'];
             }
@@ -372,9 +339,9 @@ class PluginModel extends ModelAbstract
             return self::$output->withCode(223027);
         }
         self::t('plugins')->withWhere($row['id'])->update(['available' => $switch]);
-
-        if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
+        $pluginDir = self::getPluginPath($identifier);
+        if (is_file($pluginDir . 'install.php')) {
+            $arr = require $pluginDir . 'install.php';
             if (!empty($arr['openSwitch'])) {
                 $arr['openSwitch'](self::installTables($identifier), $switch);
             }
@@ -402,11 +369,12 @@ class PluginModel extends ModelAbstract
         }
         self::t('plugins')->withWhere($row['id'])->delete();
 
+        $pluginDir = self::getPluginPath($identifier);
         //删除文件
-        File::delFiles(CSDATA . 'plugins/' . $identifier . '/');
+        File::delFiles($pluginDir);
 
-        if (is_file(CSDATA . 'plugins/' . $identifier . '/install.php')) {
-            $arr = require CSDATA . 'plugins/' . $identifier . '/install.php';
+        if (is_file($pluginDir . 'install.php')) {
+            $arr = require $pluginDir . 'install.php';
             if (!empty($arr['delete'])) {
                 $arr['delete']();
             }
@@ -434,10 +402,10 @@ class PluginModel extends ModelAbstract
      */
     private static function _market()
     {
-        $cachekey = static::class. __FUNCTION__;
+        $cachekey = static::class . __FUNCTION__;
         $plugins = FileCache::get($cachekey);
         if (empty($plugins)) {
-            $url = Http::curlGet('https://gitee.com/919579/plugin/raw/master/url.txt');
+            $url = Http::curlGet('https://gitee.com/919579/plugin/raw/master/url'.(int)VERSION.'.txt');
             $url = Http::curlGet(trim($url));
             $list = json_decode($url, true);
             $plugins = [];

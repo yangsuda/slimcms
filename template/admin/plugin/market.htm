@@ -1,0 +1,232 @@
+<!--{template admin/html_head}-->
+<link rel="stylesheet" type="text/css" href="$cfg[resourceUrl]assets/plugins/datatables/datatables.min.css" />
+<link href="$cfg[resourceUrl]assets/css/tag.css" rel="stylesheet" type="text/css" />
+</head>
+<body class="adminbody">
+
+<div id="main">
+    <!--{template admin/head}-->
+    <!--{template admin/leftMenu}-->
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="breadcrumb-holder">
+                            <h5 class="float-left" style="line-height: 2.2rem">插件管理</h5>
+                            <ol class="breadcrumb float-right">
+                            </ol>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-1 text-center tag">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <a href="/admin/forms/dataList?fid=8">我的插件</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-1 text-center tag active">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <a href="/admin/plugin/market">插件市场</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                        <div class="card mb-3 cardcontent">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table id="form$data[fid]" class="table table-hover display dataTable">
+                                                    <thead>
+                                                    <tr role="row" align="center">
+                                                        <th>插件名称</th>
+                                                        <th>标识符</th>
+                                                        <th>类型</th>
+                                                        <th>作者</th>
+                                                        <th>管理</th>
+                                                        <th>操作</th>
+
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <!--{loop $data[list] $v}-->
+                                                    <tr align='center' bgcolor="#FFFFFF">
+                                                        <td class="text-dark" style="text-align: left;">$v[title]($v[version])<br><span class="text-secondary small">$v[intro]</span></td>
+                                                        <td class="text-dark">$v[identifier]</td>
+                                                        <td class="text-dark">$v[versiontype]</td>
+                                                        <td class="text-dark">$v[author]</td>
+                                                        <td class="text-dark">
+                                                            <!--{if aval($v,'my/isinstall')==1 && aval($v,'my/available')==1}-->
+                                                            <!--{loop $v[menu] $mv}-->
+                                                            <a href="$mv[url]" target="{echo $mv[target]?:''}">$mv[name]</a>
+                                                            <!--{/loop}-->
+                                                            <!--{/if}-->
+                                                        </td>
+                                                        <td>
+                                                            <!--{if !$v[my]}-->
+                                                            <!--{if $v[versiontype]=='voucher'}-->
+                                                            <a class="btn btn-success btn-sm btn-installbox" href="javascript:void(0)" data-identifier="$v[identifier]">安装</a>
+                                                            <!--{else}-->
+                                                            <a class="btn btn-success btn-sm btn-install" href="javascript:void(0)" data-identifier="$v[identifier]">安装</a>
+                                                            <!--{/if}-->
+                                                            <!--{else}-->
+                                                            <!--{if $v[my][available]==1}-->
+                                                            <a class="btn btn-secondary btn-sm btn-switch" href="javascript:void(0)" data-open="-1" data-identifier="$v[identifier]">关闭</a>
+                                                            <!--{else}-->
+                                                            <a class="btn btn-danger btn-sm btn-switch" href="javascript:void(0)" data-open="1" data-identifier="$v[identifier]">开启</a>
+                                                            <!--{/if}-->
+                                                            <a class="btn btn-warning btn-sm btn-unstall" href="javascript:void(0)" data-identifier="$v[identifier]">卸载</a>
+                                                            <!--{/if}-->
+                                                        </td>
+                                                    </tr>
+                                                    <!--{/loop}-->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--{template admin/modal_msg}-->
+    <!--{template admin/listjs}-->
+
+    <div class="modal fade" id="confirmUnstall" tabindex="-1" role="dialog" aria-labelledby="confirmUnstall" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="width: 500px;">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-3 col-md-3 text-right p-3">
+                            <i class="fa fa-warning bigfonts text-warning fa-3x"></i>
+                        </div>
+                        <div class="mt-3 text-left h5">
+                            <span class="custom-control custom-checkbox mr-2">
+        <input type="checkbox" sucmsg="" class="custom-control-input " id="delTable" name="delTable" value="1">
+        <label for="delTable" class="custom-control-label">删除相关数据库中相关数据？</label>
+    </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success btn-submit">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="btn-installbox" tabindex="-1" role="dialog" aria-labelledby="btn-installbox" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="width: 500px;">
+                <div class="modal-body">
+                    <div class="form-group row formgroup-title">
+                        <label for="voucher" class="col-sm-3 col-form-label text-xl-right"><sapn style="color: red">*</sapn>兑换码：</label>
+                        <div class="col-sm-5 ">
+                            <input type="hidden" id="identifier">
+                            <input type="text" datatype="*" nullmsg="请输入兑换码" placeholder="请输入兑换码" class="form-control" id="voucher">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-sm-4 text-muted"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success btn-installsubmit">安装</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $('.btn-installbox').click(function () {
+                $('#btn-installbox').modal();
+                $('#identifier').val($(this).data('identifier'));
+            })
+
+            $('.btn-installsubmit').click(function () {
+                var that = $(this);
+                that.text('安装中...');
+                var identifier = $('#identifier').val();
+                var voucher = $('#voucher').val();
+                $('#btn-installbox').modal('hide');
+                $.getJSON('/admin/plugin/install?identifier='+identifier+'&voucher='+voucher,function (res) {
+                    resultMsg(res.msg,res.code);
+                    that.text('安装');
+                    if(res.code==200){
+                        setTimeout(function () {
+                            location = res.referer;
+                        }, 2000);
+                    }
+                })
+            })
+
+            function confirmUnstall(callback) {
+                $('#confirmUnstall').modal();
+                $('#confirmUnstall .btn-submit').unbind('click').click(function () {
+                    typeof callback === 'function' && callback();
+                })
+            }
+
+            $('.btn-install').click(function () {
+                var that = $(this);
+                that.text('安装中...');
+                var identifier = $(this).data('identifier');
+                $.getJSON('/admin/plugin/install?identifier='+identifier,function (res) {
+                    resultMsg(res.msg,res.code);
+                    that.text('安装');
+                    if(res.code==200){
+                        setTimeout(function () {
+                            location = res.referer;
+                        }, 2000);
+                    }
+                })
+            })
+            $('.btn-unstall').click(function () {
+                var identifier = $(this).data('identifier');
+                confirmUnstall(function () {
+                    var delTable = $('#delTable').prop('checked')?1:0;
+                    $.getJSON('/admin/plugin/unstall?identifier='+identifier+'&delTable='+delTable,function (res) {
+                        $('#confirmUnstall').modal('hide');
+                        resultMsg(res.msg,res.code);
+                        if(res.code==200){
+                            setTimeout(function () {
+                                location = res.referer;
+                            }, 2000);
+                        }
+                    })
+                })
+            })
+            $('.btn-switch').click(function () {
+                var identifier = $(this).data('identifier');
+                var open = $(this).data('open');
+                $.getJSON('/admin/plugin/openSwitch?identifier='+identifier+'&switch='+open,function (res) {
+                    resultMsg(res.msg,res.code);
+                    if(res.code==200){
+                        setTimeout(function () {
+                            location = res.referer;
+                        }, 2000);
+                    }
+                })
+            })
+        })
+    </script>
+
+</div>
+<!--{template footer}-->
+</body>
+</html>

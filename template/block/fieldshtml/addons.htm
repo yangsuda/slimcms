@@ -31,7 +31,7 @@
         var that = $(this);
         var url = that.data('url');
         var id = "{echo (int)aval($_GET,'id')}";
-        $.getJSON('{url ?p=main/delFromAddons&identifier=$data[identifier]&id='+id+'&fid=$data[formid]&url='+url+'}',function (res) {
+        $.getJSON('/admin/delFromAddons?identifier=$data[identifier]&id='+id+'&fid=$data[formid]&url='+url,function (res) {
             if(res.code!=200){
                 alert(res.msg);
             }else{

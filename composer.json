@@ -18,12 +18,13 @@
         }
     ],
     "require": {
-        "php": "^7.3 || ^8.0",
+        "php": "^8.0",
         "ext-curl": "*",
         "ext-json": "*",
         "ext-redis": "*",
         "respect/validation": "^2.2",
-        "yangsuda/framework": "^4.0"
+        "vlucas/phpdotenv": "^5.6",
+        "yangsuda/framework": "^5.0"
     },
     "repositories": {
         "packagist": {

@@ -12,13 +12,13 @@ use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Interfaces\TemplateInterface;
 use SlimCMS\Interfaces\DatabaseInterface;
 use SlimCMS\Interfaces\UploadInterface;
-use App\Core\Routes;
 use App\Core\Redis;
 use App\Core\Template;
 use App\Core\Upload;
 use App\Core\Output;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Database;
+use SlimCMS\Core\Routes;
 
 return function (ContainerBuilder $containerBuilder) {
     //Session保存路径
@@ -29,20 +29,18 @@ return function (ContainerBuilder $containerBuilder) {
 
     $cfg = getConfig();
 
-    //Session跨域设置,为方便调试，debug开启时不设置
-    if (CORE_DEBUG === false) {
-        session_set_cookie_params([
-            'lifetime' => 0,
-            'path' => '/',
-            'domain' => '.' . $cfg['cfg']['domain'],
-            'secure' => true,  // 生产环境启用
-            'httponly' => true,
-            'samesite' => 'Strict'
-        ]);
-    }
+    // Session 安全配置 - 所有环境统一设置
+    session_set_cookie_params([
+        'lifetime' => (int)($_ENV['SESSION_LIFETIME'] ?? 0),
+        'path' => '/',
+        'domain' => $_ENV['SESSION_DOMAIN'] ?? '',
+        'secure' => APP_ENV === 'production',  // 仅生产环境强制 HTTPS
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
 
-    //时区设置
-    @date_default_timezone_set('Etc/GMT-8');
+    // 时区设置 - 使用标准时区名称
+    date_default_timezone_set('Asia/Shanghai');
 
     //全局变量设置
     $containerBuilder->addDefinitions($cfg);

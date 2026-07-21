@@ -155,7 +155,7 @@ basehost = typeof basehost=='undefined'?'index.php?':basehost;
             swf: '../0.1.5/Uploader.swf',
             chunked: false,
             chunkSize: 512 * 1024,
-            server: basehost+'&p=image/webupload',
+            server: basehost+'/admin/image/webupload',
             // runtimeOrder: 'flash',
 
             accept: {
@@ -290,7 +290,7 @@ basehost = typeof basehost=='undefined'?'index.php?':basehost;
                         img = $('<img src="'+src+'">');
                         $wrap.empty().append( img );
                     } else {
-                        $.ajax(basehost+'&p=ajax/webuploadThumbnail&id='+file.id, {
+                        $.ajax(basehost+'/admin/image/webuploadThumbnail?id='+file.id, {
                             method: 'POST',
                             data: src,
                             dataType:'json'
@@ -611,7 +611,7 @@ basehost = typeof basehost=='undefined'?'index.php?':basehost;
 
 //删除已经上传的图片
 function DelAlbPic(fid){	
-	$.get(basehost+"&p=image/webuploadDel&id="+fid);
+	$.get(basehost+"/admin/image/webuploadDel?id="+fid);
 	$("li#"+fid).remove();
 }
 
@@ -622,7 +622,7 @@ $(function(){
         var id = $(this).parents('div.mod_list_photo').data('id');
         var fid = $(this).parents('div.mod_list_photo').data('fid');
         var pic = $(this).data('ref');
-        $.getJSON(basehost+'&p=image/webuploadCover&id=' + id + '&fid=' + fid + '&pic=' + pic + '&rand=' + Math.random(), function(result) {
+        $.getJSON(basehost+'/admin/image/webuploadCover?id=' + id + '&fid=' + fid + '&pic=' + pic + '&rand=' + Math.random(), function(result) {
             if(result.code==200) {
                 $('.cover_photo').remove();
                 obj.parent('.btn_photo').before('<div class="cover_photo"></div>');
@@ -637,7 +637,7 @@ $(function(){
         var id = $(this).parents('div.mod_list_photo').data('id');
         var field = $(this).parents('div.mod_list_photo').data('identifier');
         var fid = $(this).data('fid');
-        $.get(basehost+'&p=image/webuploadImageDel&pic='+path+'&id='+id+'&field='+field+'&fid='+fid);
+        $.get(basehost+'/admin/image/webuploadImageDel?pic='+path+'&id='+id+'&field='+field+'&fid='+fid);
         pic.remove();
     })
 
