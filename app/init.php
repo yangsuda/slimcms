@@ -15,13 +15,21 @@ define('CSDATA', CSROOT . 'data/');
 define('CSPUBLIC', CSROOT . 'public/');
 define('CSTEMPLATE', CSROOT . 'template/');
 define('CSVENDOR', CSROOT . 'vendor/');
-define('CORE_DEBUG', true); //生产环境下设置false
 define('TIMESTAMP', time());
 define('MICROTIME', microtime(true));
-define('VERSION', '3.0.1');
-error_reporting(CORE_DEBUG ? E_ALL : 0);
+define('VERSION', '5.0.0');
 
 require_once CSROOT . 'vendor/autoload.php';
+
+// 加载环境变量
+$dotenv = Dotenv\Dotenv::createImmutable(CSROOT);
+$dotenv->load();
+
+// 从环境变量读取配置
+define('CORE_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN));
+define('APP_ENV', $_ENV['APP_ENV'] ?? 'production');
+
+error_reporting(CORE_DEBUG ? E_ALL : 0);
 
 //初始化
 $containerBuilder = new ContainerBuilder();

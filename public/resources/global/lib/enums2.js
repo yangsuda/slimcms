@@ -22,7 +22,7 @@ function Enums() {
         self.ajax_get_enums_list();
     }
     this.ajax_get_enums_list = function() {
-        $.getJSON(basehost+"&p=main/enumsData&egroup=" + self.egroup + "&rand=" + Math.random(), function(result) {
+        $.getJSON(basehost+"/admin/enumsData?egroup=" + self.egroup + "&rand=" + Math.random(), function(result) {
             var _infolist = result.data.list;
             if(Object.keys(_infolist).length>0) {
                 if(self.evalue == 0 || self.get_reid(_infolist, self.evalue) == -1) {

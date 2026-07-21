@@ -9,18 +9,6 @@ namespace App\Core;
 
 class Template extends \SlimCMS\Core\Template
 {
-    protected static function urlTag($matches)
-    {
-        $config = getConfig();
-        $param = str_replace(['<?=', '?>'], ['".', '."'], $matches[1]);
-        if (!empty($config['cfg']['urlEncrypt']) && strpos($param, '\'+')) {
-            $expr = '<?php echo "' . $param . '"; ?>';
-        } else {
-            $expr = '<?php echo \App\Core\Forms::url("' . $param . '"); ?>';
-        }
-        return self::stripvtags($expr);
-    }
-
     protected static function loadTemplateTag($matches)
     {
         $param = str_replace(['<?=', '?>'], ["'.", ".'"], $matches[1]);

@@ -51,9 +51,9 @@ if ($step == 1) {
     $gd = empty($tmp['GD Version']) ? 'noext' : $tmp['GD Version'];
     unset($tmp);
     $disksize = function_exists('disk_free_space') ? floor(disk_free_space(SLIMCMSROOT) / (1024 * 1024)) . 'M' : 'unknow';
-    $frameworkExist = is_file(SLIMCMSROOT.'../vendor/yangsuda/framework/src/function/Core.php');
+    $frameworkExist = is_file(SLIMCMSROOT . '../vendor/yangsuda/framework/src/function/Core.php');
 
-    $dirs = ['../uploads/','../../config/', '../../data/', '../../data/template/', '../../data/sessions/'];
+    $dirs = ['../uploads/', '../../config/', '../../data/', '../../data/template/', '../../data/sessions/'];
     $isok = true;
     include('./template/step_' . $step . '.htm');
     exit();
@@ -77,7 +77,7 @@ if ($step == 1) {
     $options = array();
     $options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET character_set_connection=utf8, character_set_results=utf8, character_set_client=binary, sql_mode=\'\'';
     try {
-        $link = new PDO('mysql:host=' . $dbhost . ':'.$dbport.';', $dbuser, $dbpwd, $options);
+        $link = new PDO('mysql:host=' . $dbhost . ':' . $dbport . ';', $dbuser, $dbpwd, $options);
     } catch (Exception $exc) {
         exit('数据库连接失败，请重新设置！');
     }
@@ -93,44 +93,85 @@ if ($step == 1) {
 
     $query = $link->query("CREATE DATABASE IF NOT EXISTS `" . $dbname . "`;");
     try {
-        $link = new PDO('mysql:host=' . $dbhost . ':'.$dbport.';dbname=' . $dbname, $dbuser, $dbpwd, $options);
+        $link = new PDO('mysql:host=' . $dbhost . ':' . $dbport . ';dbname=' . $dbname, $dbuser, $dbpwd, $options);
     } catch (Exception $exc) {
         exit('选择数据库失败，可能是你没权限，请先创建一个数据库！');
     }
 
-    //生成后台访问文件
-    $filename = input('filename');
-    if (empty($filename)) {
-        exit('后台访问地址不能为空');
-    }
+    $app_env = input('app_env');
+    $app_debug = input('app_debug');
+    $redis_host = input('redis_host');
+    $redis_port = input('redis_port');
+    $redis_pwd = input('redis_pwd');
+    $redis_database = input('redis_database');
+    $redis_prefix = input('redis_prefix');
+    $cookie_prefix = random(5) . '_';
+    $auth_key = random(21);
+    $encrypt_key = random(8);
+    $encrypt_iv = random(8);
+
     $code = <<<EOT
-<?php
-declare(strict_types=1);
-define('MANAGE', '1');
-define('CURSCRIPT', 'admincp');
-require __DIR__ . '/../app/init.php';
+# 应用配置
+APP_ENV={$app_env}
+APP_DEBUG={$app_debug}
+
+# 数据库配置
+DB_HOST={$dbhost}
+DB_PORT={$dbport}
+DB_NAME={$dbname}
+DB_USER={$dbuser}
+DB_PASSWORD={$dbpwd}
+DB_CHARSET=utf8mb4
+DB_TABLEPRE={$dbprefix}
+DB_CONNECTTYPE=:
+DB_PCONNECT=0
+
+# Redis配置
+REDIS_HOST={$redis_host}
+REDIS_PORT={$redis_port}
+REDIS_PASSWORD={$redis_pwd}
+REDIS_DATABASE={$redis_database}
+REDIS_PREFIX={$redis_prefix}
+REDIS_PCONNECT=0
+REDIS_TIMEOUT=0
+REDIS_SERIALIZER=1
+
+# 缓存配置
+CACHE_TYPE=file
+
+# Session配置
+SESSION_DOMAIN=
+SESSION_LIFETIME=0
+
+# Cookie配置
+COOKIE_PREFIX={$cookie_prefix}
+COOKIE_DOMAIN=
+COOKIE_PATH=/
+
+# 上传配置
+UPLOAD_DIR=/uploads/
+UPLOAD_DIR_RULE={Y}/{m}
+UPLOAD_FORBID_FILE=php|pl|cgi|asp|aspx|jsp|php3|shtm|shtml|js
+UPLOAD_CHECK_WORDS=
+
+# 安全配置
+AUTH_KEY={$auth_key}
+ENCRYPT_KEY={$encrypt_key}
+ENCRYPT_IV={$encrypt_iv}
+ATTACK_EVASIVE=0
+QUERY_SAFE_STATUS=1
+CSRF_TOKEN_EXPIRE=3600
+
+# 输出配置
+OUTPUT_GZIP=0
+
+# 内存缓存前缀
+MEMORY_PREFIX=b7H6Sa_
 EOT;
-    file_put_contents('../'.$filename . '.php', $code) or exit('后台访问地址创建失败，请检查根目录是否可写入！');
-
-    $_config = include '../../config/settings.php';
-    $settings = &$_config['settings'];
-    $settings['db']['dbhost'] = $dbhost;
-    $settings['db']['dbport'] = $dbport;
-    $settings['db']['dbuser'] = $dbuser;
-    $settings['db']['dbpw'] = $dbpwd;
-    $settings['db']['dbname'] = $dbname;
-    $settings['db']['tablepre'] = $dbprefix;
-    $settings['memory']['prefix'] = random(6).'_';
-    $settings['cookie']['cookiepre'] = random(5) . '_';
-    $settings['security']['authkey'] = random(21);
-    $settings['keys']['key'] = random(8);
-    $settings['keys']['iv'] = random(8);
-
-    $config = "<?php\n\r" . 'return ' . var_export($_config, true) . ';';
-    file_put_contents('../../config/settings.php', $config) or exit('配置文件创建失败，请检查../../config/目录是否可写入！');
+    file_put_contents('../../.env', $code) or exit('配置文件创建失败，请检查根目录是否可写入！');
 
     //创建数据表
-    $content = file_get_contents( './installsql.txt');
+    $content = file_get_contents('./installsql.txt');
     $content = str_replace('#@#', $dbprefix, $content);
     foreach (explode('; ', $content) as $v) {
         $v = trim($v);
@@ -139,7 +180,7 @@ EOT;
         }
     }
     $_SERVER["REQUEST_SCHEME"] = !empty($_SERVER["REQUEST_SCHEME"]) ? $_SERVER["REQUEST_SCHEME"] : 'http';
-    $basehost = $_SERVER["REQUEST_SCHEME"] . '://' . $_SERVER['HTTP_HOST'] . str_replace('\\', '', dirname(dirname($_SERVER['SCRIPT_NAME']))).'/';
+    $basehost = $_SERVER["REQUEST_SCHEME"] . '://' . $_SERVER['HTTP_HOST'] . str_replace('\\', '', dirname(dirname($_SERVER['SCRIPT_NAME']))) . '/';
     $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $basehost . '\' where varname=\'basehost\'');
     $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $basehost . 'resources/\' where varname=\'resourceUrl\'');
     $link->query('update ' . $dbprefix . 'sysconfig set value=\'' . $_SERVER['HTTP_HOST'] . '\' where varname=\'domain\'');
@@ -150,15 +191,14 @@ EOT;
     $cfg['cfg']['resourceUrl'] = $basehost . 'resources/';
     $cfg['cfg']['domain'] = $_SERVER['HTTP_HOST'];
     $cfg['cfg']['attachmentHost'] = $basehost;
-    $cfg['cfg']['tokenCheck'] = 0;
     $config = "<?php\n\r" . 'return ' . var_export($cfg, true) . ';';
     file_put_contents('../../data/ConfigCache.php', $config);
 
     //增加管理员帐号
     $adminuser = input('adminuser');
     $adminpwd = input('adminpwd');
-    $pwd = password_hash($adminpwd . $settings['security']['authkey'], PASSWORD_DEFAULT);
-    $link->query("INSERT INTO `".$dbprefix."admin` VALUES (null, '1', '" . $adminuser . "', '" . $pwd . "', '0', '', '0', '', '0', '', '1', '');");
+    $pwd = password_hash($adminpwd . $auth_key, PASSWORD_DEFAULT);
+    $link->query("INSERT INTO `" . $dbprefix . "admin` VALUES (null, '1', '" . $adminuser . "', '" . $pwd . "', '0', '', '0', '', '0', '', '1', '');");
 
     unlink('./index.php');
     unlink('./installsql.txt');

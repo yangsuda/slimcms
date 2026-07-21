@@ -81,7 +81,7 @@
             <tr>
                 <td class="onetd sui-text-large"><strong>数据库主机：</strong></td>
                 <td><input type="text" name="dbhost" id="dbhost" value="localhost" class="input-xfat">
-                    <span class="sui-text-disabled">一般为localhost</span></td>
+                    <span class="sui-text-disabled"></span></td>
             </tr>
             <tr>
                 <td class="onetd sui-text-large"><strong>数据库用户：</strong></td>
@@ -115,17 +115,33 @@
             </tr>
         </table>
 
-        <div class="pr-title"><h3>后台管理设置</h3></div>
+        <div class="pr-title"><h3>redis设置</h3></div>
         <table width="960" border="0" align="center" cellpadding="0" cellspacing="0" class="twbox">
             <tr>
-                <td class="onetd"><strong>后台访问地址：</strong></td>
-                <td>
-                    <span class="sui-text-disabled"><?=$_SERVER["REQUEST_SCHEME"].'://' . $_SERVER['HTTP_HOST'].str_replace('\\','',dirname(dirname($_SERVER['SCRIPT_NAME'])))?>
-                        /</span><input name="filename" type="text" value="<?=random(6)?>"
-                                       class="input-medium input-xfat"/><span class="sui-text-disabled">.php</span>
-                    <span class="sui-text-disabled">(为防止被人知道后台访问地址，后台访问地址默认为随机生成)</span>
-                </td>
+                <td class="onetd sui-text-large"><strong>Redis主机：</strong></td>
+                <td><input type="text" name="redis_host" id="redis_host" value="" class="input-xfat">
+                    <span class="sui-text-disabled">如不需要开启，请留空</span></td>
             </tr>
+            <tr>
+                <td class="onetd"><strong>Redis端口：</strong></td>
+                <td><input name="redis_port" type="text" value="6379" class="input-xfat"/></td>
+            </tr>
+            <tr>
+                <td class="onetd"><strong>Redis密码：</strong></td>
+                <td><input name="redis_pwd" type="text" value="" class="input-xfat"/></td>
+            </tr>
+            <tr>
+                <td class="onetd"><strong>Redis数据库索引：</strong></td>
+                <td><input name="redis_database" type="text" value="1" class="input-xfat"/></td>
+            </tr>
+            <tr>
+                <td class="onetd"><strong>键前缀：</strong></td>
+                <td><input name="redis_prefix" type="text" value="1" class="input-xfat"/></td>
+            </tr>
+        </table>
+
+        <div class="pr-title"><h3>后台管理设置</h3></div>
+        <table width="960" border="0" align="center" cellpadding="0" cellspacing="0" class="twbox">
             <tr>
                 <td class="onetd"><strong>用户名：</strong></td>
                 <td>
@@ -135,6 +151,28 @@
             <tr>
                 <td class="onetd"><strong>密　码：</strong></td>
                 <td><input name="adminpwd" type="text" value="<?=random(6)?>" class="input-xfat"/></td>
+            </tr>
+        </table>
+
+        <div class="pr-title"><h3>环境设置</h3></div>
+        <table width="960" border="0" align="center" cellpadding="0" cellspacing="0" class="twbox">
+            <tr>
+                <td class="onetd"><strong>环境：</strong></td>
+                <td>
+                    <span class="custom-control custom-radio mr-2">
+                        <input type="radio" id="app_env1" name="app_env" value="development"/><label for="app_env1">开发环境</label>
+                        <input type="radio" id="app_env2" name="app_env" value="production"/><label for="app_env2">生产环境</label>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="onetd"><strong>调试模式：</strong></td>
+                <td>
+                    <span class="custom-control custom-radio mr-2">
+                        <input type="radio" id="app_debug1" name="app_debug" value="true"/><label for="app_debug1">开启</label>
+                        <input type="radio" id="app_debug2" name="app_debug" value="false"/><label for="app_debug2">关闭</label>
+                    </span>
+                </td>
             </tr>
         </table>
 
