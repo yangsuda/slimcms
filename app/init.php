@@ -49,10 +49,10 @@ $container = $containerBuilder->build();
 //实例化应用
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+$container->set(\Slim\App::class, $app);
 
 //中间件设置
 $app->add(\App\MiddleWare\MiddleWare::class);
-$app->add(\App\MiddleWare\CsrfMiddleware::class);
 
 //注册路由
 $routes = $container->get(RouteInterface::class);

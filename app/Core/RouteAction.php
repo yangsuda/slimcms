@@ -14,6 +14,7 @@ namespace App\Core;
 
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use SlimCMS\Error\TextException;
@@ -24,11 +25,6 @@ class RouteAction
      * 当前路由收集器（App 或 RouteCollectorProxy）
      */
     private static App|RouteCollectorProxy|null $collector = null;
-
-    /**
-     * 路由分组中间件队列
-     */
-    private static array $groupMiddlewares = [];
 
     /**
      * 设置路由收集器（在 Routes.php 的 route() 方法中调用）
@@ -123,11 +119,12 @@ class RouteAction
     public static function action(string $action = null): callable
     {
         return function (ServerRequestInterface $request, ResponseInterface $response, array $args = []) use ($action) {
-            global $app;
             [$controller, $method] = self::parseAction($request, $action, $args);
-            $req = new Request($request, $response, $app);
-            $res = new Response($request, $response, $app);
-            $instance = new $controller($req, $res);
+            $parameters = ['request' => $request, 'response' => $response, 'app' => self::$collector];
+            $instance = self::$collector->getContainer()->make($controller, [
+                'request' => self::$collector->getContainer()->make(Request::class, $parameters),
+                'response' => self::$collector->getContainer()->make(Response::class, $parameters)
+            ]);
             return $instance->$method();
         };
     }
