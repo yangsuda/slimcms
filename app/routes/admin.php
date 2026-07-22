@@ -8,7 +8,7 @@ declare(strict_types=1);
 use App\Core\RouteAction as Route;
 use App\Middleware\SessionMiddleware;
 use App\Middleware\AdminAuthMiddleware;
-
+use App\Middleware\CsrfMiddleware;
 // 后台路由组
 Route::group('/admin', function () {
     // 登录相关（无需认证）
@@ -32,5 +32,5 @@ Route::group('/admin', function () {
         });
 
         Route::gp('/{path1}/{path2}');
-    })->add(AdminAuthMiddleware::class);
+    })->add(AdminAuthMiddleware::class)->add(CsrfMiddleware::class);
 })->add(SessionMiddleware::class);
