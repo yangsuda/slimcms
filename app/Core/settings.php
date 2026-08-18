@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use Slim\App;
 use function DI\autowire;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
@@ -12,12 +13,13 @@ use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Interfaces\TemplateInterface;
 use SlimCMS\Interfaces\DatabaseInterface;
 use SlimCMS\Interfaces\UploadInterface;
-use App\Core\Redis;
-use App\Core\Template;
-use App\Core\Upload;
-use App\Core\Output;
+use app\Core\Template;
+use app\Core\Upload;
+use app\Core\Output;
+use app\Core\Request;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Database;
+use SlimCMS\Core\Redis;
 use SlimCMS\Core\Routes;
 
 return function (ContainerBuilder $containerBuilder) {
@@ -49,16 +51,6 @@ return function (ContainerBuilder $containerBuilder) {
         LoggerInterface::class => DI\factory(function (ContainerInterface $c) {
             return File::log();
         }),
-        'csrf.token' => DI\factory(function () {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-            if (!isset($_SESSION['csrf_token'])) {
-                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-                $_SESSION['csrf_token_time'] = time();
-            }
-            return $_SESSION['csrf_token'];
-        }),
         RouteInterface::class => autowire(Routes::class),
         CookieInterface::class => function (ContainerInterface $c) {
             return new Cookie($c);
@@ -72,9 +64,23 @@ return function (ContainerBuilder $containerBuilder) {
             $redis = new Redis($c);
             return $redis->selectDB();
         },
-        UploadInterface::class => function (ContainerInterface $c) {
-            //return new \App\Model\aliyun\AliOss();
-            return new Upload();
+        UploadInterface::class => function (App $app) {
+            return new Upload($app);
         },
+        \SlimCMS\Core\Session::class => function () {
+            $session = new \SlimCMS\Core\Session();
+            $session->start();
+            return $session;
+        },
+        \Psr\Http\Message\ServerRequestInterface::class => function (ContainerInterface $c) {
+            $serverRequestCreator = \Slim\Factory\ServerRequestCreatorFactory::create();
+            return $serverRequestCreator->createServerRequestFromGlobals();
+        },
+
+        \Psr\Http\Message\ResponseInterface::class => function (ContainerInterface $c) {
+            return $c->get(\Slim\App::class)->getResponseFactory()->createResponse();
+        },
+        // Request 和 Response 类的绑定
+        Request::class => autowire(Request::class),
     ]);
 };

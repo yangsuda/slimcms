@@ -39,10 +39,10 @@ composer create-project yangsuda/slimcms [my-app-name] dev-master
 
 ### 路由注册方式
 
-使用 `App\Core\RouteAction` 提供类似 ThinkPHP/Laravel 风格的路由注册：
+使用 `app\Core\RouteAction` 提供类似 ThinkPHP/Laravel 风格的路由注册：
 
 ```php
-use App\Core\RouteAction as Route;
+use app\Core\RouteAction as Route;
 
 Route::get('/path', 'Controller@method');    // GET
 Route::post('/path', 'Controller@method');   // POST
@@ -67,7 +67,7 @@ Route::group('/admin', function () {
 - `app/Controller/admin/` - 后台控制器
 - `app/Controller/plugin/` - 插件控制器
 
-控制器类名以 `Controller` 结尾，如 `MainController`、`LoginController`。路由中使用 `模块\类名Controller@方法名` 格式指定，框架会自动补全完整类名 `App\Controller\`。
+控制器类名以 `Controller` 结尾，如 `MainController`、`LoginController`。路由中使用 `模块\类名Controller@方法名` 格式指定，框架会自动补全完整类名 `app\Controller\`。
 
 ### 路由示例
 
@@ -95,15 +95,15 @@ Route::group('/admin', function () {
 
 ## 数据获取
 
-通过self::input()获取外部传参
+通过$this->input()获取外部传参
 
 或
 
-self::inputInt获取强转为int类型的外部传参
+$this->inputInt获取强转为int类型的外部传参
 
-self::inputFloat获取强转为float类型的外部传参
+$this->inputFloat获取强转为float类型的外部传参
 
-self::inputString获取强转为string类型的外部传参
+$this->inputString获取强转为string类型的外部传参
 
 ## 数据结构
 
@@ -135,7 +135,7 @@ Model层数据统一以Output对象形式返回，
 
 3、$this->json(),返回json数据
 
-4、self::response(),根据请求的content-type返回相应的数据类型
+4、$this->response(),根据请求的content-type返回相应的数据类型
 
 ## 功能插件
 
@@ -307,11 +307,11 @@ $v[...]
 ```bash
 composer require aliyuncs/oss-sdk-php
 ```
-2、修改调用参数$accessKeyId、$accessKeySecret等：app/Model/aliyun/AliOss.php
+2、修改调用参数$accessKeyId、$accessKeySecret等：app/Service/aliyun/AliOssService.php
 
 3、修改加载的上传类：app/Core/settings.php
 
-将new Upload()改成new AliOss(),注意相应的引用要改一下
+将new Upload()改成new AliOssService(),注意相应的引用要改一下
 
 ## 数据库分表
 
@@ -321,23 +321,23 @@ composer require aliyuncs/oss-sdk-php
 
 在app/Table/文件夹中创建相应表的类文件，文件名称格式：表名+'Table.php'(表名第一个字母大写)，如:AdminlogTable.php
 
-在构造函数中增加$this->subtable($tableName, $extendName);
+在构造函数中增加$this->setTableName($tableName, $extendName);
 
 如：
 ```bash
-public function __construct(Request $request, string $tableName, string $extendName = null)
-{
+public function setTableName(string $tableName, string $extendName = null): self
+    {
+        $tableName = strtolower(substr(pathinfo(__CLASS__, PATHINFO_FILENAME), 0, -5));
         //根据年份进行分表
         if (!isset($extendName)) {
             $extendName = date('Y');
-            $this->subtable($tableName, $extendName);
         }
-        parent::__construct($request, $tableName, $extendName);
-}
+        return parent::setTableName($tableName, $extendName);
+    }
 ```
 
 以示例为例
 
 数据库中将自动创建表adminlog2022
 
-数据调用方式:self::t('adminlog')->...（默认调用当前年份数据），如需调用2021数据，:self::t('adminlog','2021')->...
+数据调用方式:$this->t('adminlog')->...（默认调用当前年份数据），如需调用2021数据，:$this->t('adminlog','2021')->...

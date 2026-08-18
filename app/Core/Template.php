@@ -5,14 +5,14 @@
  */
 declare(strict_types=1);
 
-namespace App\Core;
+namespace app\Core;
 
 class Template extends \SlimCMS\Core\Template
 {
     protected static function loadTemplateTag($matches)
     {
         $param = str_replace(['<?=', '?>'], ["'.", ".'"], $matches[1]);
-        $expr = '<?php include App\Core\Template::loadTemplate(\'' . $param . '\'); ?>';
+        $expr = '<?php include app\Core\Template::loadTemplate(\'' . $param . '\'); ?>';
         return self::stripvtags($expr);
     }
 }

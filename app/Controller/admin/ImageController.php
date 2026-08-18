@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller\admin;
+namespace app\Controller\admin;
 
-use App\Core\Forms;
-use App\Service\admin\MainService;
+use app\Service\common\FileService;
 use SlimCMS\Interfaces\UploadInterface;
 
 class ImageController extends AdminController
@@ -14,12 +13,11 @@ class ImageController extends AdminController
      */
     public function webupload()
     {
-        $post = [];
-        $post['files'] = aval($_FILES, 'file');
-        $post['water'] = self::input('water') ? true : false;
-        $post['fileid'] = self::input('id');
-        $upload = self::$container->get(UploadInterface::class);
-        $res = $upload->webupload($post);
+        $option = [];
+        $option['water'] = $this->input('water') ? true : false;
+        $option['fileid'] = $this->input('id');
+        $upload = $this->container->get(UploadInterface::class);
+        $res = $upload->webupload($this->request->getUploadedFiles()['file'] ?? null, $option);
         if ($res->getCode() != 200) {
             echo '上传失败:' . $res->getMsg();
         } else {
@@ -33,14 +31,15 @@ class ImageController extends AdminController
      */
     public function webuploadDel()
     {
-        $id = self::input('id');
-        if (!isset($_SESSION['bigfile_info'][$id])) {
+        $id = $this->input('id');
+        $bigfile_info = $this->session()->get('bigfile_info', []);
+        if (!isset($bigfile_info[$id])) {
             exit();
         }
-        $upload = self::$container->get(UploadInterface::class);
-        $upload->uploadDel($_SESSION['bigfile_info'][$id]);
-        unset($_SESSION['file_info'][$id]);
-        unset($_SESSION['bigfile_info'][$id]);
+        $upload = $this->container->get(UploadInterface::class);
+        $upload->uploadDel($bigfile_info[$id]);
+        unset($bigfile_info[$id]);
+        $this->session()->set('bigfile_info', $bigfile_info);
         exit("已删除");
     }
 
@@ -49,16 +48,19 @@ class ImageController extends AdminController
      */
     public function webuploadThumbnail()
     {
-        $id = self::input('id');
+        $id = $this->input('id');
         if (empty($id)) {
             exit('No ID');
         }
-        if (!isset($_SESSION['file_info'][$id])) {
+        $bigfile_info = $this->session()->get('bigfile_info', []);
+        if (!isset($bigfile_info[$id])) {
             exit(0);
         }
+        $url = $bigfile_info[$id];
+        $imagevariable = file_get_contents(CSPUBLIC . str_replace($this->config['basehost'], '', copyImage($url, 120, 120)));
         header('Content-type: image/jpeg');
-        header('Content-Length: ' . strlen($_SESSION['file_info'][$id]));
-        exit($_SESSION['file_info'][$id]);
+        header('Content-Length: ' . strlen($imagevariable));
+        exit($imagevariable);
     }
 
     /**
@@ -67,40 +69,82 @@ class ImageController extends AdminController
      */
     public function webuploadImageDel()
     {
-        $fid = self::inputInt('fid');
-        $id = self::inputInt('id');
-        $field = self::inputString('field');
-        $pic = self::inputString('pic');
-        $res = Forms::imgsDel($fid, $id, $field, $pic);
-        return self::response($res);
+        $fid = $this->inputInt('fid');
+        $id = $this->inputInt('id');
+        $field = $this->inputString('field');
+        $pic = $this->inputString('pic');
+        $res = $this->i(FileService::class)->imgsDel($fid, $id, $field, $pic);
+        return $this->response($res);
     }
 
     /**
      * 超大附件上传
-     * @return array|\Psr\Http\Message\ResponseInterface
-     * @throws \DI\DependencyException
-     * @throws \DI\NotFoundException
+     * @return \Psr\Http\Message\MessageInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \SlimCMS\Error\TextException
      */
     public function superFileUpload()
     {
         $this->checkAllow();
-        $file = aval($_FILES, 'file');
-        $index = self::inputInt('index');
-        $filename = self::inputString('filename');
-        $upload = self::$container->get(UploadInterface::class);
+        $file = $this->request->getUploadedFiles()['file'] ?? null;
+        $index = $this->inputInt('index');
+        $filename = $this->inputString('filename');
+        $upload = $this->container->get(UploadInterface::class);
         $res = $upload->superFileUpload($file, $index, $filename, 'superFile');
         return $this->json($res);
     }
 
     /**
      * 删除附件图片
-     * @return array
+     * @return \Psr\Http\Message\MessageInterface
+     * @throws \SlimCMS\Error\TextException
      */
     public function delImg()
     {
         $this->checkAllow();
-        $param = self::input(['fid' => 'int', 'id' => 'int', 'identifier' => 'string']);
-        $res = MainService::delImg($param);
-        return self::response($res);
+        $fid = $this->inputInt('fid');
+        $id = $this->inputInt('id');
+        $identifier = $this->inputString('identifier');
+        $res = $this->FileService()->delImg($fid, $id, $identifier);
+        return $this->response($res);
+    }
+
+    /**
+     * 设置封面
+     * @return \Psr\Http\Message\MessageInterface
+     * @throws \SlimCMS\Error\TextException
+     */
+    public function webuploadCover()
+    {
+        $this->checkAllow();
+        $fid = $this->inputInt('fid');
+        $id = $this->inputInt('id');
+        $pic = $this->inputString('pic');
+        $res = $this->FileService()->webuploadCover($fid, $id, $pic);
+        return $this->response($res);
+    }
+
+    /**
+     * 多附件删除
+     * @return \Psr\Http\Message\MessageInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     * @throws \SlimCMS\Error\TextException
+     */
+    public function delFromAddons()
+    {
+        $this->checkAllow();
+        $fid = $this->inputInt('fid');
+        $id = $this->inputInt('id');
+        $identifier = $this->inputString('identifier');
+        $url = $this->inputString('url');
+        $res = $this->FileService()->delFromAddons($fid, $id, $identifier, $url);
+        return $this->response($res);
+    }
+
+    private function FileService(): FileService
+    {
+        return $this->i(FileService::class);
     }
 }

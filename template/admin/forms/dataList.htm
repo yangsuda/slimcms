@@ -50,7 +50,7 @@
                                                     </thead>
                                                     <tbody>
                                                     <!--{loop $data[list] $v}-->
-                                                    <tr align='center' bgcolor="#FFFFFF">
+                                                    <tr align='center' bgcolor="#FFFFFF" class="row-$v[id]">
                                                         <!--{if $data[form][cpcheck]==1 && (empty($data[admin][purviews]) || in_array('dataCheck'.$data[fid],$data[admin][purviews]))||$data[form][cpdel]==1 && (empty($data[admin][purviews]) || in_array('dataDel'.$data[fid],$data[admin][purviews]))}-->
                                                         <td>
                                                             <label class="am-checkbox-inline"><input name="ids" type="checkbox" id="diyid_$v[id]" value="$v[id]" /><span style="display:inline-block;"></span></label>

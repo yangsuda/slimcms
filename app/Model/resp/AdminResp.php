@@ -2,25 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Model\resp;
+namespace app\Model\resp;
 
-use App\Service\table\AdmingroupService;
-use App\Service\table\AdminService;
+use app\Repository\AdmingroupRepository;
+use app\Repository\AdminRepository;
 use SlimCMS\Abstracts\RespAbstract;
 
 class AdminResp extends RespAbstract
 {
-    protected function groupid(array &$data, AdminService $table): void
+    protected function _groupid(array &$list, AdminRepository $table)
     {
         $field = __FUNCTION__;
-        !empty($data[$field]) && $data['_' . $field] = $this->relations[$field][$data[$field]] ?? [];
-    }
-
-    protected function groupidRelation(array $data, AdminService $table): array
-    {
-        $field = str_replace('Relation','',__FUNCTION__);
-        return AdmingroupService::instance()
-            ->withWhere(['ids' => array_column($data, $field)])
+        $groupids = $this->r(AdmingroupRepository::class)
+            ->withWhere(['ids' => array_column($list, 'groupid')])
             ->fetchList('id,groupname,purviews', 'id');
+        foreach ($list as &$v) {
+            !empty($v['groupid']) && $v[$field] = $groupids[$v['groupid']] ?? null;
+        }
     }
 }

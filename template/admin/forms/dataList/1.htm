@@ -51,7 +51,7 @@
                                                     </thead>
                                                     <tbody>
                                                     <!--{loop $data[list] $v}-->
-                                                    <tr align='center' bgcolor="#FFFFFF">
+                                                    <tr align='center' bgcolor="#FFFFFF" class="row-$v[id]">
                                                         <!--{if $data[form][cpdel]==1}-->
                                                         <td>
                                                             <label class="am-checkbox-inline"><input name="ids" type="checkbox" id="diyid_$v[id]" value="$v[id]" /><span style="display:inline-block;"></span></label>

@@ -6,15 +6,14 @@
  */
 declare(strict_types=1);
 
-namespace App\Controller\admin;
+namespace app\Controller\admin;
 
-use App\Core\Csrf;
-use App\Core\Forms;
-use App\Service\admin\AuthService;
+use app\Service\admin\AuthService;
+use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseInterface;
 use SlimCMS\Abstracts\ControlAbstract;
+use SlimCMS\Core\Cookie;
 use SlimCMS\Helper\Crypt;
-use SlimCMS\Helper\ImageCode;
 
 class LoginController extends ControlAbstract
 {
@@ -23,10 +22,10 @@ class LoginController extends ControlAbstract
      * GET  /admin/login - 显示登录表单
      * POST /admin/login - 处理登录请求
      */
-    public function login(): ResponseInterface
+    public function login(): MessageInterface
     {
         // POST 请求：处理登录
-        if (self::$request->getRequest()->getMethod() === 'POST') {
+        if ($this->request->getMethod() === 'POST') {
             return $this->handleLogin();
         }
         // GET 请求：显示登录表单
@@ -36,19 +35,15 @@ class LoginController extends ControlAbstract
     /**
      * 显示登录表单
      */
-    private function showLoginForm(): ResponseInterface
+    private function showLoginForm(): MessageInterface
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        $referer = self::input('referer', 'url');
+        $referer = $this->input('referer', 'url');
         // 检查是否已登录
-        $session = self::$request->getRequest()->getAttribute('session', []);
-        $admin = $session['admin']['adminAuth'] ?? null;
-        $adminid = $admin ? Crypt::decrypt($admin) : null;
+        $admin = $this->session()->get('admin');
+        $adminid = $admin && $admin->adminAuth ? Crypt::decrypt($admin->adminAuth) : null;
         if (is_numeric($adminid) && $adminid > 0) {
             // 已登录，重定向到首页
-            return self::$response->getResponse()
+            return $this->response
                 ->withHeader('Location', $referer ?: '/admin/index')
                 ->withStatus(302);
         }
@@ -59,11 +54,10 @@ class LoginController extends ControlAbstract
         }
 
         // 返回模板渲染
-        $output = self::$output
+        $output = $this->output
             ->withCode(200)
             ->withData([
                 'referer' => $referer,
-                'csrfToken' => Csrf::getToken()
             ]);
         return $this->view($output);
     }
@@ -71,33 +65,31 @@ class LoginController extends ControlAbstract
     /**
      * 处理登录请求
      */
-    private function handleLogin(): ResponseInterface
+    private function handleLogin(): MessageInterface
     {
         // CSRF 检查
-        $formhash = self::inputString('formhash');
-        $res = Forms::submitCheck($formhash);
-        if ($res->getCode() != 200) {
-            return self::response($res);
-        }
+        $formhash = $this->inputString('formhash');
         // 验证码检查
-        $ccode = self::inputString('ccode');
-        if (ImageCode::checkCode($ccode) === false) {
-            return self::response(self::$output->withCode(24023));
-        }
+        $ccode = $this->inputString('ccode');
         // 用户名密码校验
-        $userid = self::inputString('userid');
-        $pwd = self::inputString('pwd');
-        $res = AuthService::instance()->loginCheck($userid, $pwd);
+        $userid = $this->inputString('userid');
+        $pwd = $this->inputString('pwd');
+        $res = $this->authService()->formVerify($formhash, $ccode)->loginCheck($userid, $pwd);
         if ($res->getCode() != 200) {
-            return self::response($res);
+            return $this->json($res);
         }
 
-        $_SESSION['admin'] = $res->getData();
+        $this->session()->set('admin', $res->getData()['admin']);
         // 返回成功响应
-        $referer = self::inputString('referer');
+        $referer = $this->inputString('referer');
         $referer = $referer ?: '/admin/index';
         $output = $res->withReferer($referer);
-        return self::response($output);
+        return $this->json($output);
+    }
+
+    private function authService(): AuthService
+    {
+        return $this->i(AuthService::class);
     }
 
     /**
@@ -105,13 +97,13 @@ class LoginController extends ControlAbstract
      */
     public function logout(): ResponseInterface
     {
-        unset($_SESSION['adminAuth']);
-        unset($_SESSION['admin']);
+        $this->session()->delete('admin');
+        $this->session()->delete('adminAuth');
 
-        $referer = self::$request->cookie()->get('HTTP_REFERER') ?? '';
+        $referer = $this->i(Cookie::class)->get('HTTP_REFERER') ?? '';
         $referer = '/admin/login?referer=' . urlencode($referer);
 
-        $output = self::$output->withCode(200)->withReferer($referer);
-        return self::directTo($output);
+        $output = $this->output->withCode(200)->withReferer($referer);
+        return $this->directTo($output);
     }
 }

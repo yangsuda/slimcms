@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Model\req;
+namespace app\Model\req;
 
 use SlimCMS\Abstracts\ReqAbstract;
 

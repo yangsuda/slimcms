@@ -5,13 +5,14 @@
  */
 declare(strict_types=1);
 
-namespace App\Controller\main;
+namespace app\Controller\main;
 
-use App\Core\Forms;
-use App\Core\Ueditor;
+use app\Repository\SysenumRepository;
 use Psr\Http\Message\ResponseInterface;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Helper\ImageCode;
+use SlimCMS\Helper\Str;
+use SlimCMS\Interfaces\UploadInterface;
 
 class MainController extends ControlAbstract
 {
@@ -21,19 +22,25 @@ class MainController extends ControlAbstract
      */
     public function index(): ResponseInterface
     {
-        return $this->view(self::$output, 'index');
+        $file = $this->request->getUploadedFiles();
+
+        var_dump($file); // bool(true)
+        exit;
+        return $this->view($this->output, 'index');
     }
 
     /**
      * 联动菜单数据
-     * @return array|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\MessageInterface
      * @throws \SlimCMS\Error\TextException
      */
     public function enumsData()
     {
-        $egroup = self::input('egroup');
-        $res = Forms::enumsData($egroup);
-        return self::response($res);
+        $egroup = $this->input('egroup');
+        $list = $this->r(SysenumRepository::class)
+            ->withWhere(['egroup' => $egroup, 'evalueOverNil' => 1])
+            ->fetchList('id,ename,evalue,reid');
+        return $this->json($this->output->withData(['list' => $list]));
     }
 
     /**
@@ -41,63 +48,27 @@ class MainController extends ControlAbstract
      */
     public function captcha()
     {
-        ImageCode::doimg();
+        ImageCode::doimg($this->session());
     }
 
     /**
      * 获取 FORMHASH（用于 AJAX 请求）
      */
-    public function formHash(): ResponseInterface
+    public function formHash()
     {
-        $data = ['formHash' => self::$request->getFormHash()];
-        $output = self::$output->withData($data);
-        return self::response($output);
+        $data = ['formHash' => Str::formHash($this->session())];
+        $output = $this->output->withData($data);
+        return $this->json($output);
     }
 
     /**
      * 兜底处理：所有未匹配的路由统一返回友好错误页面
      */
-    public function notFound(): ResponseInterface
+    public function notFound()
     {
-        if (strpos(self::$request->getRequest()->getHeaderLine('Accept'), 'application/json') !== false) {
-            return $this->json(self::$output->withCode(21009));
+        if (strpos($this->request->getHeaderLine('Accept'), 'application/json') !== false) {
+            return $this->json($this->output->withCode(21009));
         }
-        return $this->view(self::$output, 'error');
-    }
-
-    /**
-     * Ueditor编辑码执行程序
-     */
-    public function ueditor()
-    {
-        $action = self::input('action');
-        $water = self::input('needwatermark') ? true : false;
-        switch ($action) {
-            case 'config':
-                $result = Ueditor::config();
-                break;
-            case 'uploadimage':
-                $result = Ueditor::upload('imageFieldName', 'image', $water);
-                break;
-            case 'uploadscrawl':
-                $result = Ueditor::upload('scrawlFieldName');
-                break;
-            case 'uploadvideo':
-                $result = Ueditor::upload('videoFieldName', 'media');
-                break;
-            case 'uploadfile':
-                $result = Ueditor::upload('fileFieldName', 'addon');
-                break;
-            case 'listfile':
-            case 'listimage':
-                $size = self::input('size', 'int');
-                $start = self::input('start', 'int');
-                $result = Ueditor::listdata($size, $start);
-                break;
-        }
-        if (!empty($result)) {
-            echo json_encode($result->getData());
-        }
-        exit;
+        return $this->view($this->output, 'error');
     }
 }

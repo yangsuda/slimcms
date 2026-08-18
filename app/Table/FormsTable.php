@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Table;
+namespace app\Table;
 
-use App\Core\Forms;
-use App\Core\Table;
-use App\Model\plugin\PluginModel;
+use app\Core\Table;
+use app\Repository\Forms_fieldsRepository;
+use app\Repository\FormsRepository;
+use app\Service\admin\FormsService;
 
 class FormsTable extends Table
 {
@@ -31,7 +32,17 @@ class FormsTable extends Table
             }
             $table = (string)aval($data, 'table');
             $name = (string)aval($data, 'name');
-            empty($data['jumpurl']) && Forms::createTable($table, $name);
+            empty($data['jumpurl']) && $this->r(FormsRepository::class)->createTable($table, $name);
+        }
+        return 200;
+    }
+
+    public function dataSaveAfter($data, $row = [], $options = []): int
+    {
+        if (defined('MANAGE') && MANAGE == 1) {
+            if ($data['mngtype'] == 'add') {
+                $this->i(FormsService::class)->formInit((int)$data['id']);
+            }
         }
         return 200;
     }
@@ -46,7 +57,7 @@ class FormsTable extends Table
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (!empty($data['id'])) {
-                self::t('forms_fields')->withWhere(['formid' => $data['id']])->delete();
+                $this->r(Forms_fieldsRepository::class)->withWhere(['formid' => $data['id']])->batchDelete();
             }
         }
         return 200;
@@ -55,7 +66,7 @@ class FormsTable extends Table
     /**
      * 列表数据获取之前的自定义处理
      * @param $param
-     * @return array
+     * @return int
      */
     public function dataListInit(&$param)
     {

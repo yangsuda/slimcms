@@ -114,7 +114,7 @@
 <script src="$cfg[resourceUrl]plugins/webuploader/image-upload/js/upload.js"></script>
 <script>
     var _setText = '1';
-    var csrf_token = '{echo \App\Core\Csrf::getToken()}'
+    var csrf_token = '{$data[csrfToken]}'
 </script>
 <style>
     .pc_area,.pc_area *{ box-sizing:border-box !important; }
@@ -154,7 +154,11 @@
         <div class="box_photo">
             <em><a href="{echo copyImage($iv[img], 2000, 2000)}" target="_blank" title="查看"><i></i><img src="{echo copyImage($iv[img], 160, 160)}" /></a></em>
         </div>
+        <!--{if aval($iv,'iscover')==1}-->
+        <div class="cover_photo"></div>
+        <!--{/if}-->
         <div class="btn_photo">
+            <a data-ref="$iv[img]" data-fid="$data[fid]" class="btn_set_cover" title="封面"><span>封面</span></a>
             <a data-ref="$iv[img]" data-fid="$data[fid]" class="btn_delete_pic" title="删除"><span>删除</span></a>
             <a href="{echo copyImage($iv[img], 2000, 2000)}" target="_blank" title="查看" class="btn_view_pic"><span>查看</span></a>
         </div>

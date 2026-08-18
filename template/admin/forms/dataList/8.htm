@@ -96,7 +96,7 @@
                                                     </thead>
                                                     <tbody>
                                                     <!--{loop $data[list] $v}-->
-                                                    <tr align='center' bgcolor="#FFFFFF">
+                                                    <tr align='center' bgcolor="#FFFFFF" class="row-$v[id]">
                                                         <!--{loop $data[listFields] $f_v}-->
                                                         <!--{if in_array($f_v[identifier],['isinstall','available','description','version'])}-->
                                                         <!--{elseif in_array($f_v[identifier],['name'])}-->
@@ -125,7 +125,7 @@
                                                             <!--{else}-->
                                                             <a class="btn btn-danger btn-sm btn-switch" href="javascript:void(0)" data-open="1" data-identifier="$v[identifier]">开启</a>
                                                             <!--{/if}-->
-                                                            <a class="btn btn-warning btn-sm btn-unstall" href="javascript:void(0)" data-identifier="$v[identifier]">卸载</a>
+                                                            <a class="btn btn-warning btn-sm btn-uninstall" href="javascript:void(0)" data-identifier="$v[identifier]">卸载</a>
                                                             <!--{/if}-->
                                                         </td>
                                                     </tr>
@@ -202,11 +202,11 @@
                     }
                 })
             })
-            $('.btn-unstall').click(function () {
+            $('.btn-uninstall').click(function () {
                 var identifier = $(this).data('identifier');
                 confirmUnstall(function () {
                     var delTable = $('#delTable').prop('checked')?1:0;
-                    $.getJSON('/admin/plugin/unstall?identifier='+identifier+'&delTable='+delTable,function (res) {
+                    $.getJSON('/admin/plugin/uninstall?identifier='+identifier+'&delTable='+delTable,function (res) {
                         $('#confirmUnstall').modal('hide');
                         resultMsg(res.msg,res.code);
                         if(res.code==200){
