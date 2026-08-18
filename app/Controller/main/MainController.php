@@ -12,7 +12,6 @@ use Psr\Http\Message\ResponseInterface;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Helper\ImageCode;
 use SlimCMS\Helper\Str;
-use SlimCMS\Interfaces\UploadInterface;
 
 class MainController extends ControlAbstract
 {
@@ -22,10 +21,6 @@ class MainController extends ControlAbstract
      */
     public function index(): ResponseInterface
     {
-        $file = $this->request->getUploadedFiles();
-
-        var_dump($file); // bool(true)
-        exit;
         return $this->view($this->output, 'index');
     }
 
