@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Table;
+namespace app\Table;
 
-use App\Core\Table;
+use app\Core\Table;
+use app\Model\entity\Forms_fieldsEntity;
+use app\Repository\Forms_fieldsRepository;
+use app\Repository\FormsRepository;
+use app\Repository\SysenumRepository;
 use SlimCMS\Helper\Str;
 
 class Forms_fieldsTable extends Table
@@ -32,9 +36,9 @@ class Forms_fieldsTable extends Table
     public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
-            $arr = ['id', 'ischeck', 'style', 'fid', 'p', 'q', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
+            $arr = ['id', 'ischeck', 'style', 'fid', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
                 'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
-                'main', 'linkurl'];
+                'main'];
             if (!empty($data['identifier']) && in_array($data['identifier'], $arr)) {
                 return 21059;
             }
@@ -46,7 +50,7 @@ class Forms_fieldsTable extends Table
                     return 21003;
                 }
                 $where = ['formid' => $data['formid'], 'identifier' => $data['identifier']];
-                if (self::t('forms_fields')->withWhere($where)->count()) {
+                if ($this->r(Forms_fieldsRepository::class)->withWhere($where)->count() > 0) {
                     return 27011;
                 }
             }
@@ -74,12 +78,24 @@ class Forms_fieldsTable extends Table
             if (!empty($row['id'])) {
                 $row = array_merge($row, $data);
             }
-            if (!empty($row['identifier']) && !empty($row['formid'])) {
-                $form = self::t('forms')->withWhere($row['formid'])->fetch();
-                self::t($form['table'])->fieldUpdate($row);
+            $row = Forms_fieldsEntity::fromArray($row);
+            if (!empty($row->identifier) && !empty($row->formid)) {
+                $table = $this->getTableByFormId($row->formid);
+                $this->r(Forms_fieldsRepository::class)->fieldUpdate($table, $row);
             }
         }
         return 200;
+    }
+
+    /**
+     * 获取表名
+     * @param int $formid
+     * @return mixed|null
+     * @throws \SlimCMS\Error\TextException
+     */
+    private function getTableByFormId(int $formid)
+    {
+        return $this->r(FormsRepository::class)->withWhere(['id' => $formid])->fetch('table')?->table;
     }
 
     /**
@@ -91,9 +107,10 @@ class Forms_fieldsTable extends Table
     public function dataDelAfter($data, $options = []): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
-            if (!empty($data['identifier']) && !empty($data['formid'])) {
-                $form = self::t('forms')->withWhere($data['formid'])->fetch();
-                self::t($form['table'])->fieldDelete($data['identifier']);
+            $data = Forms_fieldsEntity::fromArray($data);
+            if (!empty($data->identifier) && !empty($data->formid)) {
+                $table = $this->getTableByFormId($data->formid);
+                $this->r(Forms_fieldsRepository::class)->fieldDelete($table, $data->identifier);
             }
         }
         return 200;
@@ -111,16 +128,18 @@ class Forms_fieldsTable extends Table
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if (empty($data['displayorder']) && !empty($data['formid'])) {
-                $list = self::t('forms_fields')
+                $displayorder = $this->r(Forms_fieldsRepository::class)
                     ->withWhere(['formid' => $data['formid']])
-                    ->withLimit(1)
-                    ->withOrderby('displayorder','asc')
-                    ->fetchList('id,displayorder');
-                if (!empty($list[0]['displayorder'])) {
-                    $data['displayorder'] = $list[0]['displayorder'] - 1;
+                    ->withOrderby('displayorder', 'asc')
+                    ->fetch('displayorder')?->displayorder;
+                if (!empty($displayorder)) {
+                    $data['displayorder'] = $displayorder - 1;
                 }
             }
-            $data['enums'] = self::t('sysenum')->withWhere(['evalue' => 0])->fetchList();
+            $enums = $this->r(SysenumRepository::class)
+                ->withWhere(['evalue' => 0])
+                ->fetchList('id,ename,evalue,egroup,reid');
+            $data['enums'] = $enums ? json_decode(json_encode($enums), true) : [];
         }
         return 200;
     }

@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace App\Core;
+namespace app\Core;
 
 class Page extends \SlimCMS\Core\Page
 {

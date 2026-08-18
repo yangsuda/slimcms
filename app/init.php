@@ -17,7 +17,7 @@ define('CSTEMPLATE', CSROOT . 'template/');
 define('CSVENDOR', CSROOT . 'vendor/');
 define('TIMESTAMP', time());
 define('MICROTIME', microtime(true));
-define('VERSION', '5.0.0');
+define('VERSION', '6.0.0');
 
 require_once CSROOT . 'vendor/autoload.php';
 
@@ -52,14 +52,13 @@ $app = AppFactory::create();
 $container->set(\Slim\App::class, $app);
 
 //中间件设置
-$app->add(\App\MiddleWare\MiddleWare::class);
+$app->add(\app\Middleware\Middleware::class)->add(\app\Middleware\ErrorLogMiddleware::class);
 
 //注册路由
 $routes = $container->get(RouteInterface::class);
 $routes($app);
 
-$serverRequestCreator = ServerRequestCreatorFactory::create();
-$request = $serverRequestCreator->createServerRequestFromGlobals();
+$request = $container->get(\Psr\Http\Message\ServerRequestInterface::class);
 
 // Create Error Handler
 $logger = $container->get(LoggerInterface::class);
@@ -76,6 +75,6 @@ $shutdownHandler = new ShutdownHandler($request, $errorHandler, CORE_DEBUG);
 register_shutdown_function($shutdownHandler);
 
 //cors middleware
-$app->add(\App\MiddleWare\CorsMiddleWare::class);
+$app->add(\app\Middleware\CorsMiddleware::class);
 
 $app->run($request);

@@ -5,83 +5,59 @@
  */
 declare(strict_types=1);
 
-namespace App\Controller\admin;
+namespace app\Controller\admin;
 
-use App\Core\Forms;
-use App\Service\admin\AuthService;
-use App\Service\table\AdminlogService;
-use SlimCMS\Helper\Crypt;
+use app\Core\Forms;
+use app\Model\entity\AdminEntity;
+use app\Service\admin\AuthService;
+use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\App;
 use SlimCMS\Abstracts\ControlAbstract;
-use SlimCMS\Core\Request;
-use SlimCMS\Core\Response;
-use SlimCMS\Helper\Ipdata;
-use SlimCMS\Helper\Str;
+use SlimCMS\Error\TextException;
 use SlimCMS\Interfaces\OutputInterface;
 
 class AdminController extends ControlAbstract
 {
-    protected static $admin = [];
+    protected AdminEntity|null $admin = null;
 
-    public function __construct(Request $request, Response $response)
+    public function __construct(App $app, ServerRequestInterface $request = null)
     {
-        parent::__construct($request, $response);
-        self::$admin = $request->getRequest()->getAttribute('admin');
+        parent::__construct($app, $request);
+        $this->admin = $this->request->getAttribute('admin');
         define('MANAGE', '1');
     }
 
     /**
      * 权限检测
-     * @param $auth
-     * @return array|\Psr\Http\Message\ResponseInterface
+     * @param string|null $auth
+     * @return void
+     * @throws TextException
      */
     protected function checkAllow(string $auth = null)
     {
-        $auth = $auth ?: $this->p;
-        $res = AuthService::instance()->checkAllow(self::$admin, $auth);
+        $auth = $auth ?? $this->p;
+        $res = $this->authService()->checkAllow($this->admin, $auth);
         if ($res->getCode() != 200) {
-            $this->directTo($res);
-            $url = $res->getReferer() ?: '/admin/index';
-            if (self::$response->determineContentType() == 'application/json') {
-                $res = self::$output->withCode(21048)->withReferer('')->jsonSerialize();
-                echo json_encode($res);
+            if ($this->determineContentType() == 'application/json') {
+                throw new TextException($res->getCode(), $res->getMsg());
             } else {
-                header('location:' . $url);
+                header('location:' . $res->getReferer() ?: '/admin/index');
+                exit;
             }
-            exit;
-        }
-        //日志记录
-        if (!empty(self::$config['adminLog'])) {
-            $query = self::$request->getRequest()->getUri()->getQuery();
-            $server = self::$request->getRequest()->getServerParams();
-            $method = aval($server, 'REQUEST_METHOD');
-            $query = substr($query, 0, 500);
-            $postinfo = self::$request->getRequest()->getParsedBody();
-            $postinfo = $postinfo ? serialize(Str::addslashes($postinfo)) : '';
-            $postinfo = substr($postinfo, 0, 5000);
-            $data = [
-                'adminid' => aval(self::$admin, 'id'),
-                'adminname' => aval(self::$admin, 'userid'),
-                'method' => $method,
-                'query' => $query,
-                'ip' => Ipdata::getip(),
-                'createtime' => TIMESTAMP,
-                'postinfo' => $postinfo,
-                'route' => self::input('p')
-            ];
-            AdminlogService::instance()->add($data);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public function view(OutputInterface $output = null, string $template = '')
+    public function view(OutputInterface $output = null, string $template = ''): MessageInterface
     {
-        $output = $output ?? self::$output;
+        $output = $output ?? $this->output;
         $data = [];
         $data['leftMenu'] = $this->leftMenu();
         if (empty($output->getData()['admin'])) {
-            $data['admin'] = self::$admin;
+            $data['admin'] = $this->admin->toArray();
         }
         $output = $output->withData($data);
         return parent::view($output, $template);
@@ -89,10 +65,8 @@ class AdminController extends ControlAbstract
 
     private function leftMenu()
     {
-        $purviews = aval(self::$admin, '_groupid/purviews');
-        $purviews = $purviews ? explode(',', $purviews) : [];
-        $param = ['fid' => 1, 'ischeck' => 1, 'pagesize' => 200, 'inlistField' => 'inlistcp', 'cacheTime' => 60, 'order' => 'weight', 'noinput' => 1];
-        $res = Forms::dataList($param)->getData();
+        $param = ['fid' => 1, 'ischeck' => 1, 'pagesize' => 200, 'cacheTime' => 60, 'order' => 'weight', 'noinput' => 1];
+        $res = $this->forms()->dataList($param)->getData();
         $arr = [];
         $weight = [];
         foreach ($res['list'] as $v) {
@@ -103,7 +77,7 @@ class AdminController extends ControlAbstract
             } else {
                 $purview = 'dataList' . $v['id'];
             }
-            if (!in_array('admin_AllowAll', $purviews) && !in_array($purview, $purviews)) {
+            if (!$this->admin->groupidEntity()?->isSuperAdmin() && !$this->admin->groupidEntity()?->hasPurview($purview)) {
                 continue;
             }
             if (!empty($v['types'])) {
@@ -116,5 +90,15 @@ class AdminController extends ControlAbstract
             array_multisort($weight[$k], SORT_DESC, $arr[$k]['subMenu']);
         }
         return $arr;
+    }
+
+    protected function authService(): AuthService
+    {
+        return $this->i(AuthService::class);
+    }
+
+    protected function forms(): Forms
+    {
+        return $this->i(Forms::class);
     }
 }

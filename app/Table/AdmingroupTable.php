@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Table;
+namespace app\Table;
 
-use App\Core\Table;
+use app\Core\Table;
 
 class AdmingroupTable extends Table
 {
+    use \SlimCMS\Traits\table;
+
     /**
      * 表单HTML获取之前的自定义处理
      * @param $fields
@@ -18,8 +20,8 @@ class AdmingroupTable extends Table
     public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
     {
         if (defined('MANAGE') && MANAGE == 1) {
-            $data['forms'] = self::t('forms')->withWhere(['jumpurl' => ''])->fetchList();
-            $permissions = self::t('adminpermission')->fetchList();
+            $data['forms'] = $this->t('forms')->withWhere(['jumpurl' => ''])->fetchList();
+            $permissions = $this->t('adminpermission')->fetchList();
             $data['permissions'] = [];
             foreach ($permissions as $v1) {
                 $index = strpos($v1['purview'], '/') ? stristr($v1['purview'], '/', true) : '_';
@@ -27,8 +29,8 @@ class AdmingroupTable extends Table
             }
             //插件中设置的权限
             $where = ['isinstall' => 1, 'available' => 1];
-            $where[] = self::t()->field('permission', '', '<>');
-            $data['plugin'] = self::t('plugins')->withWhere($where)->fetchList();
+            $where[] = $this->t()->field('permission', '', '<>');
+            $data['plugin'] = $this->t('plugins')->withWhere($where)->fetchList();
             foreach ($data['plugin'] as &$v) {
                 $v['permission'] = unserialize($v['permission']);
             }

@@ -1,49 +1,55 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller\admin;
+namespace app\Controller\admin;
 
-use App\Model\plugin\PluginModel;
+use app\Service\admin\PluginsService;
 
 class PluginController extends AdminController
 {
+    protected function pluginsService(): PluginsService
+    {
+        return $this->i(PluginsService::class);
+    }
     /**
      * 安装插件
-     * @return array|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\MessageInterface
+     * @throws \SlimCMS\Error\TextException
      */
     public function install()
     {
         $this->checkAllow();
-        $identifier = self::inputString('identifier');
-        $voucher = self::inputString('voucher');
-        $res = PluginModel::install($identifier, $voucher);
+        $identifier = $this->inputString('identifier');
+        $voucher = $this->inputString('voucher');
+        $res = $this->pluginsService()->install($identifier, $voucher);
         return $this->json($res);
     }
 
     /**
      * 卸载插件
-     * @return array|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\MessageInterface
+     * @throws \SlimCMS\Error\TextException
      */
-    public function unstall()
+    public function uninstall()
     {
         $this->checkAllow();
-        $identifier = self::inputString('identifier');
-        $delTable = self::inputInt('delTable') ? true : false; //开启 -1关，1开
-        $res = PluginModel::unstall($identifier, $delTable);
+        $identifier = $this->inputString('identifier');
+        $delTable = $this->inputInt('delTable') ? true : false; //开启 -1关，1开
+        $res = $this->pluginsService()->uninstall($identifier, $delTable);
         return $this->json($res);
     }
 
     /**
      * 插件启用开关
-     * @return array|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\MessageInterface
      * @throws \SlimCMS\Error\TextException
      */
     public function openSwitch()
     {
         $this->checkAllow();
-        $identifier = self::inputString('identifier');
-        $switch = self::inputInt('switch');
-        $res = PluginModel::openSwitch($identifier, $switch);
+        $identifier = $this->inputString('identifier');
+        $switch = $this->inputInt('switch');
+        $res = $this->pluginsService()->openSwitch($identifier, $switch);
         return $this->json($res);
     }
 
@@ -55,7 +61,7 @@ class PluginController extends AdminController
     public function market()
     {
         $this->checkAllow();
-        $res = PluginModel::market();
+        $res = $this->pluginsService()->market();
         return $this->view($res);
     }
 }

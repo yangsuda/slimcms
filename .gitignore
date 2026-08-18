@@ -2,7 +2,6 @@
 .vscode/
 /data/
 /vendor/
-/public/
 /public/uploads/
 /tests/
 composer.lock

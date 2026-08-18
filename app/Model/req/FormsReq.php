@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Model\req;
+namespace app\Model\req;
 
 use SlimCMS\Abstracts\ReqAbstract;
 
@@ -10,26 +10,31 @@ class FormsReq extends ReqAbstract
 {
     protected function export(array $param, $words = null): void
     {
-        isset($words) && $this->where['export'] = $words;
+        isset($words) && $this->where[__FUNCTION__] = $words;
     }
 
     protected function cpcheck(array $param, $words = null): void
     {
-        isset($words) && $this->where['cpcheck'] = $words;
+        isset($words) && $this->where[__FUNCTION__] = $words;
     }
 
     protected function cpadd(array $param, $words = null): void
     {
-        isset($words) && $this->where['cpadd'] = $words;
+        isset($words) && $this->where[__FUNCTION__] = $words;
     }
 
     protected function cpdel(array $param, $words = null): void
     {
-        isset($words) && $this->where['cpdel'] = $words;
+        isset($words) && $this->where[__FUNCTION__] = $words;
     }
 
     protected function isarchive(array $param, $words = null): void
     {
-        isset($words) && $this->where['isarchive'] = $words;
+        isset($words) && $this->where[__FUNCTION__] = $words;
+    }
+
+    protected function table(array $param, $words = null): void
+    {
+        isset($words) && $this->where[__FUNCTION__] = $words;
     }
 }

@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Table;
+namespace app\Table;
 
-use App\Core\Table;
+use app\Core\Table;
 
 class AdminTable extends Table
 {
+    use \SlimCMS\Traits\table;
     /**
      * 数据获取之后的自定义处理
      * @param $data
@@ -19,7 +20,7 @@ class AdminTable extends Table
         if (defined('MANAGE') && MANAGE == 1) {
             unset($data['pwd']);
             !empty($data['groupid']) &&
-            $data['_groupid'] = self::t('admingroup')->withWhere($data['groupid'])->fetch('id,groupname');
+            $data['_groupid'] = $this->t('admingroup')->withWhere($data['groupid'])->fetch('id,groupname');
         }
         return 200;
     }

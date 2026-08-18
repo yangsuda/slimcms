@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-use App\Core\RouteAction as Route;
+use SlimCMS\Core\RouteAction as Route;
 
 Route::get('/', 'main\MainController@index');
 Route::get('/captcha', 'main\MainController@captcha');

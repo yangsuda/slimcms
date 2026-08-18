@@ -2,21 +2,25 @@
 
 declare(strict_types=1);
 
-namespace App\Table;
+namespace app\Table;
 
-use App\Core\Table;
-use SlimCMS\Core\Request;
+use app\Core\Table;
 
 class AdminlogTable extends Table
 {
-    //根据自己情况决定是否开启分表，如果需要开启，取消注释
-    /*public function __construct(Request $request, string $tableName, string $extendName = null)
+    /**
+     * 重写设置表名(根据自己情况决定是否开启分表，如果需要开启，取消注释)
+     * @param string $tableName
+     * @param string|null $extendName
+     * @return self
+     */
+    public function setTableName(string $tableName, string $extendName = null): self
     {
+        $tableName = strtolower(substr(pathinfo(__CLASS__, PATHINFO_FILENAME), 0, -5));
         //根据年份进行分表
         if (!isset($extendName)) {
             $extendName = date('Y');
-            $this->subtable($tableName, $extendName);
         }
-        parent::__construct($request, $tableName, $extendName);
-    }*/
+        return parent::setTableName($tableName, $extendName);
+    }
 }

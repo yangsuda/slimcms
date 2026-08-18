@@ -6,13 +6,10 @@
  */
 declare(strict_types=1);
 
-namespace App\Controller\admin;
+namespace app\Controller\admin;
 
-use App\Core\Csrf;
-use App\Core\Forms;
-use App\Core\Page;
+use app\Core\Page;
 use SlimCMS\Error\TextException;
-use SlimCMS\Helper\ImageCode;
 
 class FormsController extends AdminController
 {
@@ -23,33 +20,31 @@ class FormsController extends AdminController
      */
     public function dataList()
     {
-        $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int', 'order' => 'string', 'by' => 'string', 'ischeck' => 'int']);
+        $param = $this->input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int', 'order' => 'string', 'by' => 'string', 'ischeck' => 'int']);
         $fid = (int)aval($param, 'fid');
         $this->checkAllow('dataList' . $fid);
-        $param['inlistField'] = 'inlistcp';
-        $param['admin'] = self::$admin;
-        $res = Forms::dataList($param);
+        $res = $this->forms()->dataList($param);
         if ($res->getCode() != 200) {
             try {
-                return self::directTo($res);
+                return $this->directTo($res);
             } catch (TextException $e) {
-                return self::directTo($res->withReferer('/admin/index'));
+                return $this->directTo($res->withReferer('/admin/index'));
             }
         }
+
         $data = $res->getData();
-        $data['admin'] = self::$admin;
-        $data['admin']['purviews'] = preg_match('/admin_AllowAll/i', $data['admin']['_groupid']['purviews']) ? [] : explode(',', $data['admin']['_groupid']['purviews']);
-        $data['mult'] = Page::multi($data['count'], $data['pagesize'], $data['page'], $data['currenturl'], $data['maxpages'], 5, true, true);
+        $data['admin'] = $this->admin->toArray();
+        $data['admin']['purviews'] = $this->admin->groupidEntity()->isSuperAdmin() ? [] : $this->admin->groupidEntity()->getPurviewsList();
+        $data['mult'] = $this->i(Page::class)->multi($data['count'], $data['pagesize'], $data['page'], $data['currenturl'], $data['maxpages'], 5, true, true);
         //处理展示字段
-        $res = Forms::listFields($fid)->withData($data);
+        $res = $this->forms()->listFields($fid)->withData($data);
         //搜索条件显示
-        $res = Forms::searchFields($fid)->withData($res->getData());
+        $res = $this->forms()->searchFields($fid)->withData($res->getData());
         //参与排序
-        $output = Forms::orderFields($fid)->withData($res->getData());
-        $output = $output->withData(['csrfToken' => Csrf::getToken()]);
+        $output = $this->forms()->orderFields($fid)->withData($res->getData());
 
         $template = '';
-        if (is_file(CSTEMPLATE .$this->p . '/' . $fid . '.htm')) {
+        if (is_file(CSTEMPLATE . $this->p . '/' . $fid . '.htm')) {
             $template = $this->p . '/' . $fid;
         }
         return $this->view($output, $template);
@@ -62,42 +57,25 @@ class FormsController extends AdminController
      */
     public function dataSave()
     {
-        $fid = self::inputInt('fid');
-        $id = self::inputInt('id');
+        $fid = $this->inputInt('fid');
+        $id = $this->inputInt('id');
         $this->checkAllow('dataSave' . $fid);
-        $formhash = self::input('formhash');
+        $formhash = $this->inputString('formhash');
         if ($formhash) {
-            //如启用验证码，对验证码验证
-            if (self::$config['ccode'] == '1') {
-                $ccode = self::inputString('ccode');
-                if (ImageCode::checkCode($ccode) === false) {
-                    $output = self::$output->withCode(24023);
-                    return self::directTo($output);
-                }
-            }
-            $res = Forms::submitCheck($formhash);
-            if ($res->getCode() != 200) {
-                try {
-                    return self::directTo($res);
-                } catch (TextException $e) {
-                    return self::directTo($res->withReferer('admin/index'));
-                }
-            }
-            $referer = self::input('referer', 'url');
-            $referer = $referer ?: self::url('&id=','/admin/forms/dataList');
-            $res = Forms::dataSave($fid, $id, [], ['admin' => self::$admin])->withReferer($referer);
-            return self::directTo($res);
+            $ccode = $this->config['ccode'] == '1' ? $this->inputString('ccode') : null;
+            $referer = $this->input('referer', 'url');
+            $referer = $referer ?: $this->url('&id=', '/admin/forms/dataList');
+            $res = $this->forms()->formVerify($formhash, $ccode)->dataSave($fid, $id)->withReferer($referer);
+            return $this->directTo($res);
         }
-        $options = ['cacheTime' => 300, 'ueditorType' => 'admin', 'admin' => self::$admin];
-        $res = Forms::dataFormHtml($fid, $id, $options);
+        $res = $this->forms()->dataFormHtml($fid, $id, ['cacheTime' => 300, 'ueditorType' => 'admin']);
         if ($res->getCode() != 200) {
             try {
-                return self::directTo($res);
+                return $this->directTo($res);
             } catch (TextException $e) {
-                return self::directTo($res->withReferer('/admin/index'));
+                return $this->directTo($res->withReferer('/admin/index'));
             }
         }
-        $res = $res->withData(['csrfToken' => Csrf::getToken()]);
         $template = '';
         if (is_file(CSTEMPLATE . $this->p . '/' . $fid . '.htm')) {
             $template = $this->p . '/' . $fid;
@@ -107,32 +85,33 @@ class FormsController extends AdminController
 
     /**
      * 数据审核
-     * @return array
+     * @return \Psr\Http\Message\MessageInterface
+     * @throws TextException
      */
     public function dataCheck()
     {
-        $fid = self::inputInt('fid');
-        $ids = self::input('ids');
+        $fid = $this->inputInt('fid');
+        $ids = $this->input('ids');
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : []);
-        $ischeck = self::inputInt('ischeck');
+        $ischeck = $this->inputInt('ischeck');
         $this->checkAllow('dataCheck' . $fid);
-        $res = Forms::dataCheck($fid, $ids, $ischeck, ['admin' => self::$admin]);
-        return self::response($res);
+        $res = $this->forms()->dataCheck($fid, $ids, $ischeck);
+        return $this->response($res);
     }
 
     /**
      * 数据删除
-     * @return array
+     * @return \Psr\Http\Message\MessageInterface
+     * @throws TextException
      */
     public function dataDel()
     {
-        $fid = self::inputInt('fid');
-        $ids = self::input('ids');
+        $fid = $this->inputInt('fid');
+        $ids = $this->input('ids');
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : []);
         $this->checkAllow('dataDel' . $fid);
-        $referer = self::url('&ids=', '/admin/forms/dataList');
-        $res = Forms::dataDel($fid, $ids, ['admin' => self::$admin])->withReferer($referer);
-        return $this->directTo($res);
+        $res = $this->forms()->dataDel($fid, $ids);
+        return $this->response($res);
     }
 
     /**
@@ -140,21 +119,19 @@ class FormsController extends AdminController
      */
     public function dataExport()
     {
-        $param = self::input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int']);
+        $param = $this->input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int']);
         $this->checkAllow('dataExport' . $param['fid']);
-        $param['admin'] = self::$admin;
-        $res = Forms::dataExport($param);
+        $res = $this->forms()->dataExport($param);
         $data = $res->getData();
-        $response = self::$response->getResponse();
-        if (self::input('down') == 1) {
+        if ($this->inputInt('down') == 1) {
             if (!is_file($data['file'])) {
-                $output = self::$output->withCode(21050);
+                $output = $this->output->withCode(21050);
                 return $this->directTo($output);
             }
             $file = fopen($data['file'], 'r');
             $filesize = filesize($data['file']);
             ob_end_clean();
-            $response = $response
+            $response = $this->response
                 ->withHeader('Content-type', 'application/octet-stream')
                 ->withHeader('Accept-Ranges', 'bytes')
                 ->withHeader('Accept-Length', $filesize)
@@ -162,7 +139,7 @@ class FormsController extends AdminController
             $content = fread($file, $filesize);
             fclose($file);
         } else {
-            $response = $response->withHeader('Content-type', 'text/html');
+            $response = $this->response->withHeader('Content-type', 'text/html');
             $content = $data['text'] . '<script>location="' . $res->getReferer() . '";</script>';
         }
         $response->getBody()->write($content);

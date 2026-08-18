@@ -1,12 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Table;
+namespace app\Table;
 
-use App\Core\Table;
+use app\Core\Table;
+use SlimCMS\Core\Request;
+use SlimCMS\Core\Ueditor;
 
 class SysconfigTable extends Table
 {
+    use \SlimCMS\Traits\table;
     /**
      * 数据获取之后的自定义处理
      * @param $data
@@ -31,7 +34,7 @@ class SysconfigTable extends Table
     {
         if (defined('MANAGE') && MANAGE == 1) {
             $value = aval($data, 'value', '');
-            $data['ueditorHtml'] = ueditor('ueditorValue', $value, ['identity' => 'admin']);
+            $data['ueditorHtml'] = $this->i(Ueditor::class)->ueditor('ueditorValue', $value, ['identity' => 'admin']);
         }
         return 200;
     }
@@ -46,10 +49,10 @@ class SysconfigTable extends Table
     {
         if (defined('MANAGE') && MANAGE == 1) {
             if ($data['type'] == 5) {
-                $data['value'] = self::input('ueditorValue', 'htmltext');
+                $data['value'] = $this->i(Request::class)->input('ueditorValue', 'htmltext');
             }
             if ($data['type'] == 4) {
-                $data['value'] = self::input('value', 'addon');
+                $data['value'] = $this->i(Request::class)->input('value', 'addon');
             }
         }
         return 200;
@@ -69,7 +72,7 @@ class SysconfigTable extends Table
                 return 21020;
             }
             $str = "<?php\r\nreturn ";
-            $row = self::t('sysconfig')->fetchList();
+            $row = $this->t('sysconfig')->fetchList();
             $arr = [];
             foreach ($row as $v) {
                 $value = str_replace("'", '', $v['value']);
