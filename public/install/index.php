@@ -159,7 +159,6 @@ AUTH_KEY={$auth_key}
 ENCRYPT_KEY={$encrypt_key}
 ENCRYPT_IV={$encrypt_iv}
 ATTACK_EVASIVE=0
-QUERY_SAFE_STATUS=1
 CSRF_TOKEN_EXPIRE=3600
 
 # 输出配置

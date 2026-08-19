@@ -33,6 +33,10 @@ class Forms_fieldsRepository extends RepositoryAbstract
      */
     private function fetchAllField(string $table): array
     {
+        // [SQL安全改造] 表名白名单校验，防止SHOW FIELDS注入
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            return [];
+        }
         return $this->t()->db()->fetchList('SHOW FIELDS FROM ' . $this->setting['db']['tablepre'] . $table, 'Field');
     }
 
@@ -44,50 +48,65 @@ class Forms_fieldsRepository extends RepositoryAbstract
      */
     public function fieldUpdate(string $table, Forms_fieldsEntity $data): int
     {
-        if (empty($table) || empty($data)) {
+        // [SQL安全改造] 表名与字段名白名单校验，防止ALTER注入
+        if (empty($table) || empty($data) || !preg_match('/^[a-zA-Z0-9_]+$/', $table) || !preg_match('/^[a-zA-Z0-9_]+$/', (string)$data->identifier)) {
             return 0;
         }
         $fields = $this->fetchAllField($table);
         $tableName = $this->setting['db']['tablepre'] . $table;
         $length = $data->fieldlength ? str_replace('.', ',', (string)$data->fieldlength) : '';
+        // [SQL安全改造] 字段长度仅允许数字和逗号
+        if ($length && !preg_match('/^[\d,]+$/', $length)) {
+            $length = '';
+        }
+        // [SQL安全改造] 字段类型白名单校验
+        $fieldtype = (string)$data->fieldtype;
+        if ($fieldtype && !preg_match('/^[a-zA-Z0-9_ ]+$/', $fieldtype)) {
+            $fieldtype = '';
+        }
         if (!empty($fields[$data->identifier])) {
             $sql = 'ALTER TABLE  `' . $tableName . '` MODIFY COLUMN `' . $data->identifier . '` ';
         } else {
             $sql = 'ALTER TABLE  `' . $tableName . '` ADD `' . $data->identifier . '` ';
         }
         if (in_array($data->datatype, ['multitext', 'multidate', 'htmltext', 'imgs', 'serialize', 'addons'])) {
-            $fieldtype = $data->fieldtype ?: 'TEXT';
+            $fieldtype = $fieldtype ?: 'TEXT';
             $sql .= $fieldtype . ' NOT NULL ';
         } elseif (in_array($data->datatype, ['int', 'datetime', 'date', 'stepselect'])) {
-            $fieldtype = $data->fieldtype ?: 'bigint';
+            $fieldtype = $fieldtype ?: 'bigint';
             $length = $length ?: '11';
             $default = $data->default ?: 0;
+            // [SQL安全改造] 默认值转义，防止单引号破坏SQL
+            $default = str_replace(['\\', "'"], ['\\\\', "\\'"], (string)$default);
             $sql .= $fieldtype . '( ' . $length . ' ) NOT NULL DEFAULT  \'' . $default . '\' ';
         } elseif ($data->datatype == 'float') {
-            $fieldtype = $data->fieldtype ?: 'double';
+            $fieldtype = $fieldtype ?: 'double';
             $length = $length ?: '15,4';
             $sql .= $fieldtype . '( ' . $length . ' ) NOT NULL ';
         } elseif ($data->datatype == 'price') {
-            $fieldtype = $data->fieldtype ?: 'decimal';
+            $fieldtype = $fieldtype ?: 'decimal';
             $length = $length ?: '15,2';
             $sql .= $fieldtype . '( ' . $length . ' ) NOT NULL ';
         } elseif ($data->datatype == 'hidden') {
-            $fieldtype = $data->fieldtype ?: 'VARCHAR';
+            $fieldtype = $fieldtype ?: 'VARCHAR';
             if (in_array($fieldtype, ['text', 'mediumtext', 'longtext'])) {
                 $sql .= $fieldtype . ' NOT NULL ';
             } else {
                 $length = $length ?: '250';
-                $default = $data->default ? ' DEFAULT  \'' . $data->default . '\' ' : '';
+                // [SQL安全改造] 默认值转义，防止单引号破坏SQL
+                $default = $data->default ? ' DEFAULT  \'' . str_replace(['\\', "'"], ['\\\\', "\\'"], (string)$data->default) . '\' ' : '';
                 $sql .= $fieldtype . '( ' . $length . ' ) NOT NULL ' . $default;
             }
         } else {
-            $fieldtype = $data->fieldtype ?: 'VARCHAR';
+            $fieldtype = $fieldtype ?: 'VARCHAR';
             if (in_array($fieldtype, ['text', 'mediumtext', 'longtext', 'year', 'date', 'datetime', 'timestamp', 'geometry',
                 'polygon', 'point', 'linestring', 'multipoint', 'multilinestring', 'multipolygon', 'geometrycollection', 'set', 'enum'])) {
                 $sql .= $fieldtype . ' NOT NULL ';
             } else {
                 $length = $length ?: '250';
                 $default = $data->default ?: (strpos($fieldtype, 'int') !== false ? '0' : '');
+                // [SQL安全改造] 字段默认值转义，防止单引号破坏SQL
+                $default = str_replace(['\\', "'"], ['\\\\', "\\'"], (string)$default);
                 $sql .= $fieldtype . '( ' . $length . ' ) NOT NULL DEFAULT  \'' . $default . '\' ';
             }
         }
@@ -103,6 +122,8 @@ class Forms_fieldsRepository extends RepositoryAbstract
             $comment .= '(' . implode(',', $arr) . ')';
         }
         $comment = mb_substr($comment, 0, 255, 'utf-8');
+        // [SQL安全改造] 注释转义，防止单引号破坏SQL
+        $comment = str_replace(['\\', "'"], ['\\\\', "\\'"], (string)$comment);
         $query = $db->query($sql . ' COMMENT \'' . $comment . '\'');
 
         //非多行文本才能创建索引
@@ -125,7 +146,8 @@ class Forms_fieldsRepository extends RepositoryAbstract
      */
     public function fieldDelete(string $table, string $identifier): int
     {
-        if (empty($table) || empty($identifier)) {
+        // [SQL安全改造] 表名与字段名白名单校验，防止ALTER注入
+        if (empty($table) || empty($identifier) || !preg_match('/^[a-zA-Z0-9_]+$/', $table) || !preg_match('/^[a-zA-Z0-9_]+$/', $identifier)) {
             return 0;
         }
         $fields = $this->fetchAllField($table);
