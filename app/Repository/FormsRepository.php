@@ -45,6 +45,10 @@ class FormsRepository extends RepositoryAbstract
         }
         $db = $this->t()->db();
         foreach ($tables as $v) {
+            // [SQL安全改造] 表名白名单校验，防止DROP注入
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', (string)$v)) {
+                continue;
+            }
             $tableName = $this->setting['db']['tablepre'] . $v;
             $db->query('DROP TABLE IF EXISTS `' . $tableName . '`');
         }
@@ -60,7 +64,8 @@ class FormsRepository extends RepositoryAbstract
     public function tableExist(string $table): bool
     {
         $db = $this->t()->db();
-        return $db->fetch("SHOW TABLES LIKE '" . $this->setting['db']['tablepre'] . $table . "'") ? true : false;
+        // [SQL安全改造] SHOW TABLES LIKE 参数化，防止表名注入
+        return $db->fetch('SHOW TABLES LIKE ?', [$this->setting['db']['tablepre'] . $table]) ? true : false;
     }
 
     /**
@@ -74,9 +79,15 @@ class FormsRepository extends RepositoryAbstract
         if (empty($table)) {
             return false;
         }
+        // [SQL安全改造] 表名白名单校验，防止CREATE注入
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            return false;
+        }
         if ($this->tableExist($table)) {
             return false;
         }
+        // [SQL安全改造] 表注释（表单名）转义，防止单引号破坏SQL
+        $name = str_replace(['\\', "'"], ['\\\\', "\\'"], (string)$name);
         $sql = "CREATE TABLE IF NOT EXISTS `" . $this->setting['db']['tablepre'] . $table . "`(
 				`id` int(11) NOT NULL AUTO_INCREMENT,
 				`ischeck` tinyint(1) NOT NULL default '2' COMMENT '是否审核(1=已审核，2=未审核)',

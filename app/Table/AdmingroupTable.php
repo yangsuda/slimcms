@@ -29,7 +29,8 @@ class AdmingroupTable extends Table
             }
             //插件中设置的权限
             $where = ['isinstall' => 1, 'available' => 1];
-            $where[] = $this->t()->field('permission', '', '<>');
+            // [SQL安全改造] 惰性条件：参数由 withWhere->implode 统一收集
+            $where[] = ['permission' => ['<>', '']];
             $data['plugin'] = $this->t('plugins')->withWhere($where)->fetchList();
             foreach ($data['plugin'] as &$v) {
                 $v['permission'] = unserialize($v['permission']);
