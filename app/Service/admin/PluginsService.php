@@ -8,6 +8,7 @@ use app\Model\entity\PluginsEntity;
 use app\Repository\Forms_fieldsRepository;
 use app\Repository\FormsRepository;
 use app\Repository\PluginsRepository;
+use Slim\App;
 use SlimCMS\Abstracts\ServiceAbstract;
 use SlimCMS\Error\TextException;
 use SlimCMS\Helper\File;
@@ -18,6 +19,21 @@ use SlimCMS\Interfaces\OutputInterface;
 
 class PluginsService extends ServiceAbstract
 {
+    protected $setting;//站点初始化参数
+
+    protected $pluginsRepository;
+    protected $formsRepository;
+    protected $forms_fieldsRepository;
+
+    public function __construct(App $app, PluginsRepository $pluginsRepository, FormsRepository $formsRepository, Forms_fieldsRepository $forms_fieldsRepository)
+    {
+        parent::__construct($app);
+        $this->setting = $this->container->get('settings');
+        $this->pluginsRepository = $pluginsRepository;
+        $this->formsRepository = $formsRepository;
+        $this->forms_fieldsRepository = $forms_fieldsRepository;
+    }
+
     /**
      * 插件参数设置
      * @param string $identifier 插件标识符
@@ -71,7 +87,7 @@ class PluginsService extends ServiceAbstract
         if (!empty($plugin[$identifier])) {
             return $plugin[$identifier];
         }
-        $row = $this->r(PluginsRepository::class)->fetchByIdIdentifier($identifier);
+        $row = $this->pluginsRepository->fetchByIdIdentifier($identifier);
         if ($row?->isinstall != 1 || $row?->available != 1) {
             throw new TextException(223023, '此插件不存在或尚未启用');
         }
@@ -165,21 +181,21 @@ class PluginsService extends ServiceAbstract
         }
 
         //插件安装记录入库
-        $data = [];
-        $data['name'] = $plugin['title'];
-        $data['identifier'] = $plugin['identifier'];
-        $data['description'] = $plugin['intro'];
-        $data['version'] = $plugin['version'];
-        $data['isinstall'] = 1;
-        $data['author'] = $plugin['author'];
-        $data['signature'] = $plugin['signature'];
-        $data['menu'] = serialize($plugin['menu']);
-        $data['permission'] = serialize($plugin['permission']);
-        $this->r(PluginsRepository::class)->add($data);
+        $this->pluginsRepository->add([
+            'name' => $plugin['title'],
+            'identifier' => $plugin['identifier'],
+            'description' => $plugin['intro'],
+            'version' => $plugin['version'],
+            'isinstall' => 1,
+            'author' => $plugin['author'],
+            'signature' => $plugin['signature'],
+            'menu' => json_encode($plugin['menu']),
+            'permission' => json_encode($plugin['permission']),
+        ]);
 
         //数据库表是否存在判断
         foreach ($this->installTables($identifier) as $v) {
-            if ($this->r(FormsRepository::class)->tableExist($v)) {
+            if ($this->formsRepository->tableExist($v)) {
                 $this->output->withCode(223026, '数据库中' . $v . '表已存在，插件安装失败');
             }
         }
@@ -191,7 +207,7 @@ class PluginsService extends ServiceAbstract
             //创建数据表
             foreach (explode('; ', $content) as $v) {
                 $v = trim($v);
-                $v && $this->r(PluginsRepository::class)->excuteSql($v);
+                $v && $this->pluginsRepository->excuteSql($v);
             }
         }
 
@@ -205,9 +221,9 @@ class PluginsService extends ServiceAbstract
         };
 
         foreach ($this->installTables($identifier) as $k => $v) {
-            $id = $this->r(FormsRepository::class)->withWhere(['table' => $v])->fetch('id')?->id;
+            $id = $this->formsRepository->withWhere(['table' => $v])->fetch('id')?->id;
             if ($id) {
-                $this->r(Forms_fieldsRepository::class)->withWhere(['formid' => $k])->batchUpdate(['formid' => $id]);
+                $this->forms_fieldsRepository->withWhere(['formid' => $k])->batchUpdate(['formid' => $id]);
                 //模板重命名
                 $rename('admin/forms/dataList/', $k, $id);
                 $rename('admin/forms/dataSave/', $k, $id);
@@ -238,10 +254,10 @@ class PluginsService extends ServiceAbstract
         $row = $this->pluginInfo($identifier);
         //删除数据表
         if ($delTable === true) {
-            $this->r(FormsRepository::class)->dropTable($this->installTables($identifier));
+            $this->formsRepository->dropTable($this->installTables($identifier));
         }
 
-        $this->r(PluginsRepository::class)->uninstall($row->getRawAttribute('id'));
+        $this->pluginsRepository->uninstall($row->getRawAttribute('id'));
 
         //删除文件
         $dirs = [
@@ -255,14 +271,14 @@ class PluginsService extends ServiceAbstract
             CSPUBLIC . 'resources/plugin/' . $identifier . '/',
         ];
         foreach ($this->installTables($identifier) as $v) {
-            $id = $this->r(FormsRepository::class)->withWhere(['table' => $v])->fetch('id')?->id;
+            $id = $this->formsRepository->withWhere(['table' => $v])->fetch('id')?->id;
             if ($id) {
                 $dirs[] = CSAPP . 'Table/' . ucfirst($v) . 'Table.php';
                 $dirs[] = CSTEMPLATE . 'admin/forms/dataList/' . $id . '.htm';
                 $dirs[] = CSTEMPLATE . 'admin/forms/dataSave/' . $id . '.htm';
 
-                $this->r(FormsRepository::class)->delete($id);
-                $this->r(Forms_fieldsRepository::class)->withWhere(['formid' => $id])->batchDelete();
+                $this->formsRepository->delete($id);
+                $this->forms_fieldsRepository->withWhere(['formid' => $id])->batchDelete();
             }
         }
         foreach ($dirs as $v) {
@@ -314,11 +330,11 @@ class PluginsService extends ServiceAbstract
             return $this->output->withCode(21002);
         }
         $switch = $switch == 1 ? 1 : -1;
-        $id = $this->r(PluginsRepository::class)->fetchByIdIdentifier($identifier)?->id;
+        $id = $this->pluginsRepository->fetchByIdIdentifier($identifier)?->id;
         if (empty($id)) {
             return $this->output->withCode(223027);
         }
-        $this->r(PluginsRepository::class)->openSwitch($id, $switch);
+        $this->pluginsRepository->openSwitch($id, $switch);
         $pluginDir = $this->getPluginPath($identifier);
         if (is_file($pluginDir . 'install.php')) {
             $arr = require $pluginDir . 'install.php';
@@ -340,14 +356,14 @@ class PluginsService extends ServiceAbstract
         if (empty($identifier)) {
             return $this->output->withCode(21002);
         }
-        $row = $this->r(PluginsRepository::class)->fetchByIdIdentifier($identifier);
+        $row = $this->pluginsRepository->fetchByIdIdentifier($identifier);
         if (empty($row)) {
             return $this->output->withCode(223027);
         }
         if ($row->isinstall == 1) {
             return $this->output->withCode(223030);
         }
-        $this->r(PluginsRepository::class)->delete($row->id);
+        $this->pluginsRepository->delete($row->id);
 
         $pluginDir = $this->getPluginPath($identifier);
         //删除文件
@@ -371,7 +387,7 @@ class PluginsService extends ServiceAbstract
     {
         $plugins = self::_market();
         foreach ($plugins as &$v) {
-            $v['my'] = $this->r(PluginsRepository::class)->fetchByIdIdentifier($v['identifier'])?->toArray();
+            $v['my'] = $this->pluginsRepository->fetchByIdIdentifier($v['identifier'])?->toArray();
         }
         return $this->output->withCode(200)->withData(['list' => $plugins]);
     }

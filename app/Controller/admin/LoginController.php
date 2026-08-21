@@ -9,20 +9,30 @@ declare(strict_types=1);
 namespace app\Controller\admin;
 
 use app\Service\admin\AuthService;
-use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseInterface;
+use Slim\App;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Helper\Crypt;
 
 class LoginController extends ControlAbstract
 {
+    protected AuthService $authService;
+    private Cookie $cookie;
+
+    public function __construct(App $app, AuthService $authService, Cookie $cookie)
+    {
+        parent::__construct($app);
+        $this->authService = $authService;
+        $this->cookie = $cookie;
+    }
+
     /**
      * 登录页面 / 登录处理
      * GET  /admin/login - 显示登录表单
      * POST /admin/login - 处理登录请求
      */
-    public function login(): MessageInterface
+    public function login(): ResponseInterface
     {
         // POST 请求：处理登录
         if ($this->request->getMethod() === 'POST') {
@@ -35,7 +45,7 @@ class LoginController extends ControlAbstract
     /**
      * 显示登录表单
      */
-    private function showLoginForm(): MessageInterface
+    private function showLoginForm(): ResponseInterface
     {
         $referer = $this->input('referer', 'url');
         // 检查是否已登录
@@ -49,7 +59,7 @@ class LoginController extends ControlAbstract
         }
 
         //防止安装完后点登录，成功后又退回安装页面
-        if (preg_match('/(install\/index.php)$/', $referer)) {
+        if ($referer && preg_match('/(install\/index.php)$/', $referer)) {
             $referer = '';
         }
 
@@ -65,7 +75,7 @@ class LoginController extends ControlAbstract
     /**
      * 处理登录请求
      */
-    private function handleLogin(): MessageInterface
+    private function handleLogin(): ResponseInterface
     {
         // CSRF 检查
         $formhash = $this->inputString('formhash');
@@ -74,7 +84,7 @@ class LoginController extends ControlAbstract
         // 用户名密码校验
         $userid = $this->inputString('userid');
         $pwd = $this->inputString('pwd');
-        $res = $this->authService()->formVerify($formhash, $ccode)->loginCheck($userid, $pwd);
+        $res = $this->authService->formVerify($formhash, $ccode)->loginCheck($userid, $pwd);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
@@ -87,11 +97,6 @@ class LoginController extends ControlAbstract
         return $this->json($output);
     }
 
-    private function authService(): AuthService
-    {
-        return $this->i(AuthService::class);
-    }
-
     /**
      * 退出登录
      */
@@ -100,7 +105,7 @@ class LoginController extends ControlAbstract
         $this->session()->delete('admin');
         $this->session()->delete('adminAuth');
 
-        $referer = $this->i(Cookie::class)->get('HTTP_REFERER') ?? '';
+        $referer = $this->cookie->get('HTTP_REFERER') ?? '';
         $referer = '/admin/login?referer=' . urlencode($referer);
 
         $output = $this->output->withCode(200)->withReferer($referer);

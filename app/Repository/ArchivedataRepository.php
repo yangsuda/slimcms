@@ -24,6 +24,7 @@ class ArchivedataRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return ArchivedataEntity::fromArrayList($data);
+        $data['list'] =  ArchivedataEntity::fromArrayList($data['list']);
+        return $data;
     }
 }

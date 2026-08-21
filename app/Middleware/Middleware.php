@@ -16,7 +16,7 @@ class Middleware extends \SlimCMS\Core\MiddleWare
 
         return $response
             ->withHeader('X-Content-Type-Options', 'nosniff')
-            ->withHeader('X-Frame-Options', 'DENY')
+            ->withHeader('X-Frame-Options', 'SAMEORIGIN')
             ->withHeader('X-XSS-Protection', '1; mode=block')
             ->withHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }

@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace app\Controller\admin;
 
 use app\Service\admin\RecoveryService;
-use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class MainController extends AdminController
 {
@@ -16,18 +16,20 @@ class MainController extends AdminController
      * 后台仪表盘
      * 当前管理员信息通过 AdminAuthMiddleware 注入的 request attribute 'admin' 获取
      */
-    public function index(): MessageInterface
+    public function index(): ResponseInterface
     {
         return $this->view($this->output);
     }
 
     /**
      * 恢复数据
-     * @return MessageInterface
+     * @return ResponseInterface
      */
-    public function recovery()
+    public function recovery(): ResponseInterface
     {
-        $this->checkAllow();
+        if($r = $this->checkAllow()){
+            return $r;
+        }
         $id = $this->inputInt('id');
         $res = $this->i(RecoveryService::class)->recovery($id);
         return $this->json($res);
@@ -35,17 +37,19 @@ class MainController extends AdminController
 
     /**
      * 修改密码
-     * @return MessageInterface
+     * @return ResponseInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public function updatePwd(): MessageInterface
+    public function updatePwd(): ResponseInterface
     {
-        $this->checkAllow();
+        if($r = $this->checkAllow()){
+            return $r;
+        }
         if ($this->request->getMethod() === 'POST') {
             $formhash = $this->inputString('formhash');
             $oldpwd = $this->inputString('oldpwd');
             $newpwd = $this->inputString('newpwd');
-            $res = $this->authService()->formVerify($formhash)->updatePwd($this->admin->userid, $oldpwd, $newpwd);
+            $res = $this->authService->formVerify($formhash)->updatePwd($this->adminInfo()->userid, $oldpwd, $newpwd);
             return $this->directTo($res);
         }
         return $this->view($this->output);

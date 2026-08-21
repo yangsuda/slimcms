@@ -37,4 +37,9 @@ class FormsReq extends ReqAbstract
     {
         isset($words) && $this->where[__FUNCTION__] = $words;
     }
+
+    protected function ischeck(array $param, $words = null): void
+    {
+        isset($words) && $this->where[__FUNCTION__] = $words;
+    }
 }

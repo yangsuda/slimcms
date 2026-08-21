@@ -8,11 +8,37 @@ declare(strict_types=1);
 
 namespace app\Controller\admin;
 
+use app\Core\Forms;
 use app\Core\Page;
+use app\Service\admin\AuthService;
+use Slim\App;
 use SlimCMS\Error\TextException;
 
 class FormsController extends AdminController
 {
+    use \SlimCMS\Traits\Url;
+
+    private Page $page;
+    private Forms $forms;
+    private array $config;//后台配置参数
+
+    public function __construct(App $app, AuthService $authService, Forms $forms, Page $page)
+    {
+        parent::__construct($app, $authService);
+        $this->page = $page;
+        $this->forms = $forms;
+        $this->config = $this->container->get('cfg');
+    }
+
+    /**
+     * 表单服务,设置请求对象，用于将中间件中数据传进去
+     * @return Forms
+     */
+    private function forms()
+    {
+        return $this->forms->setRequest($this->request);
+    }
+
     /**
      * 数据列表页
      * @return array|\Psr\Http\Message\ResponseInterface|\SlimCMS\Interfaces\OutputInterface
@@ -22,7 +48,9 @@ class FormsController extends AdminController
     {
         $param = $this->input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int', 'order' => 'string', 'by' => 'string', 'ischeck' => 'int']);
         $fid = (int)aval($param, 'fid');
-        $this->checkAllow('dataList' . $fid);
+        if($r = $this->checkAllow('dataList' . $fid)){
+            return $r;
+        }
         $res = $this->forms()->dataList($param);
         if ($res->getCode() != 200) {
             try {
@@ -33,9 +61,9 @@ class FormsController extends AdminController
         }
 
         $data = $res->getData();
-        $data['admin'] = $this->admin->toArray();
-        $data['admin']['purviews'] = $this->admin->groupidEntity()->isSuperAdmin() ? [] : $this->admin->groupidEntity()->getPurviewsList();
-        $data['mult'] = $this->i(Page::class)->multi($data['count'], $data['pagesize'], $data['page'], $data['currenturl'], $data['maxpages'], 5, true, true);
+        $data['admin'] = $this->adminInfo()->toArray();
+        $data['admin']['purviews'] = $this->adminInfo()->groupidEntity()->isSuperAdmin() ? [] : $this->adminInfo()->groupidEntity()->getPurviewsList();
+        $data['mult'] = $this->page->multi($data['count'], $data['pagesize'], $data['page'], $data['currenturl'], $data['maxpages'], 5, true, true);
         //处理展示字段
         $res = $this->forms()->listFields($fid)->withData($data);
         //搜索条件显示
@@ -59,7 +87,9 @@ class FormsController extends AdminController
     {
         $fid = $this->inputInt('fid');
         $id = $this->inputInt('id');
-        $this->checkAllow('dataSave' . $fid);
+        if($r = $this->checkAllow('dataSave' . $fid)){
+            return $r;
+        }
         $formhash = $this->inputString('formhash');
         if ($formhash) {
             $ccode = $this->config['ccode'] == '1' ? $this->inputString('ccode') : null;
@@ -94,7 +124,9 @@ class FormsController extends AdminController
         $ids = $this->input('ids');
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : []);
         $ischeck = $this->inputInt('ischeck');
-        $this->checkAllow('dataCheck' . $fid);
+        if($r = $this->checkAllow('dataCheck' . $fid)){
+            return $r;
+        }
         $res = $this->forms()->dataCheck($fid, $ids, $ischeck);
         return $this->response($res);
     }
@@ -109,7 +141,9 @@ class FormsController extends AdminController
         $fid = $this->inputInt('fid');
         $ids = $this->input('ids');
         $ids = is_array($ids) ? $ids : ($ids ? explode(',', $ids) : []);
-        $this->checkAllow('dataDel' . $fid);
+        if($r = $this->checkAllow('dataDel' . $fid)){
+            return $r;
+        }
         $res = $this->forms()->dataDel($fid, $ids);
         return $this->response($res);
     }
@@ -120,7 +154,9 @@ class FormsController extends AdminController
     public function dataExport()
     {
         $param = $this->input(['fid' => 'int', 'page' => 'int', 'pagesize' => 'int']);
-        $this->checkAllow('dataExport' . $param['fid']);
+        if($r = $this->checkAllow('dataExport' . $param['fid'])){
+            return $r;
+        }
         $res = $this->forms()->dataExport($param);
         $data = $res->getData();
         if ($this->inputInt('down') == 1) {

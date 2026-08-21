@@ -24,7 +24,8 @@ class SysenumRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return SysenumEntity::fromArrayList($data);
+        $data['list'] = SysenumEntity::fromArrayList($data['list']);
+        return $data;
     }
 
     /**

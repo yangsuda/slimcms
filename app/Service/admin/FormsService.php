@@ -6,11 +6,22 @@ namespace app\Service\admin;
 
 use app\Repository\Forms_fieldsRepository;
 use app\Repository\FormsRepository;
+use Slim\App;
 use SlimCMS\Abstracts\ServiceAbstract;
 use SlimCMS\Interfaces\OutputInterface;
 
 class FormsService extends ServiceAbstract
 {
+    private FormsRepository $formsRepository;
+    private Forms_fieldsRepository $forms_fieldsRepository;
+
+    public function __construct(App $app, FormsRepository $formsRepository, Forms_fieldsRepository $forms_fieldsRepository)
+    {
+        parent::__construct($app);
+        $this->formsRepository = $formsRepository;
+        $this->forms_fieldsRepository = $forms_fieldsRepository;
+    }
+
     /**
      * 获取表单字段映射
      * @param string $table
@@ -21,11 +32,11 @@ class FormsService extends ServiceAbstract
         if (empty($table)) {
             return [];
         }
-        $formId = $this->r(FormsRepository::class)->withWhere(['table' => $table])->fetch('id')?->id;
+        $formId = $this->formsRepository->withWhere(['table' => $table])->fetch('id')?->id;
         if (empty($formId)) {
             return [];
         }
-        return $this->r(Forms_fieldsRepository::class)->withWhere(['formid' => $formId])->map('title', 'identifier');
+        return $this->forms_fieldsRepository->withWhere(['formid' => $formId])->map('title', 'identifier');
     }
 
     /**
@@ -35,7 +46,7 @@ class FormsService extends ServiceAbstract
      */
     public function formInit(int $formId): bool
     {
-        $table = $this->r(FormsRepository::class)->withWhere(['id' => $formId])->fetch('table')?->table;
+        $table = $this->formsRepository->withWhere(['id' => $formId])->fetch('table')?->table;
         if (empty($table)) {
             return false;
         }

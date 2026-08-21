@@ -24,7 +24,8 @@ class Forms_fieldsRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return Forms_fieldsEntity::fromArrayList($data);
+        $data['list'] = Forms_fieldsEntity::fromArrayList($data['list']);
+        return $data;
     }
 
     /**

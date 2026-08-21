@@ -12,6 +12,8 @@ namespace app\Service\admin;
 use app\Model\entity\AdminEntity;
 use app\Repository\AdminloginlogRepository;
 use app\Repository\AdminRepository;
+use app\Repository\FormsRepository;
+use Slim\App;
 use SlimCMS\Abstracts\ServiceAbstract;
 use SlimCMS\Helper\Crypt;
 use SlimCMS\Helper\Ipdata;
@@ -20,6 +22,17 @@ use SlimCMS\Interfaces\OutputInterface;
 class AuthService extends ServiceAbstract
 {
     use \SlimCMS\Traits\Form;
+
+    private $maxRetries = 3;//1小时内登陆最大可重试次数
+    private AdminRepository $adminRepository;
+    private AdminloginlogRepository $adminloginlogRepository;
+
+    public function __construct(App $app, AdminRepository $adminRepository, AdminloginlogRepository $adminloginlogRepository)
+    {
+        parent::__construct($app);
+        $this->adminRepository = $adminRepository;
+        $this->adminloginlogRepository = $adminloginlogRepository;
+    }
 
     /**
      * 登录操作
@@ -36,31 +49,21 @@ class AuthService extends ServiceAbstract
         if ($this->output->getCode() != 200) {
             return $this->output;
         }
-        $admin = $this->getAdmin()->withWhere(['userid' => $userid, 'status' => 1])->fetch('id,pwd');
+        $admin = $this->adminRepository->withWhere(['userid' => $userid, 'status' => 1])->fetch('id,pwd');
         if (empty($admin)) {
             return $this->output->withCode(21001);
         }
-        if ($this->getAdminloginlog()->withWhere(['userid' => $userid, 'start' => TIMESTAMP - 3600])->count() >= 3) {
+        if ($this->adminloginlogRepository->withWhere(['userid' => $userid, 'start' => TIMESTAMP - 3600])->count() >= $this->maxRetries) {
             return $this->output->withCode(223014);
         }
         $ip = Ipdata::getip();
         if (!Crypt::pwdVerify($pwd, $admin->pwd)) {
-            $this->getAdminloginlog()->add(['userid' => $userid, 'pwd' => $pwd, 'ip' => $ip]);
+            $this->adminloginlogRepository->add(['userid' => $userid, 'pwd' => $pwd, 'ip' => $ip]);
             return $this->output->withCode(211032);
         }
-        $this->getAdmin()->update($admin->id, ['loginip' => $ip, 'logintime' => TIMESTAMP]);
-        $admin = $this->getAdmin()->adminInfo($admin->id);
+        $this->adminRepository->update($admin->id, ['loginip' => $ip, 'logintime' => TIMESTAMP]);
+        $admin = $this->adminRepository->adminInfo($admin->id);
         return $this->output->withCode(200)->withData(['admin' => $admin]);
-    }
-
-    private function getAdmin(): ?AdminRepository
-    {
-        return $this->r(AdminRepository::class);
-    }
-
-    private function getAdminloginlog(): ?AdminloginlogRepository
-    {
-        return $this->r(AdminloginlogRepository::class);
     }
 
     /**
@@ -115,7 +118,40 @@ class AuthService extends ServiceAbstract
         if ($res->getCode() != 200) {
             return $res;
         }
-        $this->getAdmin()->update((int)$res->getData()['admin']->id, ['pwd' => Crypt::pwd($newpwd)]);
+        $this->adminRepository->update((int)$res->getData()['admin']->id, ['pwd' => Crypt::pwd($newpwd)]);
         return $this->output->withCode(200)->withReferer('/admin/logout');
+    }
+
+    /**
+     * 后台左侧菜单
+     * @param AdminEntity $admin
+     * @return array
+     * @throws \SlimCMS\Error\TextException
+     */
+    public function leftMenu(AdminEntity $admin): array
+    {
+        $list = $this->r(FormsRepository::class)->tableList();
+        $arr = [];
+        $weight = [];
+        foreach ($list as $v) {
+            if ($v?->jumpurl && !preg_match('/^http/i', $v->jumpurl)) {
+                $path = parse_url($v->jumpurl, PHP_URL_PATH);
+                $purview = $path ?: '';
+            } else {
+                $purview = 'dataList' . $v->id;
+            }
+            if (!$admin->groupidEntity()?->isSuperAdmin() && !$admin->groupidEntity()?->hasPurview($purview)) {
+                continue;
+            }
+            if ($v?->types) {
+                $weight[$v->types][] = $v->weight;
+                $arr[$v->types]['types'] = ['key' => $v->types, 'jumpurl' => $v->jumpurl, 'name' => $v->_types];
+                $arr[$v->types]['subMenu'][] = $v->toArray();
+            }
+        }
+        foreach ($arr as $k => $v) {
+            array_multisort($weight[$k], SORT_DESC, $arr[$k]['subMenu']);
+        }
+        return $arr;
     }
 }

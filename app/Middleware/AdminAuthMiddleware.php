@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace app\Middleware;
 
+use app\Repository\AdminlogRepository;
 use app\Repository\AdminRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -45,7 +46,7 @@ class AdminAuthMiddleware implements MiddlewareInterface
             return $response->withHeader('Location', '/admin/login?referer=' . $referer);
         }
 
-        $adminRepository = $this->app->getContainer()->make(AdminRepository::class, ['app' => $this->app, 'request' => $request]);
+        $adminRepository = $this->app->getContainer()->make(AdminRepository::class, ['app' => $this->app]);
         // 3. 获取用户信息
         $adminInfo = $adminRepository->adminInfo((int)$adminid);
         if (empty($adminInfo)) {
@@ -54,20 +55,24 @@ class AdminAuthMiddleware implements MiddlewareInterface
         }
         $request = $request->withAttribute('admin', $adminInfo);
 
+        $config = $this->app->getContainer()->get('cfg');
         //日志记录
-        $postinfo = $request->getParsedBody();
-        $postinfo = $postinfo ? serialize(Str::addslashes($postinfo)) : '';
-        $postinfo = substr($postinfo, 0, 5000);
-        $adminRepository->adminLogSave([
-            'adminid' => $adminInfo->id,
-            'adminname' => $adminInfo->userid,
-            'method' => aval($request->getServerParams(), 'REQUEST_METHOD'),
-            'query' => substr($request->getUri()->getQuery(), 0, 500),
-            'ip' => Ipdata::getip(),
-            'createtime' => TIMESTAMP,
-            'postinfo' => $postinfo,
-            'route' => $request->getUri()->getPath()
-        ]);
+        if (!empty($config['adminLog'])) {
+            $adminlogRepository = $this->app->getContainer()->make(AdminlogRepository::class, ['app' => $this->app]);
+            $postinfo = $request->getParsedBody();
+            $postinfo = $postinfo ? json_encode(Str::addslashes($postinfo)) : '';
+            $postinfo = substr($postinfo, 0, 5000);
+            $adminlogRepository->add([
+                'adminid' => $adminInfo->id,
+                'adminname' => $adminInfo->userid,
+                'method' => aval($request->getServerParams(), 'REQUEST_METHOD'),
+                'query' => substr($request->getUri()->getQuery(), 0, 500),
+                'ip' => Ipdata::getip(),
+                'createtime' => TIMESTAMP,
+                'postinfo' => $postinfo,
+                'route' => $request->getUri()->getPath()
+            ]);
+        }
         return $handler->handle($request);
     }
 }

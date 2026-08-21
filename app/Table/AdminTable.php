@@ -8,7 +8,7 @@ use app\Core\Table;
 
 class AdminTable extends Table
 {
-    use \SlimCMS\Traits\table;
+    use \SlimCMS\Traits\Table;
     /**
      * 数据获取之后的自定义处理
      * @param $data
