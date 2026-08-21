@@ -24,7 +24,8 @@ class PluginsRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return PluginsEntity::fromArrayList($data);
+        $data['list'] = PluginsEntity::fromArrayList($data['list']);
+        return $data;
     }
 
     public function fetchByIdIdentifier(string $identifier): ?PluginsEntity

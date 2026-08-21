@@ -7,11 +7,9 @@ declare(strict_types=1);
 
 namespace app\Controller\admin;
 
-use app\Core\Forms;
 use app\Model\entity\AdminEntity;
 use app\Service\admin\AuthService;
-use Psr\Http\Message\MessageInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Error\TextException;
@@ -19,13 +17,22 @@ use SlimCMS\Interfaces\OutputInterface;
 
 class AdminController extends ControlAbstract
 {
-    protected AdminEntity|null $admin = null;
+    protected AuthService $authService;
 
-    public function __construct(App $app, ServerRequestInterface $request = null)
+    public function __construct(App $app, AuthService $authService)
     {
-        parent::__construct($app, $request);
-        $this->admin = $this->request->getAttribute('admin');
+        parent::__construct($app);
+        $this->authService = $authService;
         define('MANAGE', '1');
+    }
+
+    /**
+     * 获取管理员信息
+     * @return AdminEntity|null
+     */
+    protected function adminInfo(): AdminEntity
+    {
+        return $this->request->getAttribute('admin');
     }
 
     /**
@@ -34,71 +41,32 @@ class AdminController extends ControlAbstract
      * @return void
      * @throws TextException
      */
-    protected function checkAllow(string $auth = null)
+    protected function checkAllow(string $auth = null): ?ResponseInterface
     {
         $auth = $auth ?? $this->p;
-        $res = $this->authService()->checkAllow($this->admin, $auth);
-        if ($res->getCode() != 200) {
-            if ($this->determineContentType() == 'application/json') {
-                throw new TextException($res->getCode(), $res->getMsg());
-            } else {
-                header('location:' . $res->getReferer() ?: '/admin/index');
-                exit;
-            }
+        $res = $this->authService->checkAllow($this->adminInfo(), $auth);
+        if ($res->getCode() === 200) {
+            return null;
         }
+        if ($this->determineContentType() === 'application/json') {
+            throw new TextException($res->getCode(), $res->getMsg());
+        }
+        $referer = $res->getReferer() ?: '/admin/index';
+        return $this->response->withStatus(302)->withHeader('Location', $referer);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function view(OutputInterface $output = null, string $template = ''): MessageInterface
+    public function view(OutputInterface $output = null, string $template = ''): ResponseInterface
     {
         $output = $output ?? $this->output;
         $data = [];
-        $data['leftMenu'] = $this->leftMenu();
+        $data['leftMenu'] = $this->authService->leftMenu($this->adminInfo());
         if (empty($output->getData()['admin'])) {
-            $data['admin'] = $this->admin->toArray();
+            $data['admin'] = $this->adminInfo()->toArray();
         }
         $output = $output->withData($data);
         return parent::view($output, $template);
-    }
-
-    private function leftMenu()
-    {
-        $param = ['fid' => 1, 'ischeck' => 1, 'pagesize' => 200, 'cacheTime' => 60, 'order' => 'weight', 'noinput' => 1];
-        $res = $this->forms()->dataList($param)->getData();
-        $arr = [];
-        $weight = [];
-        foreach ($res['list'] as $v) {
-            if (!empty($v['jumpurl']) && !preg_match('/^http/i', $v['jumpurl'])) {
-                $urlinfo = parse_url($v['jumpurl']);
-                parse_str($urlinfo['query'], $para);
-                $purview = !empty($para['p']) ? $para['p'] : '';
-            } else {
-                $purview = 'dataList' . $v['id'];
-            }
-            if (!$this->admin->groupidEntity()?->isSuperAdmin() && !$this->admin->groupidEntity()?->hasPurview($purview)) {
-                continue;
-            }
-            if (!empty($v['types'])) {
-                $weight[$v['types']][] = $v['weight'];
-                $arr[$v['types']]['types'] = ['key' => $v['types'], 'jumpurl' => $v['jumpurl'], 'name' => $v['_types']];
-                $arr[$v['types']]['subMenu'][] = $v;
-            }
-        }
-        foreach ($arr as $k => $v) {
-            array_multisort($weight[$k], SORT_DESC, $arr[$k]['subMenu']);
-        }
-        return $arr;
-    }
-
-    protected function authService(): AuthService
-    {
-        return $this->i(AuthService::class);
-    }
-
-    protected function forms(): Forms
-    {
-        return $this->i(Forms::class);
     }
 }

@@ -25,7 +25,8 @@ class FormsRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return FormsEntity::fromArrayList($data);
+        $data['list'] = FormsEntity::fromArrayList($data['list']);
+        return $data;
     }
 
     public function getTable(int $id): ?string
@@ -98,5 +99,22 @@ class FormsRepository extends RepositoryAbstract
         $query = $db->query($sql);
         $db->affectedRows($query);
         return true;
+    }
+
+    /**
+     * 表单列表
+     * @return array
+     * @throws TextException
+     */
+    public function tableList(): array
+    {
+        static $list = [];
+        if (empty($list)) {
+            $list = $this->withWhere(['ischeck' => 1])
+                ->withOrderBy('weight')
+                ->withLimit(1000)
+                ->list('id,name,jumpurl,types,weight')['list'];
+        }
+        return $list;
     }
 }

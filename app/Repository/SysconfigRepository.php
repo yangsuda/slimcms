@@ -24,6 +24,7 @@ class SysconfigRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return SysconfigEntity::fromArrayList($data);
+        $data['list'] = SysconfigEntity::fromArrayList($data['list']);
+        return $data;
     }
 }

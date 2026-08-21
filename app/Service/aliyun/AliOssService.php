@@ -12,16 +12,26 @@ namespace app\Service\aliyun;
 
 use OSS\Core\OssException;
 use OSS\OssClient;
+use Slim\App;
 use Slim\Psr7\UploadedFile;
-use SlimCMS\Abstracts\BaseAbstract;
+use SlimCMS\Abstracts\ServiceAbstract;
 use SlimCMS\Core\Request;
 use SlimCMS\Helper\Ipdata;
 use SlimCMS\Helper\File;
 use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Interfaces\UploadInterface;
 
-class AliOssService extends BaseAbstract implements UploadInterface
+class AliOssService extends ServiceAbstract implements UploadInterface
 {
+    private $setting;//站点初始化参数
+    private array $config;//后台配置参数
+
+    public function __construct(App $app)
+    {
+        parent::__construct($app);
+        $this->setting = $this->container->get('settings');
+        $this->config = $this->container->get('cfg');
+    }
 
     /**
      * RAM账号，创建地址：https://ram.console.aliyun.com/users

@@ -106,7 +106,7 @@
                                                         <!--{elseif $f_v[identifier] == 'menu'}-->
                                                         <td class="text-dark">
                                                             <!--{if $v[isinstall]==1 && $v[available]==1}-->
-                                                            <!--{loop unserialize($v[_menu]) $mv}-->
+                                                            <!--{loop json_decode($v[_menu],true) $mv}-->
                                                             <a href="$mv[url]" target="{echo $mv[target]?:''}">$mv[name]</a>
                                                             <!--{/loop}-->
                                                             <!--{/if}-->

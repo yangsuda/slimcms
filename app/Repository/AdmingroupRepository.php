@@ -24,6 +24,7 @@ class AdmingroupRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return AdmingroupEntity::fromArrayList($data);
+        $data['list'] = AdmingroupEntity::fromArrayList($data['list']);
+        return $data;
     }
 }

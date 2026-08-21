@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace app\Repository;
 
 use app\Model\entity\AdminEntity;
+use Slim\App;
 use SlimCMS\Abstracts\RepositoryAbstract;
 use SlimCMS\Helper\Crypt;
 
 class AdminRepository extends RepositoryAbstract
 {
+
     public function fetch(string $field, int $cacheTime = 0): ?AdminEntity
     {
         $data = parent::fetch($field, $cacheTime);
@@ -25,7 +27,8 @@ class AdminRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return AdminEntity::fromArrayList($data);
+        $data['list'] = AdminEntity::fromArrayList($data['list']);
+        return $data;
     }
 
     /**
@@ -45,20 +48,5 @@ class AdminRepository extends RepositoryAbstract
             $admin->setRelation('adminAuth', Crypt::encrypt((string)$admin->id));
         }
         return $admin;
-    }
-
-    /**
-     * 保存管理员日志
-     * @param array $data
-     * @return bool
-     * @throws \SlimCMS\Error\TextException
-     */
-    public function adminLogSave(array $data): bool
-    {
-        if (!empty($this->config['adminLog'])) {
-            $this->r(AdminlogRepository::class)->add($data);
-            return true;
-        }
-        return false;
     }
 }

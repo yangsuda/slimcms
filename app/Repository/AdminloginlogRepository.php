@@ -24,6 +24,7 @@ class AdminloginlogRepository extends RepositoryAbstract
     public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
     {
         $data = parent::list($fields, $page, $pagesize);
-        return AdminloginlogEntity::fromArrayList($data);
+        $data['list'] = AdminloginlogEntity::fromArrayList($data['list']);
+        return $data;
     }
 }

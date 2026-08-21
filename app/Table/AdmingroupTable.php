@@ -8,7 +8,7 @@ use app\Core\Table;
 
 class AdmingroupTable extends Table
 {
-    use \SlimCMS\Traits\table;
+    use \SlimCMS\Traits\Table;
 
     /**
      * 表单HTML获取之前的自定义处理
@@ -33,7 +33,7 @@ class AdmingroupTable extends Table
             $where[] = ['permission' => ['<>', '']];
             $data['plugin'] = $this->t('plugins')->withWhere($where)->fetchList();
             foreach ($data['plugin'] as &$v) {
-                $v['permission'] = unserialize($v['permission']);
+                $v['permission'] = json_decode($v['permission'],true);
             }
             $data['_purviews'] = !empty($data['purviews']) ? explode(',', $data['purviews']) : [];
         }
