@@ -8,10 +8,10 @@ declare(strict_types=1);
 
 namespace app\Controller\admin;
 
-use app\Core\Forms;
-use app\Core\Page;
 use app\Service\admin\AuthService;
 use Slim\App;
+use SlimCMS\Core\Forms;
+use SlimCMS\Core\Page;
 use SlimCMS\Error\TextException;
 
 class FormsController extends AdminController
@@ -128,7 +128,7 @@ class FormsController extends AdminController
             return $r;
         }
         $res = $this->forms()->dataCheck($fid, $ids, $ischeck);
-        return $this->response($res);
+        return $this->resp($res);
     }
 
     /**
@@ -145,7 +145,7 @@ class FormsController extends AdminController
             return $r;
         }
         $res = $this->forms()->dataDel($fid, $ids);
-        return $this->response($res);
+        return $this->resp($res);
     }
 
     /**

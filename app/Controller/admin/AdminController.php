@@ -23,7 +23,6 @@ class AdminController extends ControlAbstract
     {
         parent::__construct($app);
         $this->authService = $authService;
-        define('MANAGE', '1');
     }
 
     /**

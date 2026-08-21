@@ -9,9 +9,9 @@
         <!--{eval $isloadSelect2=1;}-->
         <div class="form-group mr-3 mb-1">
             <label>$v[title]：</label>
-            <select name="$v[identifier]" class="custom-select {echo count(unserialize($v[rules]))>10?'select2':''}">
+            <select name="$v[identifier]" class="custom-select {echo count(json_decode($v[rules],true))>10?'select2':''}">
                 <option value=''>--全部--</option>
-                <!--{loop unserialize($v[rules]) $r_k $r_v}-->
+                <!--{loop json_decode($v[rules],true) $r_k $r_v}-->
                 <option value='$r_k' {echo aval($data,'get/'.$v[identifier])==$r_k?'selected':''}>$r_v</option>
                 <!--{/loop}-->
             </select>

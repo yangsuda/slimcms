@@ -7,10 +7,10 @@ declare(strict_types=1);
 
 namespace app\Controller\admin;
 
-use app\Core\Ueditor;
 use app\Service\admin\AuthService;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
+use SlimCMS\Core\Ueditor;
 
 class UeditorController extends AdminController
 {

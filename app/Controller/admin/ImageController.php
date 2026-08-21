@@ -93,7 +93,7 @@ class ImageController extends AdminController
         $field = $this->inputString('field');
         $pic = $this->inputString('pic');
         $res = $this->fileService->imgsDel($fid, $id, $field, $pic);
-        return $this->response($res);
+        return $this->resp($res);
     }
 
     /**
@@ -130,7 +130,7 @@ class ImageController extends AdminController
         $id = $this->inputInt('id');
         $identifier = $this->inputString('identifier');
         $res = $this->fileService->delImg($fid, $id, $identifier);
-        return $this->response($res);
+        return $this->resp($res);
     }
 
     /**
@@ -147,7 +147,7 @@ class ImageController extends AdminController
         $id = $this->inputInt('id');
         $pic = $this->inputString('pic');
         $res = $this->fileService->webuploadCover($fid, $id, $pic);
-        return $this->response($res);
+        return $this->resp($res);
     }
 
     /**
@@ -167,6 +167,6 @@ class ImageController extends AdminController
         $identifier = $this->inputString('identifier');
         $url = $this->inputString('url');
         $res = $this->fileService->delFromAddons($fid, $id, $identifier, $url);
-        return $this->response($res);
+        return $this->resp($res);
     }
 }

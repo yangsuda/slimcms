@@ -39,10 +39,10 @@ composer create-project yangsuda/slimcms [my-app-name] dev-master
 
 ### 路由注册方式
 
-使用 `app\Core\RouteAction` 提供类似 ThinkPHP/Laravel 风格的路由注册：
+使用 `SlimCMS\Core\RouteAction` 提供类似 ThinkPHP/Laravel 风格的路由注册：
 
 ```php
-use app\Core\RouteAction as Route;
+use SlimCMS\Core\RouteAction as Route;
 
 Route::get('/path', 'Controller@method');    // GET
 Route::post('/path', 'Controller@method');   // POST
@@ -135,7 +135,7 @@ Model层数据统一以Output对象形式返回，
 
 3、$this->json(),返回json数据
 
-4、$this->response(),根据请求的content-type返回相应的数据类型
+4、$this->resp(),根据请求的content-type返回相应的数据类型
 
 ## 功能插件
 

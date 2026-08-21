@@ -21,6 +21,9 @@ class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
     public function process(Request $request, RequestHandler $handler): Response
     {
         $method = strtoupper($request->getMethod());
+        if ($method === 'OPTIONS') {
+            return $handler->handle($request);
+        }
 
         //1小时刷新一次csrftoken
         if (time() - $this->session->get('csrf_token_time', 0) > 3600) {

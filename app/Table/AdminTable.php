@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\Table;
 
-use app\Core\Table;
+use SlimCMS\Core\Table;
 
 class AdminTable extends Table
 {
@@ -17,7 +17,7 @@ class AdminTable extends Table
      */
     public function dataViewAfter(&$data): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             unset($data['pwd']);
             !empty($data['groupid']) &&
             $data['_groupid'] = $this->t('admingroup')->withWhere($data['groupid'])->fetch('id,groupname');

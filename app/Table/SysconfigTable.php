@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace app\Table;
 
-use app\Core\Table;
+use SlimCMS\Core\Table;
 use SlimCMS\Core\Request;
 use SlimCMS\Core\Ueditor;
 
@@ -32,7 +32,7 @@ class SysconfigTable extends Table
      */
     public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             $value = aval($data, 'value', '');
             $data['ueditorHtml'] = $this->i(Ueditor::class)->ueditor('ueditorValue', $value, ['identity' => 'admin']);
         }
@@ -47,7 +47,7 @@ class SysconfigTable extends Table
      */
     public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if ($data['type'] == 5) {
                 $data['value'] = $this->i(Request::class)->input('ueditorValue', 'htmltext');
             }
@@ -66,7 +66,7 @@ class SysconfigTable extends Table
      */
     public function dataSaveAfter($data, $row = [], $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             $cfg = CSDATA . '/ConfigCache.php';
             if (!is_writeable($cfg)) {
                 return 21020;

@@ -117,7 +117,7 @@ class Forms_fieldsRepository extends RepositoryAbstract
         $comment = $data->title;
         if (!empty($data->rules)) {
             $arr = [];
-            foreach (unserialize($data->rules) as $k1 => $v1) {
+            foreach (json_decode($data->rules, true) as $k1 => $v1) {
                 $arr[] = $k1 . '=' . $v1;
             }
             $comment .= '(' . implode(',', $arr) . ')';

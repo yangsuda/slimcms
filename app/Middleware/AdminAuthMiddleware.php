@@ -38,7 +38,7 @@ class AdminAuthMiddleware implements MiddlewareInterface
             // API/JSON 请求返回标准错误响应
             $accept = $request->getHeaderLine('Accept');
             if (str_starts_with($path, '/admin/api/') || str_contains($accept, 'application/json')) {
-                throw new TextException(503, '请求错误');
+                throw new TextException(401, '请求错误');
             }
             // Web 请求重定向到登录页
             $referer = urlencode($path . ($request->getUri()->getQuery() ? '?' . $request->getUri()->getQuery() : ''));
@@ -54,6 +54,8 @@ class AdminAuthMiddleware implements MiddlewareInterface
             return $response->withHeader('Location', '/admin/login');
         }
         $request = $request->withAttribute('admin', $adminInfo);
+        //标记为后台请求
+        $request = $request->withAttribute('adminContext', true);
 
         $config = $this->app->getContainer()->get('cfg');
         //日志记录
