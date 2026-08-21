@@ -10,15 +10,11 @@ namespace app\Controller\main;
 use app\Repository\SysenumRepository;
 use Psr\Http\Message\ResponseInterface;
 use SlimCMS\Abstracts\ControlAbstract;
-use SlimCMS\Helper\ImageCode;
+use SlimCMS\Helper\Captcha;
 use SlimCMS\Helper\Str;
 
 class MainController extends ControlAbstract
 {
-    /**
-     * 后台仪表盘
-     * 当前管理员信息通过 AdminAuthMiddleware 注入的 request attribute 'admin' 获取
-     */
     public function index(): ResponseInterface
     {
         return $this->view($this->output, 'index');
@@ -26,10 +22,10 @@ class MainController extends ControlAbstract
 
     /**
      * 联动菜单数据
-     * @return \Psr\Http\Message\MessageInterface
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public function enumsData()
+    public function enumsData(): ResponseInterface
     {
         $egroup = $this->input('egroup');
         $list = $this->r(SysenumRepository::class)
@@ -39,11 +35,19 @@ class MainController extends ControlAbstract
     }
 
     /**
-     * 生成验证码
+     * 生成验证码（PSR-7 兼容：不使用 header/exit，走完整中间件管线）
      */
-    public function captcha()
+    public function captcha(): ResponseInterface
     {
-        ImageCode::doimg($this->session());
+        $png = Captcha::generate($this->session());
+        $response = $this->response
+            ->withHeader('Content-Type', 'image/png')
+            ->withHeader('Content-Length', (string)\strlen($png))
+            // 验证码不应被浏览器缓存，避免刷新不换图
+            ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->withHeader('Pragma', 'no-cache');
+        $response->getBody()->write($png);
+        return $response;
     }
 
     /**

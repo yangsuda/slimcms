@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\Table;
 
-use app\Core\Table;
+use SlimCMS\Core\Table;
 use app\Model\entity\Forms_fieldsEntity;
 use app\Repository\Forms_fieldsRepository;
 use app\Repository\FormsRepository;
@@ -35,7 +35,7 @@ class Forms_fieldsTable extends Table
      */
     public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             $arr = ['id', 'ischeck', 'style', 'fid', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
                 'field', 'condition', 'fields', 'select', 'update', 'delete', 'insert', 'where', 'distinct', 'group',
                 'main'];
@@ -74,7 +74,7 @@ class Forms_fieldsTable extends Table
      */
     public function dataSaveAfter($data, $row = [], $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if (!empty($row['id'])) {
                 $row = array_merge($row, $data);
             }
@@ -106,7 +106,7 @@ class Forms_fieldsTable extends Table
      */
     public function dataDelAfter($data, $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             $data = Forms_fieldsEntity::fromArray($data);
             if (!empty($data->identifier) && !empty($data->formid)) {
                 $table = $this->getTableByFormId($data->formid);
@@ -126,7 +126,7 @@ class Forms_fieldsTable extends Table
      */
     public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if (empty($data['displayorder']) && !empty($data['formid'])) {
                 $displayorder = $this->r(Forms_fieldsRepository::class)
                     ->withWhere(['formid' => $data['formid']])

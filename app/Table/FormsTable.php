@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\Table;
 
-use app\Core\Table;
+use SlimCMS\Core\Table;
 use app\Repository\Forms_fieldsRepository;
 use app\Repository\FormsRepository;
 use app\Service\admin\FormsService;
@@ -19,7 +19,7 @@ class FormsTable extends Table
      */
     public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if (empty($data['name'])) {
                 return 21003;
             }
@@ -39,7 +39,7 @@ class FormsTable extends Table
 
     public function dataSaveAfter($data, $row = [], $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if ($data['mngtype'] == 'add') {
                 $this->i(FormsService::class)->formInit((int)$data['id']);
             }
@@ -55,7 +55,7 @@ class FormsTable extends Table
      */
     public function dataDelAfter($data, $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if (!empty($data['id'])) {
                 $this->r(Forms_fieldsRepository::class)->withWhere(['formid' => $data['id']])->batchDelete();
             }

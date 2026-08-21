@@ -14,7 +14,6 @@ class MainController extends AdminController
 {
     /**
      * 后台仪表盘
-     * 当前管理员信息通过 AdminAuthMiddleware 注入的 request attribute 'admin' 获取
      */
     public function index(): ResponseInterface
     {

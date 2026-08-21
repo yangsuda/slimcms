@@ -13,14 +13,14 @@ use SlimCMS\Interfaces\OutputInterface;
 use SlimCMS\Interfaces\TemplateInterface;
 use SlimCMS\Interfaces\DatabaseInterface;
 use SlimCMS\Interfaces\UploadInterface;
-use app\Core\Template;
-use app\Core\Upload;
-use app\Core\Output;
-use app\Core\Request;
 use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Database;
+use SlimCMS\Core\Output;
 use SlimCMS\Core\Redis;
 use SlimCMS\Core\Routes;
+use SlimCMS\Core\Request;
+use SlimCMS\Core\Upload;
+use SlimCMS\Core\Template;
 
 return function (ContainerBuilder $containerBuilder) {
     //Session保存路径
@@ -79,6 +79,12 @@ return function (ContainerBuilder $containerBuilder) {
 
         \Psr\Http\Message\ResponseInterface::class => function (ContainerInterface $c) {
             return $c->get(\Slim\App::class)->getResponseFactory()->createResponse();
+        },
+        // CORS 中间件：白名单从 .env 读取，逗号分隔，构造注入到 CorsMiddleware
+        \app\Middleware\CorsMiddleware::class => function (ContainerInterface $c) {
+            $raw = trim($_ENV['CORS_ALLOW_ORIGIN'] ?? '');
+            $allowOrigins = $raw === '' ? [] : explode(',', $raw);
+            return new \app\Middleware\CorsMiddleware($allowOrigins, $c->get(\Slim\App::class)->getResponseFactory());
         },
         // Request 和 Response 类的绑定
         Request::class => autowire(Request::class),

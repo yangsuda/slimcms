@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\Table;
 
-use app\Core\Table;
+use SlimCMS\Core\Table;
 
 class AdminlogTable extends Table
 {

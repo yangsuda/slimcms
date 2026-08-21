@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\Table;
 
-use app\Core\Table;
+use SlimCMS\Core\Table;
 
 class SysenumTable extends Table
 {
@@ -18,7 +18,7 @@ class SysenumTable extends Table
     public function dataListBefore(&$param): int
     {
         $where = [];
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if (isset($param['get']['evalue'])) {
                 $where['reid'] = $param['get']['evalue'];
                 $where['egroup'] = $param['get']['egroup'];
@@ -43,7 +43,7 @@ class SysenumTable extends Table
      */
     public function dataListAfter(&$list, $param): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             $evalue = aval($param, 'get/evalue');
             $evalue && $list['reid'] = $this->t('sysenum')->withWhere($evalue)->fetch();
         }
@@ -59,7 +59,7 @@ class SysenumTable extends Table
      */
     public function dataSaveAfter($data, $row = [], $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if ($data['mngtype'] == 'add') {
                 $where = [];
                 $where['egroup'] = $data['egroup'];

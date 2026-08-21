@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\Table;
 
-use app\Core\Table;
+use SlimCMS\Core\Table;
 
 class AdmingroupTable extends Table
 {
@@ -19,7 +19,7 @@ class AdmingroupTable extends Table
      */
     public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             $data['forms'] = $this->t('forms')->withWhere(['jumpurl' => ''])->fetchList();
             $permissions = $this->t('adminpermission')->fetchList();
             $data['permissions'] = [];
@@ -48,7 +48,7 @@ class AdmingroupTable extends Table
      */
     public function dataSaveBefore(&$data, $row = [], $options = []): int
     {
-        if (defined('MANAGE') && MANAGE == 1) {
+        if ($this->request->getAttribute('adminContext') === true) {
             if (!empty($data['purviews'])) {
                 $data['purviews'] = implode(',', $data['purviews']);
             }
