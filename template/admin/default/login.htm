@@ -16,7 +16,6 @@
 
             <div class="card-body">
                 <form name="form1" action="/admin/login" method="post" class="validform">
-                    <input type="hidden" name="formhash" value="$data[formhash]"/>
                     <input type="hidden" name="referer" value="$data[referer]"/>
                     <div class="row">
                         <div class="col-md-12">
@@ -103,9 +102,6 @@
                 if (res.code != 200) {
                     $('#vdimgck').prop('src', '/admin/captcha#' + Math.random());
                     $('.msg').addClass('Validform_wrong').html(res.msg);
-                    $.getJSON('/admin/formhash',function (result) {
-                        $('input[name=formhash]').val(result.data.formHash)
-                    });
                 } else {
                     location = res.referer;
                 }

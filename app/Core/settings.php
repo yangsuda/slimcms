@@ -52,20 +52,16 @@ return function (ContainerBuilder $containerBuilder) {
             return File::log();
         }),
         RouteInterface::class => autowire(Routes::class),
-        CookieInterface::class => function (ContainerInterface $c) {
-            return new Cookie($c);
-        },
+        CookieInterface::class => autowire(Cookie::class),
         OutputInterface::class => autowire(Output::class),
         TemplateInterface::class => autowire(Template::class),
+        UploadInterface::class => autowire(Upload::class),
         DatabaseInterface::class => function (ContainerInterface $c) {
             return new Database($c);
         },
         Redis::class => function (ContainerInterface $c) {
             $redis = new Redis($c);
             return $redis->selectDB();
-        },
-        UploadInterface::class => function (App $app) {
-            return new Upload($app);
         },
         \SlimCMS\Core\Session::class => function () {
             $session = new \SlimCMS\Core\Session();

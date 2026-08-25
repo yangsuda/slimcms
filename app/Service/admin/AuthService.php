@@ -56,7 +56,7 @@ class AuthService extends ServiceAbstract
         if ($this->adminloginlogRepository->withWhere(['userid' => $userid, 'start' => TIMESTAMP - 3600])->count() >= $this->maxRetries) {
             return $this->output->withCode(223014);
         }
-        $ip = Ipdata::getip();
+        $ip = Ipdata::getip($this->request);
         if (!Crypt::pwdVerify($pwd, $admin->pwd)) {
             $this->adminloginlogRepository->add(['userid' => $userid, 'pwd' => $pwd, 'ip' => $ip]);
             return $this->output->withCode(211032);

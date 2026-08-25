@@ -80,13 +80,13 @@ class AliOssService extends ServiceAbstract implements UploadInterface
             $str = preg_replace('/^data:image\/\w+;base64,/', '', $str);
             $data = base64_decode($str);
             if (empty($data)) {
-                return self::$output->withCode(27013);
+                return $this->output->withCode(27013);
             }
 
             //防止伪装成图片的木马上传
             $checkWords = aval($this->setting, 'security/uploadCheckWords');
             if (!empty($checkWords) && preg_match('/(' . $checkWords . ')/i', $data)) {
-                return self::$output->withCode(23005);
+                return $this->output->withCode(23005);
             }
 
             $dirname = $this->getSaveDir('tmp');
@@ -96,7 +96,7 @@ class AliOssService extends ServiceAbstract implements UploadInterface
             $fileUrl = $tmpPath . $file;
             $success = file_put_contents($fileUrl, $data);
             if (!$success) {
-                return self::$output->withCode(23014);
+                return $this->output->withCode(23014);
             }
 
             if (in_array($matches[2], explode('|', $this->config['mediatype']))) {
@@ -138,7 +138,7 @@ class AliOssService extends ServiceAbstract implements UploadInterface
         }
         $imgdir = $dirname . '/' . $dirrule . '/';
 
-        $object = $imgdir . str_replace('.', '', uniqid(Ipdata::getip(), true)) . '.' . $ext;
+        $object = $imgdir . str_replace('.', '', uniqid(Ipdata::getip($this->request), true)) . '.' . $ext;
         try {
             $ossClient = new OssClient($this->accessKeyId, $this->accessKeySecret, $this->endpoint);
             $res = $ossClient->uploadFile($this->bucket, $object, $post->getFilePath());

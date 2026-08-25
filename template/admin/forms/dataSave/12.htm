@@ -18,7 +18,6 @@
                         <div class="card mb-3">
                             <div class="card-body m-4">
                                 <form name="form1" action="$data[p]?$data[query]" enctype="multipart/form-data" method="post" class="validform">
-                                    <input type="hidden" name="formhash" value="$data[formhash]" />
                                     <input type="hidden" name="csrf_token" value="$data[csrfToken]"/>
                                     <!--{if aval($data,'data/id')}-->
                                     <div class="form-group row">

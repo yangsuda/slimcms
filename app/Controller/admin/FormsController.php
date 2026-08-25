@@ -41,8 +41,8 @@ class FormsController extends AdminController
 
     /**
      * 数据列表页
-     * @return array|\Psr\Http\Message\ResponseInterface|\SlimCMS\Interfaces\OutputInterface
-     * @throws \SlimCMS\Error\TextException
+     * @return array|\Psr\Http\Message\ResponseInterface
+     * @throws TextException
      */
     public function dataList()
     {
@@ -90,12 +90,11 @@ class FormsController extends AdminController
         if($r = $this->checkAllow('dataSave' . $fid)){
             return $r;
         }
-        $formhash = $this->inputString('formhash');
-        if ($formhash) {
+        if ($this->request->getMethod() === 'POST') {
             $ccode = $this->config['ccode'] == '1' ? $this->inputString('ccode') : null;
             $referer = $this->input('referer', 'url');
             $referer = $referer ?: $this->url('&id=', '/admin/forms/dataList');
-            $res = $this->forms()->formVerify($formhash, $ccode)->dataSave($fid, $id)->withReferer($referer);
+            $res = $this->forms()->formVerify($ccode)->dataSave($fid, $id)->withReferer($referer);
             return $this->directTo($res);
         }
         $res = $this->forms()->dataFormHtml($fid, $id, ['cacheTime' => 300, 'ueditorType' => 'admin']);
@@ -115,7 +114,7 @@ class FormsController extends AdminController
 
     /**
      * 数据审核
-     * @return \Psr\Http\Message\MessageInterface
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws TextException
      */
     public function dataCheck()
@@ -133,7 +132,7 @@ class FormsController extends AdminController
 
     /**
      * 数据删除
-     * @return \Psr\Http\Message\MessageInterface
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws TextException
      */
     public function dataDel()

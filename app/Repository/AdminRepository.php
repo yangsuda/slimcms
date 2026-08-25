@@ -7,10 +7,20 @@ namespace app\Repository;
 use app\Model\entity\AdminEntity;
 use Slim\App;
 use SlimCMS\Abstracts\RepositoryAbstract;
+use SlimCMS\Core\Forms;
+use SlimCMS\Core\Redis;
 use SlimCMS\Helper\Crypt;
+use SlimCMS\Interfaces\UploadInterface;
 
 class AdminRepository extends RepositoryAbstract
 {
+    private UploadInterface $uploader;
+
+    public function __construct(App $app, Forms $forms, Redis $redis, UploadInterface $uploader)
+    {
+        parent::__construct($app, $forms, $redis);
+        $this->uploader = $uploader;
+    }
 
     public function fetch(string $field, int $cacheTime = 0): ?AdminEntity
     {
@@ -43,9 +53,12 @@ class AdminRepository extends RepositoryAbstract
             return null;
         }
         $admin = $this->withWhere(['ids' => $adminid, 'status' => 1])
-            ->withRespExtraRowFields('_groupid')->fetch('id,groupid,userid,logintime,loginip,realname');
+            ->withRespExtraRowFields('_groupid')->fetch('id,groupid,userid,logintime,loginip,realname,headimgurl');
         if (!empty($admin)) {
             $admin->setRelation('adminAuth', Crypt::encrypt((string)$admin->id));
+            $admin->setRelation('thumbnail', $admin?->headimgurl ?
+                $this->uploader->copyImage($admin->headimgurl, 100, 100) :
+                $this->config['resourceUrl'] . 'assets/images/avatars/admin.png');
         }
         return $admin;
     }

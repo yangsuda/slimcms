@@ -5,6 +5,7 @@ namespace app\Controller\admin;
 
 use app\Service\admin\AuthService;
 use app\Service\admin\PluginsService;
+use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 
 class PluginController extends AdminController
@@ -19,10 +20,10 @@ class PluginController extends AdminController
 
     /**
      * 安装插件
-     * @return \Psr\Http\Message\MessageInterface
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public function install()
+    public function install():ResponseInterface
     {
         if($r = $this->checkAllow()){
             return $r;
@@ -35,10 +36,10 @@ class PluginController extends AdminController
 
     /**
      * 卸载插件
-     * @return \Psr\Http\Message\MessageInterface
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public function uninstall()
+    public function uninstall():ResponseInterface
     {
         if($r = $this->checkAllow()){
             return $r;
@@ -51,10 +52,10 @@ class PluginController extends AdminController
 
     /**
      * 插件启用开关
-     * @return \Psr\Http\Message\MessageInterface
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public function openSwitch()
+    public function openSwitch():ResponseInterface
     {
         if($r = $this->checkAllow()){
             return $r;
@@ -70,7 +71,7 @@ class PluginController extends AdminController
      * @return array|\Psr\Http\Message\ResponseInterface
      * @throws \SlimCMS\Error\TextException
      */
-    public function market()
+    public function market():ResponseInterface
     {
         if($r = $this->checkAllow()){
             return $r;

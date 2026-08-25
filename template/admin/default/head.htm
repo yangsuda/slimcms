@@ -42,11 +42,7 @@
         <ul class="list-inline float-right mb-0">
             <li class="list-inline-item dropdown notif">
                 <a class="nav-link dropdown-toggle nav-user" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                    <!--{if !empty($data[admin][headimgurl])}-->
-                    <img src="{echo copyImage($data[admin][headimgurl],100,100)}" alt="$data[admin][userid]" class="avatar-rounded">
-                    <!--{else}-->
-                    <img src="$cfg[resourceUrl]assets/images/avatars/admin.png" alt="$data[admin][userid]" class="avatar-rounded">
-                    <!--{/if}-->
+                    <img src="$data[admin][thumbnail]" alt="$data[admin][userid]" class="avatar-rounded">
                 </a>
                 <div class="dropdown-menu dropdown-menu-right profile-dropdown">
                     <!-- item-->

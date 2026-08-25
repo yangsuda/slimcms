@@ -77,14 +77,12 @@ class LoginController extends ControlAbstract
      */
     private function handleLogin(): ResponseInterface
     {
-        // CSRF 检查
-        $formhash = $this->inputString('formhash');
         // 验证码检查
         $ccode = $this->inputString('ccode');
         // 用户名密码校验
         $userid = $this->inputString('userid');
         $pwd = $this->inputString('pwd');
-        $res = $this->authService->formVerify($formhash, $ccode)->loginCheck($userid, $pwd);
+        $res = $this->authService->formVerify($ccode)->loginCheck($userid, $pwd);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }

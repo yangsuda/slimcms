@@ -12,7 +12,7 @@
         <li id="li_{$data[identifier]}_$i">
             <div id="cover_$i" class="cover"></div>
             <input name="{$data[identifier]}_$i" id="{$data[identifier]}_$i" type="hidden" class="html5img" value=" "/>
-            <div class="pic"><a><i></i><img src="{echo copyImage($iv[img], 80, 80)}" data-rel="{echo copyImage($iv[img])}" source_link="$iv[img]"/><canvas id="canvas_{$data[identifier]}_$i"></canvas></a></div>
+            <div class="pic"><a><i></i><img src="{echo $data[copyImage]($iv[img], 80, 80)}" data-rel="{echo $data[copyImage]($iv[img])}" source_link="$iv[img]"/><canvas id="canvas_{$data[identifier]}_$i"></canvas></a></div>
             <a href="javascript:;" class="del_img" data-field="$data[identifier]" data-index="$i" data-img="$iv[img]" title="删除">—</a></li>
         {eval $i++;}
         <!--{/loop}-->
@@ -152,7 +152,7 @@
     <!--{loop $data[imgs] $ik $iv}-->
     <li class="libtn" id='oldpic$ik'>
         <div class="box_photo">
-            <em><a href="{echo copyImage($iv[img], 2000, 2000)}" target="_blank" title="查看"><i></i><img src="{echo copyImage($iv[img], 160, 160)}" /></a></em>
+            <em><a href="{echo $data[copyImage]($iv[img])}" target="_blank" title="查看"><i></i><img src="{echo $data[copyImage]($iv[img], 160, 160)}" /></a></em>
         </div>
         <!--{if aval($iv,'iscover')==1}-->
         <div class="cover_photo"></div>
@@ -160,7 +160,7 @@
         <div class="btn_photo">
             <a data-ref="$iv[img]" data-fid="$data[fid]" class="btn_set_cover" title="封面"><span>封面</span></a>
             <a data-ref="$iv[img]" data-fid="$data[fid]" class="btn_delete_pic" title="删除"><span>删除</span></a>
-            <a href="{echo copyImage($iv[img], 2000, 2000)}" target="_blank" title="查看" class="btn_view_pic"><span>查看</span></a>
+            <a href="{echo $data[copyImage]($iv[img])}" target="_blank" title="查看" class="btn_view_pic"><span>查看</span></a>
         </div>
         <div class="box_text">
             <input type='text' class="form-control" name='imgmsg$ik' value='$iv[text]' placeholder="图片未命名" />

@@ -53,7 +53,7 @@ class ErrorLogMiddleware implements MiddlewareInterface
                 'appid'      => $appid ? Crypt::decrypt($appid) : '',
                 'post'       => $post,
                 'get'        => $get,
-                'ip'         => Ipdata::getip(),
+                'ip'         => Ipdata::getip($request),
                 'user_agent' => aval($serverParams, 'HTTP_USER_AGENT'),
             ]);
 

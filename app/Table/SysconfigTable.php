@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace app\Table;
 
+use Slim\App;
+use SlimCMS\Core\Redis;
 use SlimCMS\Core\Table;
 use SlimCMS\Core\Request;
 use SlimCMS\Core\Ueditor;
@@ -10,6 +12,17 @@ use SlimCMS\Core\Ueditor;
 class SysconfigTable extends Table
 {
     use \SlimCMS\Traits\Table;
+
+    private Request $req;
+    private Ueditor $ueditor;
+
+    public function __construct(App $app, Redis $redis, Ueditor $ueditor, Request $req)
+    {
+        parent::__construct($app, $redis);
+        $this->req = $req;
+        $this->ueditor = $ueditor;
+    }
+
     /**
      * 数据获取之后的自定义处理
      * @param $data
@@ -34,7 +47,7 @@ class SysconfigTable extends Table
     {
         if ($this->request->getAttribute('adminContext') === true) {
             $value = aval($data, 'value', '');
-            $data['ueditorHtml'] = $this->i(Ueditor::class)->ueditor('ueditorValue', $value, ['identity' => 'admin']);
+            $data['ueditorHtml'] = $this->ueditor->ueditor('ueditorValue', $value, ['identity' => 'admin']);
         }
         return 200;
     }
@@ -49,10 +62,10 @@ class SysconfigTable extends Table
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if ($data['type'] == 5) {
-                $data['value'] = $this->i(Request::class)->input('ueditorValue', 'htmltext');
+                $data['value'] = $this->req->input('ueditorValue', 'htmltext');
             }
             if ($data['type'] == 4) {
-                $data['value'] = $this->i(Request::class)->input('value', 'addon');
+                $data['value'] = $this->req->input('value', 'addon');
             }
         }
         return 200;

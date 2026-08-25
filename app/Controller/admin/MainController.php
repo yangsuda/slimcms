@@ -7,11 +7,21 @@ declare(strict_types=1);
 
 namespace app\Controller\admin;
 
+use app\Service\admin\AuthService;
 use app\Service\admin\RecoveryService;
 use Psr\Http\Message\ResponseInterface;
+use Slim\App;
 
 class MainController extends AdminController
 {
+    protected RecoveryService $recoveryService;
+
+    public function __construct(App $app, AuthService $authService, RecoveryService $recoveryService)
+    {
+        parent::__construct($app, $authService);
+        $this->recoveryService = $recoveryService;
+    }
+
     /**
      * 后台仪表盘
      */
@@ -26,11 +36,11 @@ class MainController extends AdminController
      */
     public function recovery(): ResponseInterface
     {
-        if($r = $this->checkAllow()){
+        if ($r = $this->checkAllow()) {
             return $r;
         }
         $id = $this->inputInt('id');
-        $res = $this->i(RecoveryService::class)->recovery($id);
+        $res = $this->recoveryService->recovery($id);
         return $this->json($res);
     }
 
@@ -41,14 +51,13 @@ class MainController extends AdminController
      */
     public function updatePwd(): ResponseInterface
     {
-        if($r = $this->checkAllow()){
+        if ($r = $this->checkAllow()) {
             return $r;
         }
         if ($this->request->getMethod() === 'POST') {
-            $formhash = $this->inputString('formhash');
             $oldpwd = $this->inputString('oldpwd');
             $newpwd = $this->inputString('newpwd');
-            $res = $this->authService->formVerify($formhash)->updatePwd($this->adminInfo()->userid, $oldpwd, $newpwd);
+            $res = $this->authService->updatePwd($this->adminInfo()->userid, $oldpwd, $newpwd);
             return $this->directTo($res);
         }
         return $this->view($this->output);
