@@ -9,4 +9,3 @@ use SlimCMS\Core\RouteAction as Route;
 
 Route::get('/', 'main\MainController@index');
 Route::get('/captcha', 'main\MainController@captcha');
-Route::get('/formhash', 'main\MainController@formHash');

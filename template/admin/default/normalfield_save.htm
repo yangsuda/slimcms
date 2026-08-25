@@ -23,7 +23,7 @@
                     <!--{loop $data[data]['_'.$v[identifier]] $val}-->
                     <li class="libtn" id='oldpic$ik'>
                         <div class="box_photo">
-                            <em><a href="{echo copyImage($val[img], 2000, 2000)}" target="_blank" title="查看"><i></i><img src="{echo copyImage($val[img], 160, 160)}" /></a></em>
+                            <em><a href="$val[originalImg]" target="_blank" title="查看"><i></i><img src="$val[img]" /></a></em>
                         </div>
                     </li>
                     <!--{/loop}-->

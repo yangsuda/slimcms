@@ -15,7 +15,6 @@ Route::group('/admin', function () {
     Route::gp('/login', 'admin\LoginController@login');
     Route::get('/logout', 'admin\LoginController@logout');
     Route::get('/captcha', 'main\MainController@captcha');
-    Route::get('/formhash', 'main\MainController@formHash');
     Route::get('/enumsData', 'main\MainController@enumsData');
 
     // 需要认证的路由

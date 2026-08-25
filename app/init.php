@@ -29,7 +29,7 @@ $dotenv->load();
 define('CORE_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN));
 define('APP_ENV', $_ENV['APP_ENV'] ?? 'production');
 
-error_reporting(CORE_DEBUG ? E_ALL : 0);
+error_reporting(CORE_DEBUG ? E_ALL : E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 
 //初始化
 $containerBuilder = new ContainerBuilder();

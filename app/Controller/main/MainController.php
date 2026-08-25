@@ -51,19 +51,9 @@ class MainController extends ControlAbstract
     }
 
     /**
-     * 获取 FORMHASH（用于 AJAX 请求）
-     */
-    public function formHash()
-    {
-        $data = ['formHash' => Str::formHash($this->session())];
-        $output = $this->output->withData($data);
-        return $this->json($output);
-    }
-
-    /**
      * 兜底处理：所有未匹配的路由统一返回友好错误页面
      */
-    public function notFound()
+    public function notFound():ResponseInterface
     {
         if (strpos($this->request->getHeaderLine('Accept'), 'application/json') !== false) {
             return $this->json($this->output->withCode(21009));

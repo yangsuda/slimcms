@@ -102,7 +102,11 @@
                                                         <!--{elseif in_array($f_v[identifier],['name'])}-->
                                                         <td class="text-dark" style="text-align: left;">$v[_name]($v[version])<br><span class="text-secondary small">$v[_description]</span></td>
                                                         <!--{elseif $f_v[datatype] == 'img'}-->
-                                                        <td><a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="{echo copyImage($v[$f_v['identifier']],60,60)}" width="60" /></a></td>
+                                                        <td>
+                                                            <!--{if !empty($v[$f_v['identifier']])}-->
+                                                            <a href="$v['_'.$f_v['identifier']]" target="_blank"><img src="$v['_'.$f_v['identifier'].'_thumbnail']" width="60" /></a>
+                                                            <!--{/if}-->
+                                                        </td>
                                                         <!--{elseif $f_v[identifier] == 'menu'}-->
                                                         <td class="text-dark">
                                                             <!--{if $v[isinstall]==1 && $v[available]==1}-->

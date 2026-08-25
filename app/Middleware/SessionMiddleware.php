@@ -12,20 +12,20 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use SlimCMS\Core\Session;
 
 class SessionMiddleware implements MiddlewareInterface
 {
-    private \Slim\App $app;  // 声明属性
+    private Session $session;
 
-    public function __construct(\Slim\App $app)
+    public function __construct(Session $session)
     {
-        $this->app = $app;  // 赋值，$this->app 就有了
+        $this->session = $session;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $session = $this->app->getContainer()->get(\SlimCMS\Core\Session::class);
-        $request = $request->withAttribute('session', $session);
+        $request = $request->withAttribute('session', $this->session);
 
         return $handler->handle($request);
     }

@@ -9,6 +9,7 @@ use SlimCMS\Core\Table;
 class AdminTable extends Table
 {
     use \SlimCMS\Traits\Table;
+
     /**
      * 数据获取之后的自定义处理
      * @param $data
@@ -20,7 +21,7 @@ class AdminTable extends Table
         if ($this->request->getAttribute('adminContext') === true) {
             unset($data['pwd']);
             !empty($data['groupid']) &&
-            $data['_groupid'] = $this->t('admingroup')->withWhere($data['groupid'])->fetch('id,groupname');
+            $data['_groupid'] = $this->t('admingroup')->withWhere(['id' => $data['groupid']])->fetch('id,groupname');
         }
         return 200;
     }

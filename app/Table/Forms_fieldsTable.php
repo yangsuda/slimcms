@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace app\Table;
 
+use Slim\App;
+use SlimCMS\Core\Redis;
 use SlimCMS\Core\Table;
 use app\Model\entity\Forms_fieldsEntity;
 use app\Repository\Forms_fieldsRepository;
@@ -13,6 +15,18 @@ use SlimCMS\Helper\Str;
 
 class Forms_fieldsTable extends Table
 {
+    protected FormsRepository $formsRepository;
+    protected Forms_fieldsRepository $forms_fieldsRepository;
+    protected SysenumRepository $sysenumRepository;
+
+    public function __construct(App $app, Redis $redis, FormsRepository $formsRepository, Forms_fieldsRepository $forms_fieldsRepository, SysenumRepository $sysenumRepository)
+    {
+        parent::__construct($app, $redis);
+        $this->formsRepository = $formsRepository;
+        $this->forms_fieldsRepository = $forms_fieldsRepository;
+        $this->sysenumRepository = $sysenumRepository;
+    }
+
     /**
      * 数据获取之后的自定义处理
      * @param $data
@@ -50,7 +64,7 @@ class Forms_fieldsTable extends Table
                     return 21003;
                 }
                 $where = ['formid' => $data['formid'], 'identifier' => $data['identifier']];
-                if ($this->r(Forms_fieldsRepository::class)->withWhere($where)->count() > 0) {
+                if ($this->forms_fieldsRepository->withWhere($where)->count() > 0) {
                     return 27011;
                 }
             }
@@ -81,7 +95,7 @@ class Forms_fieldsTable extends Table
             $row = Forms_fieldsEntity::fromArray($row);
             if (!empty($row->identifier) && !empty($row->formid)) {
                 $table = $this->getTableByFormId($row->formid);
-                $this->r(Forms_fieldsRepository::class)->fieldUpdate($table, $row);
+                $this->forms_fieldsRepository->fieldUpdate($table, $row);
             }
         }
         return 200;
@@ -95,7 +109,7 @@ class Forms_fieldsTable extends Table
      */
     private function getTableByFormId(int $formid)
     {
-        return $this->r(FormsRepository::class)->withWhere(['id' => $formid])->fetch('table')?->table;
+        return $this->formsRepository->withWhere(['id' => $formid])->fetch('table')?->table;
     }
 
     /**
@@ -110,7 +124,7 @@ class Forms_fieldsTable extends Table
             $data = Forms_fieldsEntity::fromArray($data);
             if (!empty($data->identifier) && !empty($data->formid)) {
                 $table = $this->getTableByFormId($data->formid);
-                $this->r(Forms_fieldsRepository::class)->fieldDelete($table, $data->identifier);
+                $this->forms_fieldsRepository->fieldDelete($table, $data->identifier);
             }
         }
         return 200;
@@ -128,7 +142,7 @@ class Forms_fieldsTable extends Table
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if (empty($data['displayorder']) && !empty($data['formid'])) {
-                $displayorder = $this->r(Forms_fieldsRepository::class)
+                $displayorder = $this->forms_fieldsRepository
                     ->withWhere(['formid' => $data['formid']])
                     ->withOrderby('displayorder', 'asc')
                     ->fetch('displayorder')?->displayorder;
@@ -136,7 +150,7 @@ class Forms_fieldsTable extends Table
                     $data['displayorder'] = $displayorder - 1;
                 }
             }
-            $enums = $this->r(SysenumRepository::class)
+            $enums = $this->sysenumRepository
                 ->withWhere(['evalue' => 0])
                 ->fetchList('id,ename,evalue,egroup,reid');
             $data['enums'] = $enums ? json_decode(json_encode($enums), true) : [];

@@ -11,6 +11,7 @@ use SlimCMS\Error\TextException;
 
 class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
 {
+    private const POOL_SIZE = 5;       // 同时保留最近 5 个有效 token
     private Session $session;
 
     public function __construct(Session $session)
@@ -25,42 +26,62 @@ class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
             return $handler->handle($request);
         }
 
-        //1小时刷新一次csrftoken
-        if (time() - $this->session->get('csrf_token_time', 0) > 3600) {
-            $this->refreshCsrfToken();
-        }
-
-        // 只对修改数据的请求进行 CSRF 检查
+        // 先验证（POST 类），再刷新 —— 修复时序 bug
         if (in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             $this->validateCsrfToken($request);
         }
 
-        // 生成新的 CSRF token（用于下次请求）
-        $this->generateCsrfToken();
-        // 在响应中添加 CSRF token
+        // 每次进入页面都生成新 token，加入令牌池
+        if (in_array($method, ['GET', 'HEAD'])) {
+            $this->rotateCsrfToken();
+        }
+
         $csrfToken = $this->getCsrfToken();
         $request = $request->withAttribute('csrfToken', $csrfToken);
         $response = $handler->handle($request);
         return $response->withHeader('X-CSRF-Token', $csrfToken);
     }
 
-    /**
-     * 验证 CSRF token
-     */
     private function validateCsrfToken(Request $request): void
     {
-        $sessionToken = $this->session->get('csrf_token', '');
+        $pool = $this->session->get('csrf_token_pool', []);
         $requestToken = $this->getRequestToken($request);
 
-        // 检查 token 是否存在
-        if (empty($sessionToken) || empty($requestToken)) {
+        if (empty($pool) || empty($requestToken)) {
             throw new TextException(403, 'CSRF token 缺失');
         }
 
-        // 安全比较 token（防止时序攻击）
-        if (!hash_equals($sessionToken, $requestToken)) {
-            throw new TextException(403, 'CSRF token 验证失败');
+        foreach ($pool as $i => $stored) {
+            if (hash_equals($stored, $requestToken)) {
+                // 一次性：用过的 token 立即移除
+                unset($pool[$i]);
+                $this->session->set('csrf_token_pool', array_values($pool));
+                return;
+            }
         }
+        throw new TextException(403, 'CSRF token 验证失败');
+    }
+
+    private function rotateCsrfToken(): void
+    {
+        $token = bin2hex(random_bytes(32));
+        $pool = $this->session->get('csrf_token_pool', []);
+        $pool[] = $token;
+        // 滑动窗口，只保留最近 N 个，防止无限增长
+        if (count($pool) > self::POOL_SIZE) {
+            $pool = array_slice($pool, -self::POOL_SIZE);
+        }
+        $this->session->set('csrf_token_pool', $pool);
+        $this->session->set('csrf_token', $token);   // 当前页面用的 token
+        $this->session->set('csrf_token_time', time());
+    }
+
+    public function getCsrfToken(): string
+    {
+        if (!$this->session->has('csrf_token')) {
+            $this->rotateCsrfToken();
+        }
+        return $this->session->get('csrf_token', '');
     }
 
     /**
@@ -75,39 +96,6 @@ class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
             $parsedBody = $request->getParsedBody();
             $token = $parsedBody['csrf_token'] ?? '';
         }
-
         return $token;
-    }
-
-    /**
-     * 生成 CSRF token
-     */
-    private function generateCsrfToken(): void
-    {
-        if (!$this->session->has('csrf_token')) {
-            $this->session->set('csrf_token', bin2hex(random_bytes(32)));
-            $this->session->set('csrf_token_time', time());
-        }
-    }
-
-    /**
-     * 获取当前 CSRF token
-     */
-    public function getCsrfToken(): string
-    {
-        if (!$this->session->has('csrf_token')) {
-            $this->generateCsrfToken();
-        }
-        return $this->session->get('csrf_token', null);
-    }
-
-    /**
-     * 刷新 CSRF token
-     */
-    public function refreshCsrfToken(): void
-    {
-        $this->session->delete('csrf_token');
-        $this->session->delete('csrf_token_time');
-        $this->generateCsrfToken();
     }
 }

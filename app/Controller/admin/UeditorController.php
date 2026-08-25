@@ -15,11 +15,13 @@ use SlimCMS\Core\Ueditor;
 class UeditorController extends AdminController
 {
     private Ueditor $ueditor;
+    private array $config;
 
     public function __construct(App $app, AuthService $authService, Ueditor $ueditor)
     {
         parent::__construct($app, $authService);
         $this->ueditor = $ueditor;
+        $this->config = $this->container->get('cfg');
     }
 
     /**
@@ -29,11 +31,11 @@ class UeditorController extends AdminController
      */
     public function ueditor(): ResponseInterface
     {
-        if($r = $this->checkAllow('')){
+        if ($r = $this->checkAllow('')) {
             return $r;
         }
         $action = $this->inputString('action');
-        $water = $this->input('needwatermark') ? true : false;
+        $water = $this->input('needwatermark') || $this->config['waterMark'] == '1' ? true : false;
         $result = null;
         switch ($action) {
             case 'config':

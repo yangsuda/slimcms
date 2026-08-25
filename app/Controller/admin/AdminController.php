@@ -37,7 +37,7 @@ class AdminController extends ControlAbstract
     /**
      * 权限检测
      * @param string|null $auth
-     * @return void
+     * @return ResponseInterface|null
      * @throws TextException
      */
     protected function checkAllow(string $auth = null): ?ResponseInterface
