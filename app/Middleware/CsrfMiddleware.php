@@ -11,7 +11,8 @@ use SlimCMS\Error\TextException;
 
 class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
 {
-    private const POOL_SIZE = 5;       // 同时保留最近 5 个有效 token
+    private const POOL_SIZE = 10;       // 同时保留最近 10 个有效 token
+    private const MAX_TOKEN_USES = 20;   // 单个 token 最大使用次数，超过即作废
     private Session $session;
 
     public function __construct(Session $session)
@@ -32,7 +33,7 @@ class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
         }
 
         // 每次进入页面都生成新 token，加入令牌池
-        if (in_array($method, ['GET', 'HEAD'])) {
+        if (in_array($method, ['POST', 'GET', 'HEAD'])) {
             $this->rotateCsrfToken();
         }
 
@@ -51,11 +52,18 @@ class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
             throw new TextException(403, 'CSRF token 缺失');
         }
 
-        foreach ($pool as $i => $stored) {
+        foreach ($pool as $i => $entry) {
+            $stored = $entry['token'] ?? '';
             if (hash_equals($stored, $requestToken)) {
-                // 一次性：用过的 token 立即移除
-                unset($pool[$i]);
-                $this->session->set('csrf_token_pool', array_values($pool));
+                // 支持多次使用：累加使用次数，达到上限才作废
+                $entry['uses'] = ($entry['uses'] ?? 0) + 1;
+                if ($entry['uses'] >= self::MAX_TOKEN_USES) {
+                    unset($pool[$i]);
+                    $pool = array_values($pool);
+                } else {
+                    $pool[$i] = $entry;
+                }
+                $this->session->set('csrf_token_pool', $pool);
                 return;
             }
         }
@@ -66,7 +74,7 @@ class CsrfMiddleware extends \SlimCMS\Core\MiddleWare
     {
         $token = bin2hex(random_bytes(32));
         $pool = $this->session->get('csrf_token_pool', []);
-        $pool[] = $token;
+        $pool[] = ['token' => $token, 'uses' => 0];
         // 滑动窗口，只保留最近 N 个，防止无限增长
         if (count($pool) > self::POOL_SIZE) {
             $pool = array_slice($pool, -self::POOL_SIZE);
