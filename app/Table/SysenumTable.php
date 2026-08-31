@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace app\Table;
 
+use SlimCMS\Core\Form\TableHookInterface;
 use SlimCMS\Core\Table;
 
-class SysenumTable extends Table
+class SysenumTable extends Table implements TableHookInterface
 {
     use \SlimCMS\Traits\Table;
 
     /**
      * 列表数据获取之前的自定义处理
-     * @param $param
-     * @return int
-     * @throws \SlimCMS\Error\TextException
      */
-    public function dataListBefore(&$param): int
+    public function dataListBefore(array &$param): int|array
     {
         $where = [];
         if ($this->request->getAttribute('adminContext') === true) {
@@ -37,12 +35,8 @@ class SysenumTable extends Table
 
     /**
      * 列表数据获取之后的自定义处理
-     * @param $list
-     * @param $param
-     * @return int
-     * @throws \SlimCMS\Error\TextException
      */
-    public function dataListAfter(&$list, $param): int
+    public function dataListAfter(array &$list, array $param): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             $evalue = aval($param, 'get/evalue');
@@ -53,12 +47,8 @@ class SysenumTable extends Table
 
     /**
      * 数据保存后的自定义处理
-     * @param $data
-     * @param array $row
-     * @return int
-     * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveAfter($data, $row = [], $options = []): int
+    public function dataSaveAfter(array $data, array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if ($data['mngtype'] == 'add') {

@@ -11,7 +11,6 @@ use app\Repository\SysenumRepository;
 use Psr\Http\Message\ResponseInterface;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Helper\Captcha;
-use SlimCMS\Helper\Str;
 
 class MainController extends ControlAbstract
 {

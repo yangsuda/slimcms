@@ -34,7 +34,11 @@ class ImageController extends AdminController
         $option = [];
         $option['water'] = $this->input('water') ? true : false;
         $option['fileid'] = $this->input('id');
-        $res = $this->uploader->webupload($this->request->getUploadedFiles()['file'] ?? null, $option);
+        $file = $this->request->getUploadedFiles()['file'] ?? null;
+        // 未选择文件时直接返回上传失败，避免对 Upload::webupload 传入 null 触发 TypeError
+        $res = $file !== null
+            ? $this->uploader->webupload($file, $option)
+            : $this->output->withCode(23001);
         $body = $res->getCode() != 200
             ? '上传失败:' . $res->getMsg()
             : (string)($res->getData()['fileid'] ?? '');
@@ -104,7 +108,8 @@ class ImageController extends AdminController
         $field = $this->inputString('field');
         $pic = $this->inputString('pic');
         $res = $this->fileService->imgsDel($fid, $id, $field, $pic);
-        return $this->resp($res);
+        // AJAX 操作端点，无对应模板，强制 JSON 输出
+        return $this->json($res);
     }
 
     /**
@@ -142,7 +147,8 @@ class ImageController extends AdminController
         $id = $this->inputInt('id');
         $identifier = $this->inputString('identifier');
         $res = $this->fileService->delImg($fid, $id, $identifier);
-        return $this->resp($res);
+        // AJAX 操作端点，无对应模板，强制 JSON 输出
+        return $this->json($res);
     }
 
     /**
@@ -159,7 +165,8 @@ class ImageController extends AdminController
         $id = $this->inputInt('id');
         $pic = $this->inputString('pic');
         $res = $this->fileService->webuploadCover($fid, $id, $pic);
-        return $this->resp($res);
+        // AJAX 操作端点，无对应模板，强制 JSON 输出
+        return $this->json($res);
     }
 
     /**
@@ -179,6 +186,7 @@ class ImageController extends AdminController
         $identifier = $this->inputString('identifier');
         $url = $this->inputString('url');
         $res = $this->fileService->delFromAddons($fid, $id, $identifier, $url);
-        return $this->resp($res);
+        // AJAX 操作端点，无对应模板，强制 JSON 输出
+        return $this->json($res);
     }
 }

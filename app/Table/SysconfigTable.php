@@ -4,12 +4,13 @@ declare(strict_types=1);
 namespace app\Table;
 
 use Slim\App;
+use SlimCMS\Core\Form\TableHookInterface;
 use SlimCMS\Core\Redis;
 use SlimCMS\Core\Table;
 use SlimCMS\Core\Request;
 use SlimCMS\Core\Ueditor;
 
-class SysconfigTable extends Table
+class SysconfigTable extends Table implements TableHookInterface
 {
     use \SlimCMS\Traits\Table;
 
@@ -25,10 +26,8 @@ class SysconfigTable extends Table
 
     /**
      * 数据获取之后的自定义处理
-     * @param $data
-     * @return int
      */
-    public function dataViewAfter(&$data): int
+    public function dataViewAfter(array &$data, array $options): int|array
     {
         if (!empty($data['value'])) {
             $data['value'] = stripslashes($data['value']);
@@ -38,27 +37,20 @@ class SysconfigTable extends Table
 
     /**
      * 表单HTML获取之前的自定义处理
-     * @param $fields
-     * @param $data
-     * @param $form
-     * @return int
      */
-    public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
+    public function getFormHtmlBefore(array &$fields, array &$row, array $form, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
-            $value = aval($data, 'value', '');
-            $data['ueditorHtml'] = $this->ueditor->ueditor('ueditorValue', $value, ['identity' => 'admin']);
+            $value = aval($row, 'value', '');
+            $row['ueditorHtml'] = $this->ueditor->setRequest($this->request)->ueditor('ueditorValue', $value, ['identity' => 'admin']);
         }
         return 200;
     }
 
     /**
      * 数据保存前的自定义处理
-     * @param $data
-     * @param array $row
-     * @return int
      */
-    public function dataSaveBefore(&$data, $row = [], $options = []): int
+    public function dataSaveBefore(array &$data, array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if ($data['type'] == 5) {
@@ -73,11 +65,8 @@ class SysconfigTable extends Table
 
     /**
      * 数据保存后的自定义处理
-     * @param $data
-     * @param array $row
-     * @return int
      */
-    public function dataSaveAfter($data, $row = [], $options = []): int
+    public function dataSaveAfter(array $data, array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             $cfg = CSDATA . '/ConfigCache.php';

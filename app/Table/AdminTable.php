@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace app\Table;
 
+use SlimCMS\Core\Form\TableHookInterface;
 use SlimCMS\Core\Table;
 
-class AdminTable extends Table
+class AdminTable extends Table implements TableHookInterface
 {
     use \SlimCMS\Traits\Table;
 
     /**
      * 数据获取之后的自定义处理
-     * @param $data
-     * @return int
-     * @throws \SlimCMS\Error\TextException
      */
-    public function dataViewAfter(&$data): int
+    public function dataViewAfter(array &$data, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             unset($data['pwd']);
@@ -28,12 +26,10 @@ class AdminTable extends Table
 
     /**
      * 删除前检测
-     * @param $data
-     * @return int
      */
-    public function dataDelBefore($data, $options = []): int
+    public function dataDelBefore(array $row, array $options): int|array
     {
-        if ($data['id'] == 1) {
+        if ($row['id'] == 1) {
             return 21051;
         }
         return 200;
@@ -41,10 +37,8 @@ class AdminTable extends Table
 
     /**
      * 列表数据获取之前的自定义处理
-     * @param $param
-     * @return int
      */
-    public function dataListInit(&$param)
+    public function dataListInit(array &$param): int|array
     {
         $where = [];
         $where[] = 'id>1';

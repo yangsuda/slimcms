@@ -42,6 +42,7 @@ class RecoveryService extends ServiceAbstract
         if (empty($table)) {
             return $this->output->withCode(21001);
         }
+        // r() 内部对未生成 Repository 类的表自动回退通用仓库
         $this->r($this->getRepositoryClassName($table))->insert($content);
         $this->archivedataRepository->delete($id);
         return $this->output->withCode(200, 211031);

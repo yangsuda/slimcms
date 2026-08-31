@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace app\Table;
 
+use SlimCMS\Core\Form\TableHookInterface;
 use SlimCMS\Core\Table;
 use app\Repository\Forms_fieldsRepository;
 use app\Repository\FormsRepository;
 use app\Service\admin\FormsService;
 
-class FormsTable extends Table
+class FormsTable extends Table implements TableHookInterface
 {
     /**
      * 自定义表单数据保存处理
-     * @param $data
-     * @param array $row
-     * @return int
      */
-    public function dataSaveBefore(&$data, $row = [], $options = []): int
+    public function dataSaveBefore(array &$data, array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if (empty($data['name'])) {
@@ -37,7 +35,7 @@ class FormsTable extends Table
         return 200;
     }
 
-    public function dataSaveAfter($data, $row = [], $options = []): int
+    public function dataSaveAfter(array $data, array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if ($data['mngtype'] == 'add') {
@@ -49,15 +47,12 @@ class FormsTable extends Table
 
     /**
      * 数据删除后的自定义处理
-     * @param $data
-     * @return int
-     * @throws \SlimCMS\Error\TextException
      */
-    public function dataDelAfter($data, $options = []): int
+    public function dataDelAfter(array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
-            if (!empty($data['id'])) {
-                $this->r(Forms_fieldsRepository::class)->withWhere(['formid' => $data['id']])->batchDelete();
+            if (!empty($row['id'])) {
+                $this->r(Forms_fieldsRepository::class)->withWhere(['formid' => $row['id']])->batchDelete();
             }
         }
         return 200;
@@ -65,10 +60,8 @@ class FormsTable extends Table
 
     /**
      * 列表数据获取之前的自定义处理
-     * @param $param
-     * @return int
      */
-    public function dataListInit(&$param)
+    public function dataListInit(array &$param): int|array
     {
         $where = [];
         !empty($param['export']) && $where['export'] = $param['export'];

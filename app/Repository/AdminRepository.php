@@ -7,7 +7,8 @@ namespace app\Repository;
 use app\Model\entity\AdminEntity;
 use Slim\App;
 use SlimCMS\Abstracts\RepositoryAbstract;
-use SlimCMS\Core\Forms;
+use SlimCMS\Core\Form\FormQueryServiceInterface;
+use SlimCMS\Core\Form\FormWriteServiceInterface;
 use SlimCMS\Core\Redis;
 use SlimCMS\Helper\Crypt;
 use SlimCMS\Interfaces\UploadInterface;
@@ -16,9 +17,9 @@ class AdminRepository extends RepositoryAbstract
 {
     private UploadInterface $uploader;
 
-    public function __construct(App $app, Forms $forms, Redis $redis, UploadInterface $uploader)
+    public function __construct(App $app, FormWriteServiceInterface $formWrite, FormQueryServiceInterface $formQuery, Redis $redis, UploadInterface $uploader)
     {
-        parent::__construct($app, $forms, $redis);
+        parent::__construct($app, $formWrite, $formQuery, $redis);
         $this->uploader = $uploader;
     }
 
