@@ -60,6 +60,6 @@ class MainController extends AdminController
             $res = $this->authService->updatePwd($this->adminInfo()->userid, $oldpwd, $newpwd);
             return $this->directTo($res);
         }
-        return $this->view($this->output);
+        return $this->view($this->output, 'admin/updatePwd');
     }
 }

@@ -4,49 +4,43 @@ declare(strict_types=1);
 
 namespace app\Table;
 
+use SlimCMS\Core\Form\TableHookInterface;
 use SlimCMS\Core\Table;
 
-class AdmingroupTable extends Table
+class AdmingroupTable extends Table implements TableHookInterface
 {
     use \SlimCMS\Traits\Table;
 
     /**
      * 表单HTML获取之前的自定义处理
-     * @param $fields
-     * @param $data
-     * @param $form
-     * @return int
      */
-    public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
+    public function getFormHtmlBefore(array &$fields, array &$row, array $form, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
-            $data['forms'] = $this->t('forms')->withWhere(['jumpurl' => ''])->fetchList();
+            $row['forms'] = $this->t('forms')->withWhere(['jumpurl' => ''])->fetchList();
             $permissions = $this->t('adminpermission')->fetchList();
-            $data['permissions'] = [];
+            $row['permissions'] = [];
             foreach ($permissions as $v1) {
                 $index = strpos($v1['purview'], '/') ? stristr($v1['purview'], '/', true) : '_';
-                $data['permissions'][$index][] = $v1;
+                $row['permissions'][$index][] = $v1;
             }
             //插件中设置的权限
             $where = ['isinstall' => 1, 'available' => 1];
             // [SQL安全改造] 惰性条件：参数由 withWhere->implode 统一收集
             $where[] = ['permission' => ['<>', '']];
-            $data['plugin'] = $this->t('plugins')->withWhere($where)->fetchList();
-            foreach ($data['plugin'] as &$v) {
+            $row['plugin'] = $this->t('plugins')->withWhere($where)->fetchList();
+            foreach ($row['plugin'] as &$v) {
                 $v['permission'] = json_decode($v['permission'],true);
             }
-            $data['_purviews'] = !empty($data['purviews']) ? explode(',', $data['purviews']) : [];
+            $row['_purviews'] = !empty($row['purviews']) ? explode(',', $row['purviews']) : [];
         }
         return 200;
     }
 
     /**
      * 数据保存前的自定义处理
-     * @param $data
-     * @param string $row
-     * @return int
      */
-    public function dataSaveBefore(&$data, $row = [], $options = []): int
+    public function dataSaveBefore(array &$data, array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if (!empty($data['purviews'])) {
@@ -58,12 +52,10 @@ class AdmingroupTable extends Table
 
     /**
      * 删除前检测
-     * @param $data
-     * @return int
      */
-    public function dataDelBefore($data, $options = []): int
+    public function dataDelBefore(array $row, array $options): int|array
     {
-        if ($data['id'] == 1) {
+        if ($row['id'] == 1) {
             return 21051;
         }
         return 200;
@@ -71,15 +63,12 @@ class AdmingroupTable extends Table
 
     /**
      * 列表数据获取之前的自定义处理
-     * @param $param
-     * @return array
      */
-    public function dataListInit(&$param)
+    public function dataListInit(array &$param): int|array
     {
         $where = [];
         $where[] = 'id>1';
         $param['where'] = $where;
         return 200;
     }
-
 }

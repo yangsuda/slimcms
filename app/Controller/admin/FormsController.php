@@ -10,7 +10,7 @@ namespace app\Controller\admin;
 
 use app\Service\admin\AuthService;
 use Slim\App;
-use SlimCMS\Core\Forms;
+use SlimCMS\Core\Form\FormServiceBus;
 use SlimCMS\Core\Page;
 use SlimCMS\Error\TextException;
 
@@ -19,10 +19,10 @@ class FormsController extends AdminController
     use \SlimCMS\Traits\Url;
 
     private Page $page;
-    private Forms $forms;
+    private FormServiceBus $forms;
     private array $config;//后台配置参数
 
-    public function __construct(App $app, AuthService $authService, Forms $forms, Page $page)
+    public function __construct(App $app, AuthService $authService, FormServiceBus $forms, Page $page)
     {
         parent::__construct($app, $authService);
         $this->page = $page;
@@ -31,10 +31,10 @@ class FormsController extends AdminController
     }
 
     /**
-     * 表单服务,设置请求对象，用于将中间件中数据传进去
-     * @return Forms
+     * 表单服务总线入口（保持与旧 Forms 同名方法签名）
+     * 每次调用前同步中间件处理后的 request，确保子服务能获取 csrfToken 等 attributes
      */
-    private function forms()
+    private function forms(): FormServiceBus
     {
         return $this->forms->setRequest($this->request);
     }
@@ -127,7 +127,8 @@ class FormsController extends AdminController
             return $r;
         }
         $res = $this->forms()->dataCheck($fid, $ids, $ischeck);
-        return $this->resp($res);
+        // AJAX 操作端点，无对应模板，强制 JSON 输出
+        return $this->json($res);
     }
 
     /**
@@ -144,7 +145,8 @@ class FormsController extends AdminController
             return $r;
         }
         $res = $this->forms()->dataDel($fid, $ids);
-        return $this->resp($res);
+        // AJAX 操作端点，无对应模板，强制 JSON 输出
+        return $this->json($res);
     }
 
     /**
@@ -163,20 +165,17 @@ class FormsController extends AdminController
                 $output = $this->output->withCode(21050);
                 return $this->directTo($output);
             }
-            $file = fopen($data['file'], 'r');
-            $filesize = filesize($data['file']);
-            ob_end_clean();
-            $response = $this->response
+            // [改造] 流式下载，避免大文件 OOM
+            $stream = new \Slim\Psr7\Stream(fopen($data['file'], 'rb'));
+            return $this->response
                 ->withHeader('Content-type', 'application/octet-stream')
                 ->withHeader('Accept-Ranges', 'bytes')
-                ->withHeader('Accept-Length', $filesize)
-                ->withHeader('Content-Disposition', 'attachment; filename=' . basename($data['file']));
-            $content = fread($file, $filesize);
-            fclose($file);
-        } else {
-            $response = $this->response->withHeader('Content-type', 'text/html');
-            $content = $data['text'] . '<script>location="' . $res->getReferer() . '";</script>';
+                ->withHeader('Content-Length', (string)filesize($data['file']))
+                ->withHeader('Content-Disposition', 'attachment; filename=' . basename($data['file']))
+                ->withBody($stream);
         }
+        $response = $this->response->withHeader('Content-type', 'text/html');
+        $content = $data['text'] . '<script>location="' . $res->getReferer() . '";</script>';
         $response->getBody()->write($content);
         return $response;
     }

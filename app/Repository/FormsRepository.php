@@ -4,30 +4,11 @@ declare(strict_types=1);
 
 namespace app\Repository;
 
-use app\Model\entity\FormsEntity;
 use SlimCMS\Abstracts\RepositoryAbstract;
 use SlimCMS\Error\TextException;
 
 class FormsRepository extends RepositoryAbstract
 {
-    public function fetch(string $field, int $cacheTime = 0): ?FormsEntity
-    {
-        $data = parent::fetch($field, $cacheTime);
-        return $data ? FormsEntity::fromArray($data) : null;
-    }
-
-    public function fetchList(string $field, string $indexField = '', int $cacheTime = 0): array
-    {
-        $data = parent::fetchList($field, $indexField, $cacheTime);
-        return FormsEntity::fromArrayList($data);
-    }
-
-    public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
-    {
-        $data = parent::list($fields, $page, $pagesize);
-        $data['list'] = FormsEntity::fromArrayList($data['list']);
-        return $data;
-    }
 
     public function getTable(int $id): ?string
     {

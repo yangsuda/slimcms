@@ -9,17 +9,20 @@ use app\Repository\FormsRepository;
 use Slim\App;
 use SlimCMS\Abstracts\ServiceAbstract;
 use SlimCMS\Interfaces\OutputInterface;
+use SlimCMS\Interfaces\RepositoryFactoryInterface;
 
 class RecoveryService extends ServiceAbstract
 {
     protected $archivedataRepository;
     protected $formsRepository;
+    protected RepositoryFactoryInterface $repoFactory;
 
-    public function __construct(App $app, ArchivedataRepository $archivedataRepository, FormsRepository $formsRepository)
+    public function __construct(App $app, ArchivedataRepository $archivedataRepository, FormsRepository $formsRepository, RepositoryFactoryInterface $repoFactory)
     {
         parent::__construct($app);
         $this->archivedataRepository = $archivedataRepository;
         $this->formsRepository = $formsRepository;
+        $this->repoFactory = $repoFactory;
     }
 
     /**
@@ -42,7 +45,8 @@ class RecoveryService extends ServiceAbstract
         if (empty($table)) {
             return $this->output->withCode(21001);
         }
-        $this->r($this->getRepositoryClassName($table))->insert($content);
+        // forTable() 内部对未生成 Repository 类的表自动回退通用仓库
+        $this->repoFactory->forTable($table)->insert($content);
         $this->archivedataRepository->delete($id);
         return $this->output->withCode(200, 211031);
     }

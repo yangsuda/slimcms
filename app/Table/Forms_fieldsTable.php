@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\Table;
 
 use Slim\App;
+use SlimCMS\Core\Form\TableHookInterface;
 use SlimCMS\Core\Redis;
 use SlimCMS\Core\Table;
 use app\Model\entity\Forms_fieldsEntity;
@@ -13,7 +14,7 @@ use app\Repository\FormsRepository;
 use app\Repository\SysenumRepository;
 use SlimCMS\Helper\Str;
 
-class Forms_fieldsTable extends Table
+class Forms_fieldsTable extends Table implements TableHookInterface
 {
     protected FormsRepository $formsRepository;
     protected Forms_fieldsRepository $forms_fieldsRepository;
@@ -29,10 +30,8 @@ class Forms_fieldsTable extends Table
 
     /**
      * 数据获取之后的自定义处理
-     * @param $data
-     * @return int
      */
-    public function dataViewAfter(&$data): int
+    public function dataViewAfter(array &$data, array $options): int|array
     {
         if (!empty($data['rules'])) {
             $data['rules'] = Str::unserializeData($data['rules']);
@@ -42,12 +41,8 @@ class Forms_fieldsTable extends Table
 
     /**
      * 数据保存前的自定义处理
-     * @param $data
-     * @param array $row
-     * @return int
-     * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveBefore(&$data, $row = [], $options = []): int
+    public function dataSaveBefore(array &$data, array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             $arr = ['id', 'ischeck', 'style', 'fid', 'ip', 'createtime', 'limit', 'order', 'by', 'nocache',
@@ -59,6 +54,12 @@ class Forms_fieldsTable extends Table
             if (!empty($data['rules'])) {
                 $data['rules'] = Str::serializeData($data['rules']);
             }
+            // cs_forms_fields 表有多个 NOT NULL DEFAULT NULL 字段，MySQL 严格模式下
+            // INSERT 不包含这些字段会报 1364 错误，此处补齐默认值
+            !isset($data['rules']) && $data['rules'] = '';
+            !isset($data['name']) && $data['name'] = '';
+            !isset($data['intro']) && $data['intro'] = '';
+            !isset($data['fieldlength']) && $data['fieldlength'] = 0;
             if (!$row) {
                 if (empty($data['identifier']) || empty($data['formid']) || empty($data['datatype'])) {
                     return 21003;
@@ -81,12 +82,8 @@ class Forms_fieldsTable extends Table
 
     /**
      * 数据保存后的自定义处理
-     * @param $data
-     * @param array $row
-     * @return int
-     * @throws \SlimCMS\Error\TextException
      */
-    public function dataSaveAfter($data, $row = [], $options = []): int
+    public function dataSaveAfter(array $data, array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if (!empty($row['id'])) {
@@ -95,7 +92,9 @@ class Forms_fieldsTable extends Table
             $row = Forms_fieldsEntity::fromArray($row);
             if (!empty($row->identifier) && !empty($row->formid)) {
                 $table = $this->getTableByFormId($row->formid);
-                $this->forms_fieldsRepository->fieldUpdate($table, $row);
+                if (!empty($table) && $this->tableExists($table)) {
+                    $this->forms_fieldsRepository->fieldUpdate($table, $row);
+                }
             }
         }
         return 200;
@@ -103,9 +102,6 @@ class Forms_fieldsTable extends Table
 
     /**
      * 获取表名
-     * @param int $formid
-     * @return mixed|null
-     * @throws \SlimCMS\Error\TextException
      */
     private function getTableByFormId(int $formid)
     {
@@ -113,18 +109,28 @@ class Forms_fieldsTable extends Table
     }
 
     /**
-     * 数据删除后的自定义处理
-     * @param $data
-     * @return int
-     * @throws \SlimCMS\Error\TextException
+     * 检查数据表是否存在
      */
-    public function dataDelAfter($data, $options = []): int
+    private function tableExists(string $table): bool
+    {
+        $setting = $this->container->get('settings');
+        $fullName = $setting['db']['tablepre'] . $table;
+        $result = $this->db->query("SHOW TABLES LIKE ?", [$fullName])->fetch();
+        return !empty($result);
+    }
+
+    /**
+     * 数据删除后的自定义处理
+     */
+    public function dataDelAfter(array $row, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
-            $data = Forms_fieldsEntity::fromArray($data);
-            if (!empty($data->identifier) && !empty($data->formid)) {
-                $table = $this->getTableByFormId($data->formid);
-                $this->forms_fieldsRepository->fieldDelete($table, $data->identifier);
+            $row = Forms_fieldsEntity::fromArray($row);
+            if (!empty($row->identifier) && !empty($row->formid)) {
+                $table = $this->getTableByFormId($row->formid);
+                if (!empty($table) && $this->tableExists($table)) {
+                    $this->forms_fieldsRepository->fieldDelete($table, $row->identifier);
+                }
             }
         }
         return 200;
@@ -132,28 +138,23 @@ class Forms_fieldsTable extends Table
 
     /**
      * 表单HTML获取之前的自定义处理
-     * @param $fields
-     * @param $data
-     * @param $form
-     * @return int
-     * @throws \SlimCMS\Error\TextException
      */
-    public function getFormHtmlBefore(&$fields, &$data, &$form, &$options): int
+    public function getFormHtmlBefore(array &$fields, array &$row, array $form, array $options): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
-            if (empty($data['displayorder']) && !empty($data['formid'])) {
+            if (empty($row['displayorder']) && !empty($row['formid'])) {
                 $displayorder = $this->forms_fieldsRepository
-                    ->withWhere(['formid' => $data['formid']])
+                    ->withWhere(['formid' => $row['formid']])
                     ->withOrderby('displayorder', 'asc')
                     ->fetch('displayorder')?->displayorder;
                 if (!empty($displayorder)) {
-                    $data['displayorder'] = $displayorder - 1;
+                    $row['displayorder'] = $displayorder - 1;
                 }
             }
             $enums = $this->sysenumRepository
                 ->withWhere(['evalue' => 0])
                 ->fetchList('id,ename,evalue,egroup,reid');
-            $data['enums'] = $enums ? json_decode(json_encode($enums), true) : [];
+            $row['enums'] = $enums ? json_decode(json_encode($enums), true) : [];
         }
         return 200;
     }

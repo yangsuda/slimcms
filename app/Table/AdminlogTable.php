@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace app\Table;
 
+use SlimCMS\Core\Form\TableHookInterface;
 use SlimCMS\Core\Table;
 
-class AdminlogTable extends Table
+class AdminlogTable extends Table implements TableHookInterface
 {
     /**
      * 重写设置表名(根据自己情况决定是否开启分表，如果需要开启，取消注释)

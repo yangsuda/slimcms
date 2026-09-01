@@ -10,6 +10,7 @@ use SlimCMS\Helper\File;
 use SlimCMS\Interfaces\RouteInterface;
 use SlimCMS\Interfaces\CookieInterface;
 use SlimCMS\Interfaces\OutputInterface;
+use SlimCMS\Interfaces\RepositoryFactoryInterface;
 use SlimCMS\Interfaces\TemplateInterface;
 use SlimCMS\Interfaces\DatabaseInterface;
 use SlimCMS\Interfaces\UploadInterface;
@@ -17,10 +18,24 @@ use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Database;
 use SlimCMS\Core\Output;
 use SlimCMS\Core\Redis;
+use SlimCMS\Core\RepositoryFactory;
 use SlimCMS\Core\Routes;
 use SlimCMS\Core\Request;
 use SlimCMS\Core\Upload;
 use SlimCMS\Core\Template;
+use SlimCMS\Core\Form\FormSchemaServiceInterface;
+use SlimCMS\Core\Form\FormSchemaService;
+use SlimCMS\Core\Form\FormQueryServiceInterface;
+use SlimCMS\Core\Form\FormQueryService;
+use SlimCMS\Core\Form\FormWriteServiceInterface;
+use SlimCMS\Core\Form\FormWriteService;
+use SlimCMS\Core\Form\FormViewRendererInterface;
+use SlimCMS\Core\Form\FormViewRenderer;
+use SlimCMS\Core\Form\FormExportServiceInterface;
+use SlimCMS\Core\Form\FormExportService;
+use SlimCMS\Core\Form\FormServiceBus;
+use SlimCMS\Core\Form\TableHookDispatcher;
+use SlimCMS\Core\Form\OrderValidator;
 
 return function (ContainerBuilder $containerBuilder) {
     //Session保存路径
@@ -59,6 +74,9 @@ return function (ContainerBuilder $containerBuilder) {
         DatabaseInterface::class => function (ContainerInterface $c) {
             return new Database($c);
         },
+        RepositoryFactoryInterface::class => function (ContainerInterface $c) {
+            return new RepositoryFactory($c, $c->get(\Slim\App::class));
+        },
         Redis::class => function (ContainerInterface $c) {
             $redis = new Redis($c);
             return $redis->selectDB();
@@ -84,5 +102,15 @@ return function (ContainerBuilder $containerBuilder) {
         },
         // Request 和 Response 类的绑定
         Request::class => autowire(Request::class),
+
+        // [Forms 拆分] 表单子服务接口绑定
+        FormSchemaServiceInterface::class => autowire(FormSchemaService::class),
+        FormQueryServiceInterface::class => autowire(FormQueryService::class),
+        FormWriteServiceInterface::class => autowire(FormWriteService::class),
+        FormViewRendererInterface::class => autowire(FormViewRenderer::class),
+        FormExportServiceInterface::class => autowire(FormExportService::class),
+        FormServiceBus::class => autowire(FormServiceBus::class),
+        TableHookDispatcher::class => autowire(TableHookDispatcher::class),
+        OrderValidator::class => autowire(OrderValidator::class),
     ]);
 };

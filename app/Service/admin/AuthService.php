@@ -26,12 +26,14 @@ class AuthService extends ServiceAbstract
     private $maxRetries = 3;//1小时内登陆最大可重试次数
     private AdminRepository $adminRepository;
     private AdminloginlogRepository $adminloginlogRepository;
+    private FormsRepository $formsRepository;
 
-    public function __construct(App $app, AdminRepository $adminRepository, AdminloginlogRepository $adminloginlogRepository)
+    public function __construct(App $app, AdminRepository $adminRepository, AdminloginlogRepository $adminloginlogRepository, FormsRepository $formsRepository)
     {
         parent::__construct($app);
         $this->adminRepository = $adminRepository;
         $this->adminloginlogRepository = $adminloginlogRepository;
+        $this->formsRepository = $formsRepository;
     }
 
     /**
@@ -130,7 +132,7 @@ class AuthService extends ServiceAbstract
      */
     public function leftMenu(AdminEntity $admin): array
     {
-        $list = $this->r(FormsRepository::class)->tableList();
+        $list = $this->formsRepository->tableList();
         $arr = [];
         $weight = [];
         foreach ($list as $v) {

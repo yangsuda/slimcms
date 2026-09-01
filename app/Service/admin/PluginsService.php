@@ -403,7 +403,13 @@ class PluginsService extends ServiceAbstract
         if (empty($plugins)) {
             $url = Http::curlGet('https://gitee.com/919579/plugin/raw/master/url' . (int)VERSION . '.txt');
             $url = Http::curlGet(trim($url));
+            if ($url === false || $url === '') {
+                throw new TextException(223034);
+            }
             $list = json_decode($url, true);
+            if (empty($list) || !is_array($list)) {
+                throw new TextException(223034);
+            }
             $plugins = [];
             foreach ($list as &$v) {
                 $plugins[$v['identifier']] = $v;
