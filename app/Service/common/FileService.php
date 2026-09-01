@@ -8,6 +8,7 @@ use app\Repository\FormsRepository;
 use Slim\App;
 use SlimCMS\Abstracts\ServiceAbstract;
 use SlimCMS\Interfaces\OutputInterface;
+use SlimCMS\Interfaces\RepositoryFactoryInterface;
 use SlimCMS\Interfaces\UploadInterface;
 
 class FileService extends ServiceAbstract
@@ -15,13 +16,15 @@ class FileService extends ServiceAbstract
     private array $config;//后台配置参数
     private FormsRepository $formsRepository;
     private Forms_fieldsRepository $forms_fieldsRepository;
+    private RepositoryFactoryInterface $repoFactory;
 
-    public function __construct(App $app, FormsRepository $formsRepository, Forms_fieldsRepository $forms_fieldsRepository)
+    public function __construct(App $app, FormsRepository $formsRepository, Forms_fieldsRepository $forms_fieldsRepository, RepositoryFactoryInterface $repoFactory)
     {
         parent::__construct($app);
         $this->config = $this->container->get('cfg');
         $this->formsRepository = $formsRepository;
         $this->forms_fieldsRepository = $forms_fieldsRepository;
+        $this->repoFactory = $repoFactory;
     }
 
     /**
@@ -42,7 +45,8 @@ class FileService extends ServiceAbstract
         if (empty($table)) {
             return $this->output->withCode(21001);
         }
-        $data = $this->r($this->getRepositoryClassName($table))->withWhere(['id' => $id])->fetch($field)?->$field;
+        $repo = $this->repoFactory->forTable($table);
+        $data = $repo->withWhere(['id' => $id])->fetch($field)?->$field;
         if (empty($data)) {
             return $this->output->withCode(21001);
         }
@@ -60,7 +64,7 @@ class FileService extends ServiceAbstract
         unset($pics[$key]);
         $this->container->get(UploadInterface::class)->uploadDel($pic);
         $data = $pics ? json_encode($pics) : '';
-        $this->r($this->getRepositoryClassName($table))->update($id, [$field => $data]);
+        $repo->update($id, [$field => $data]);
         return $this->output->withCode(200);
     }
 
@@ -83,13 +87,14 @@ class FileService extends ServiceAbstract
         if (empty($tableName)) {
             return $this->output->withCode(21001);
         }
-        $row = $this->r($this->getRepositoryClassName($tableName))->withWhere(['id' => $id])->fetch($identifier);
+        $repo = $this->repoFactory->forTable($tableName);
+        $row = $repo->withWhere(['id' => $id])->fetch($identifier);
         if (empty($row)) {
             return $this->output->withCode(21001);
         }
         $upload = $this->container->get(UploadInterface::class);
         $upload->uploadDel($row->$identifier);
-        $this->r($this->getRepositoryClassName($tableName))->update($id, [$identifier => '']);
+        $repo->update($id, [$identifier => '']);
         return $this->output->withCode(200);
     }
 
@@ -114,7 +119,7 @@ class FileService extends ServiceAbstract
             return $this->output->withCode(21001);
         }
         $key = md5($pic);
-        $pics = $this->r($this->getRepositoryClassName($tableName))->withWhere(['id' => $id])->fetch($fieldname)?->$fieldname;
+        $pics = $this->repoFactory->forTable($tableName)->withWhere(['id' => $id])->fetch($fieldname)?->$fieldname;
         if (empty($pics)) {
             return $this->output->withCode(21001);
         }
@@ -132,7 +137,7 @@ class FileService extends ServiceAbstract
         $data = [
             $fieldname => json_encode($pics),
         ];
-        $this->r($this->getRepositoryClassName($tableName))->withWhere(['id' => $id])->batchUpdate($data);
+        $this->repoFactory->forTable($tableName)->withWhere(['id' => $id])->batchUpdate($data);
         return $this->output->withCode(200);
     }
 
@@ -153,7 +158,8 @@ class FileService extends ServiceAbstract
         if (empty($tableName)) {
             return $this->output->withCode(21001);
         }
-        $row = $this->r($this->getRepositoryClassName($tableName))->withWhere(['id' => $id])->fetch($identifier);
+        $repo = $this->repoFactory->forTable($tableName);
+        $row = $repo->withWhere(['id' => $id])->fetch($identifier);
         if (empty($row)) {
             return $this->output->withCode(21001);
         }
@@ -166,7 +172,7 @@ class FileService extends ServiceAbstract
             }
         }
         $addons = $arr ? json_encode($arr) : '';
-        $this->r($this->getRepositoryClassName($tableName))->update($id, [$identifier => $addons]);
+        $repo->update($id, [$identifier => $addons]);
         return $this->output->withCode(200);
     }
 }

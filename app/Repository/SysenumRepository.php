@@ -4,29 +4,10 @@ declare(strict_types=1);
 
 namespace app\Repository;
 
-use app\Model\entity\SysenumEntity;
 use SlimCMS\Abstracts\RepositoryAbstract;
 
 class SysenumRepository extends RepositoryAbstract
 {
-    public function fetch(string $field, int $cacheTime = 0): ?SysenumEntity
-    {
-        $data = parent::fetch($field, $cacheTime);
-        return $data ? SysenumEntity::fromArray($data) : null;
-    }
-
-    public function fetchList(string $field, string $indexField = '', int $cacheTime = 0): array
-    {
-        $data = parent::fetchList($field, $indexField, $cacheTime);
-        return SysenumEntity::fromArrayList($data);
-    }
-
-    public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
-    {
-        $data = parent::list($fields, $page, $pagesize);
-        $data['list'] = SysenumEntity::fromArrayList($data['list']);
-        return $data;
-    }
 
     /**
      * 按上下级获取相关数据

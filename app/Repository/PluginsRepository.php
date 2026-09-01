@@ -9,24 +9,7 @@ use SlimCMS\Abstracts\RepositoryAbstract;
 
 class PluginsRepository extends RepositoryAbstract
 {
-    public function fetch(string $field, int $cacheTime = 0): ?PluginsEntity
-    {
-        $data = parent::fetch($field, $cacheTime);
-        return $data ? PluginsEntity::fromArray($data) : null;
-    }
-
-    public function fetchList(string $field, string $indexField = '', int $cacheTime = 0): array
-    {
-        $data = parent::fetchList($field, $indexField, $cacheTime);
-        return PluginsEntity::fromArrayList($data);
-    }
-
-    public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
-    {
-        $data = parent::list($fields, $page, $pagesize);
-        $data['list'] = PluginsEntity::fromArrayList($data['list']);
-        return $data;
-    }
+    protected ?string $entityClass = PluginsEntity::class;
 
     public function fetchByIdIdentifier(string $identifier): ?PluginsEntity
     {

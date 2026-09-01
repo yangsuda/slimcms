@@ -10,6 +10,7 @@ use SlimCMS\Helper\File;
 use SlimCMS\Interfaces\RouteInterface;
 use SlimCMS\Interfaces\CookieInterface;
 use SlimCMS\Interfaces\OutputInterface;
+use SlimCMS\Interfaces\RepositoryFactoryInterface;
 use SlimCMS\Interfaces\TemplateInterface;
 use SlimCMS\Interfaces\DatabaseInterface;
 use SlimCMS\Interfaces\UploadInterface;
@@ -17,6 +18,7 @@ use SlimCMS\Core\Cookie;
 use SlimCMS\Core\Database;
 use SlimCMS\Core\Output;
 use SlimCMS\Core\Redis;
+use SlimCMS\Core\RepositoryFactory;
 use SlimCMS\Core\Routes;
 use SlimCMS\Core\Request;
 use SlimCMS\Core\Upload;
@@ -71,6 +73,9 @@ return function (ContainerBuilder $containerBuilder) {
         UploadInterface::class => autowire(Upload::class),
         DatabaseInterface::class => function (ContainerInterface $c) {
             return new Database($c);
+        },
+        RepositoryFactoryInterface::class => function (ContainerInterface $c) {
+            return new RepositoryFactory($c, $c->get(\Slim\App::class));
         },
         Redis::class => function (ContainerInterface $c) {
             $redis = new Redis($c);

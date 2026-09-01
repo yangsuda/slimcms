@@ -8,5 +8,4 @@ use SlimCMS\Abstracts\ReqAbstract;
 
 class ArchivedataReq extends ReqAbstract
 {
-
 }

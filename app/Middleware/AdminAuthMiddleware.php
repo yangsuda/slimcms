@@ -67,7 +67,17 @@ class AdminAuthMiddleware implements MiddlewareInterface
         //日志记录
         if (!empty($config['adminLog'])) {
             $postinfo = $request->getParsedBody();
-            $postinfo = $postinfo ? json_encode(Str::addslashes($postinfo)) : '';
+            if ($postinfo) {
+                // 脱敏密码、令牌等敏感字段，避免明文写入日志
+                foreach ($postinfo as $k => $v) {
+                    if (preg_match('/pwd|pass|token|secret|auth/i', $k)) {
+                        $postinfo[$k] = '***';
+                    }
+                }
+                $postinfo = json_encode(Str::addslashes($postinfo));
+            } else {
+                $postinfo = '';
+            }
             $postinfo = substr($postinfo, 0, 5000);
             $this->adminlogRepository->add([
                 'adminid' => $adminInfo->id,

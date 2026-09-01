@@ -13,7 +13,7 @@ class AdminResp extends RespAbstract
     protected function _groupid(array &$list, AdminRepository $table)
     {
         $field = __FUNCTION__;
-        $groupids = $this->r(AdmingroupRepository::class)
+        $groupids = $this->r('admingroup')
             ->withWhere(['ids' => array_column($list, 'groupid')])
             ->fetchList('id,groupname,purviews', 'id');
         foreach ($list as &$v) {

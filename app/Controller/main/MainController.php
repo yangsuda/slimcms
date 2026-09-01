@@ -9,11 +9,20 @@ namespace app\Controller\main;
 
 use app\Repository\SysenumRepository;
 use Psr\Http\Message\ResponseInterface;
+use Slim\App;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Helper\Captcha;
 
 class MainController extends ControlAbstract
 {
+    private SysenumRepository $sysenumRepository;
+
+    public function __construct(App $app, SysenumRepository $sysenumRepository)
+    {
+        parent::__construct($app);
+        $this->sysenumRepository = $sysenumRepository;
+    }
+
     public function index(): ResponseInterface
     {
         return $this->view($this->output, 'index');
@@ -27,7 +36,7 @@ class MainController extends ControlAbstract
     public function enumsData(): ResponseInterface
     {
         $egroup = $this->input('egroup');
-        $list = $this->r(SysenumRepository::class)
+        $list = $this->sysenumRepository
             ->withWhere(['egroup' => $egroup, 'evalueOverNil' => 1])
             ->fetchList('id,ename,evalue,reid');
         return $this->json($this->output->withData(['list' => $list]));

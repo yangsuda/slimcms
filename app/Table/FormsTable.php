@@ -6,12 +6,11 @@ namespace app\Table;
 
 use SlimCMS\Core\Form\TableHookInterface;
 use SlimCMS\Core\Table;
-use app\Repository\Forms_fieldsRepository;
-use app\Repository\FormsRepository;
-use app\Service\admin\FormsService;
 
 class FormsTable extends Table implements TableHookInterface
 {
+    // 注意：此处不能构造注入 Repository —— 所有 Repository 构造期 initialize() 会经
+    // t('forms') 回解析本类，构造注入将形成 DI 循环依赖，必须用 r() 运行时惰性解析
     /**
      * 自定义表单数据保存处理
      */
@@ -30,17 +29,7 @@ class FormsTable extends Table implements TableHookInterface
             }
             $table = (string)aval($data, 'table');
             $name = (string)aval($data, 'name');
-            empty($data['jumpurl']) && $this->r(FormsRepository::class)->createTable($table, $name);
-        }
-        return 200;
-    }
-
-    public function dataSaveAfter(array $data, array $row, array $options): int|array
-    {
-        if ($this->request->getAttribute('adminContext') === true) {
-            if ($data['mngtype'] == 'add') {
-                $this->i(FormsService::class)->formInit((int)$data['id']);
-            }
+            empty($data['jumpurl']) && $this->r('forms')->createTable($table, $name);
         }
         return 200;
     }
@@ -52,7 +41,7 @@ class FormsTable extends Table implements TableHookInterface
     {
         if ($this->request->getAttribute('adminContext') === true) {
             if (!empty($row['id'])) {
-                $this->r(Forms_fieldsRepository::class)->withWhere(['formid' => $row['id']])->batchDelete();
+                $this->r('forms_fields')->withWhere(['formid' => $row['id']])->batchDelete();
             }
         }
         return 200;

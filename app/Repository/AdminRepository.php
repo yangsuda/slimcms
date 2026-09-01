@@ -17,29 +17,12 @@ class AdminRepository extends RepositoryAbstract
 {
     private UploadInterface $uploader;
 
+    protected ?string $entityClass = AdminEntity::class;
+
     public function __construct(App $app, FormWriteServiceInterface $formWrite, FormQueryServiceInterface $formQuery, Redis $redis, UploadInterface $uploader)
     {
         parent::__construct($app, $formWrite, $formQuery, $redis);
         $this->uploader = $uploader;
-    }
-
-    public function fetch(string $field, int $cacheTime = 0): ?AdminEntity
-    {
-        $data = parent::fetch($field, $cacheTime);
-        return $data ? AdminEntity::fromArray($data) : null;
-    }
-
-    public function fetchList(string $field, string $indexField = '', int $cacheTime = 0): array
-    {
-        $data = parent::fetchList($field, $indexField, $cacheTime);
-        return AdminEntity::fromArrayList($data);
-    }
-
-    public function list(string $fields = 'id,createtime', int $page = 1, int $pagesize = 30): array
-    {
-        $data = parent::list($fields, $page, $pagesize);
-        $data['list'] = AdminEntity::fromArrayList($data['list']);
-        return $data;
     }
 
     /**
