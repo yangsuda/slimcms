@@ -1,8 +1,4 @@
 <?php
-/**
- * 后台主控制器
- * @author zhucy
- */
 declare(strict_types=1);
 
 namespace app\Controller\main;
