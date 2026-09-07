@@ -38,30 +38,30 @@ class PluginsService extends ServiceAbstract
      * 插件参数设置
      * @param string $identifier 插件标识符
      * @param array $data 保存的数据
-     * @return OutputInterface
+     * @return bool
      */
-    public function setConfig(string $identifier, array $data): OutputInterface
+    public function setConfig(string $identifier, array $data): bool
     {
         if (empty($identifier) || empty($data)) {
-            return $this->output->withCode(21002);
+            return false;
         }
         $this->pluginInfo($identifier);
         $configurl = $this->getPluginPath($identifier) . 'config.php';
         $str = "<?php\r\nreturn ";
         $str .= var_export($data, true) . ';';
         file_put_contents($configurl, $str);
-        return $this->output->withCode(200);
+        return true;
     }
 
     /**
      * 插件参数获取
      * @param string $identifier 插件标识符
-     * @return OutputInterface
+     * @return PluginsEntity
      */
-    public function getConfig(string $identifier): OutputInterface
+    public function getConfig(string $identifier): ?PluginsEntity
     {
         if (empty($identifier)) {
-            return $this->output->withCode(21002);
+            return null;
         }
         $this->pluginInfo($identifier);
         $configurl = $this->getPluginPath($identifier) . 'config.php';
@@ -69,7 +69,7 @@ class PluginsService extends ServiceAbstract
         if (empty($configs[$identifier]) && is_file($configurl)) {
             $configs[$identifier] = require_once $configurl;
         }
-        return $this->output->withCode(200)->withData(['config' => aval($configs, $identifier, [])]);
+        return PluginsEntity::fromArray(aval($configs, $identifier, []));
     }
 
     /**
@@ -88,32 +88,11 @@ class PluginsService extends ServiceAbstract
             return $plugin[$identifier];
         }
         $row = $this->pluginsRepository->fetchByIdIdentifier($identifier);
-        if ($row?->isinstall != 1 || $row?->available != 1) {
+        if ($row?->isinstall != 1) {
             throw new TextException(223023, '此插件不存在或尚未启用');
         }
         $plugin[$identifier] = $row;
         return $plugin[$identifier];
-    }
-
-    /**
-     * 非插件中调用插件的勾子
-     * @param $plugin
-     * @param $method
-     * @param $param
-     * @return OutputInterface
-     * @throws \SlimCMS\Error\TextException
-     */
-    public function hook($plugin, $method, $param): OutputInterface
-    {
-        if (empty($plugin) || empty($method)) {
-            return $this->output->withCode(21003);
-        }
-        $this->pluginInfo($plugin);
-        $class = '\app\Service\plugin\\' . $plugin . '\\' . ucfirst($plugin) . 'Service';
-        if (class_exists($class) && ($obj = $this->i($class)) && is_callable([$obj, $method])) {
-            return $obj->$method($param);
-        }
-        return $this->output->withCode(21009);
     }
 
     private function getPluginPath(string $identifier): string
@@ -137,7 +116,6 @@ class PluginsService extends ServiceAbstract
         if (is_file($pluginDir . 'install.lock')) {
             return $this->output->withCode(223025);
         }
-        $this->pluginInfo($identifier);
         $plugin = aval($this->_market(), $identifier);
         if (empty($plugin)) {
             return $this->output->withCode(223023);
@@ -189,8 +167,8 @@ class PluginsService extends ServiceAbstract
             'isinstall' => 1,
             'author' => $plugin['author'],
             'signature' => $plugin['signature'],
-            'menu' => json_encode($plugin['menu']),
-            'permission' => json_encode($plugin['permission']),
+            'menu' => json_encode($plugin['menu'], JSON_UNESCAPED_UNICODE),
+            'permission' => json_encode($plugin['permission'], JSON_UNESCAPED_UNICODE),
         ]);
 
         //数据库表是否存在判断

@@ -13,6 +13,7 @@ use Slim\App;
 use SlimCMS\Core\Form\FormServiceBus;
 use SlimCMS\Core\Page;
 use SlimCMS\Error\TextException;
+use SlimCMS\Helper\Captcha;
 
 class FormsController extends AdminController
 {
@@ -92,9 +93,10 @@ class FormsController extends AdminController
         }
         if ($this->request->getMethod() === 'POST') {
             $ccode = $this->config['ccode'] == '1' ? $this->inputString('ccode') : null;
+            Captcha::verify($this->session(), $ccode);
             $referer = $this->input('referer', 'url');
             $referer = $referer ?: $this->url('&id=', '/admin/forms/dataList');
-            $res = $this->forms()->formVerify($ccode)->dataSave($fid, $id)->withReferer($referer);
+            $res = $this->forms()->dataSave($fid, $id)->withReferer($referer);
             return $this->directTo($res);
         }
         $res = $this->forms()->dataFormHtml($fid, $id, ['cacheTime' => 300, 'ueditorType' => 'admin']);

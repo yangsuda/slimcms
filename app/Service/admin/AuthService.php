@@ -21,8 +21,6 @@ use SlimCMS\Interfaces\OutputInterface;
 
 class AuthService extends ServiceAbstract
 {
-    use \SlimCMS\Traits\Form;
-
     private $maxRetries = 3;//1小时内登陆最大可重试次数
     private AdminRepository $adminRepository;
     private AdminloginlogRepository $adminloginlogRepository;

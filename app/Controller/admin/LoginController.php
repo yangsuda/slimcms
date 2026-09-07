@@ -13,6 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 use SlimCMS\Abstracts\ControlAbstract;
 use SlimCMS\Core\Cookie;
+use SlimCMS\Helper\Captcha;
 use SlimCMS\Helper\Crypt;
 
 class LoginController extends ControlAbstract
@@ -79,10 +80,11 @@ class LoginController extends ControlAbstract
     {
         // 验证码检查
         $ccode = $this->inputString('ccode');
+        Captcha::verify($this->session(), $ccode);
         // 用户名密码校验
         $userid = $this->inputString('userid');
         $pwd = $this->inputString('pwd');
-        $res = $this->authService->formVerify($ccode)->loginCheck($userid, $pwd);
+        $res = $this->authService->loginCheck($userid, $pwd);
         if ($res->getCode() != 200) {
             return $this->json($res);
         }
