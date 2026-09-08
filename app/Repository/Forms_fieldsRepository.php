@@ -11,11 +11,16 @@ class Forms_fieldsRepository extends RepositoryAbstract
 {
     protected ?string $entityClass = Forms_fieldsEntity::class;
 
+    public function fetch(string $field, int $cacheTime = 0): ?Forms_fieldsEntity
+    {
+        return parent::fetch($field, $cacheTime);
+    }
+
     /**
      * 某表的表单结构
      * @return array
      */
-    private function fetchAllField(string $table): array
+    public function fetchAllField(string $table): array
     {
         // [SQL安全改造] 表名白名单校验，防止SHOW FIELDS注入
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {

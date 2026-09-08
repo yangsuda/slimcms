@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace app\Repository;
 
+use app\Model\entity\FormsEntity;
 use SlimCMS\Abstracts\RepositoryAbstract;
 use SlimCMS\Error\TextException;
 
 class FormsRepository extends RepositoryAbstract
 {
+    protected ?string $entityClass = FormsEntity::class;
+    public function fetch(string $field, int $cacheTime = 0): ?FormsEntity
+    {
+        return parent::fetch($field, $cacheTime);
+    }
 
     public function getTable(int $id): ?string
     {
