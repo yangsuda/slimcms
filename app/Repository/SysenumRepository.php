@@ -73,7 +73,7 @@ class SysenumRepository extends RepositoryAbstract
             return [];
         }
         $user = $apptend == 1 ? [$row] : [];
-        if ($row->reid > 0) {
+        if ($row?->reid > 0) {
             $user[] = $this->superior($egoup, $row->reid, 1);
         }
         return $user;

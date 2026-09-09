@@ -23,4 +23,9 @@ class Forms_fieldsEntity extends EntityAbstract
         'forbidedit' => 'int',
         'fieldtype' => 'string',
     ];
+
+    public function getRules(): ?array
+    {
+        return $this?->rules ? json_decode($this->rules, true) : [];
+    }
 }

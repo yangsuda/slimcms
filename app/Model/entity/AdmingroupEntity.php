@@ -23,7 +23,7 @@ class AdmingroupEntity extends EntityAbstract
      */
     public function getPurviewsList(): array
     {
-        return $this->purviews ? explode(',', $this->purviews) : [];
+        return $this?->purviews ? explode(',', $this->purviews) : [];
     }
 
     /**

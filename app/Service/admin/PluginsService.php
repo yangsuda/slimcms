@@ -214,6 +214,8 @@ class PluginsService extends ServiceAbstract
         if (!empty($arr['install'])) {
             $arr['install']();
         }
+        //清除表映射缓存
+        $this->formsRepository->tableMap(true);
         return $this->output->withCode(200);
     }
 
@@ -274,6 +276,8 @@ class PluginsService extends ServiceAbstract
             unlink($pluginDir . 'config.php');
         }
 
+        //清除表映射缓存
+        $this->formsRepository->tableMap(true);
         //删除插件
         return $this->delete($identifier);
     }

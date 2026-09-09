@@ -46,15 +46,4 @@ class FormsTable extends Table implements TableHookInterface
         }
         return 200;
     }
-
-    /**
-     * 列表数据获取之前的自定义处理
-     */
-    public function dataListInit(array &$param): int|array
-    {
-        $where = [];
-        !empty($param['export']) && $where['export'] = $param['export'];
-        $param['where'] = $where;
-        return 200;
-    }
 }
