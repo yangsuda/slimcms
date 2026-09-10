@@ -36,11 +36,11 @@ class SysenumTable extends Table implements TableHookInterface
     /**
      * 列表数据获取之后的自定义处理
      */
-    public function dataListAfter(array &$list, array $param): int|array
+    public function dataListAfter(array &$data, array $param): int|array
     {
         if ($this->request->getAttribute('adminContext') === true) {
             $evalue = aval($param, 'get/evalue');
-            $evalue && $list['reid'] = $this->t('sysenum')->withWhere(['id' => $evalue])->fetch();
+            $evalue && $data['reid'] = $this->t('sysenum')->withWhere(['id' => $evalue])->fetch('egroup,reid');
         }
         return 200;
     }
@@ -59,7 +59,7 @@ class SysenumTable extends Table implements TableHookInterface
                 } else {
                     $where['evalue'] = 0;
                 }
-                $_reid = $this->t('sysenum')->withWhere($where)->withOrderby('id', 'asc')->fetch();
+                $_reid = $this->t('sysenum')->withWhere($where)->withOrderby('id', 'asc')->fetch('id,evalue');
                 if ($_reid && $_reid['id'] != $data['id']) {
                     $val = [];
                     $val['evalue'] = $data['id'];
