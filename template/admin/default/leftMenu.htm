@@ -9,7 +9,7 @@
                     <!--{loop $v[subMenu] $val}-->
                     <span class="label radius-circle bg-danger float-right count$val[id]"
                           style="display: none;margin-top:15px;margin-right:10px;position: inherit;z-index: 2;"></span>
-                    <a href="{if $val[jumpurl]}$val[jumpurl]{else}/admin/forms/dataList?fid=$val[id]{/if}" class="{echo !empty($data[form][types]) && $v[types][key]==$data[form][types]||strpos($v[types][jumpurl],$data[p])!==false?'active':''}"><i class="fa-1x $v[types][key]"></i> <span> $val[name] </span></a>
+                    <a href="{if !empty($val[jumpurl])}$val[jumpurl]{else}/admin/forms/dataList?fid=$val[id]{/if}" class="{echo !empty($data[form][types]) && $v[types][key]==$data[form][types]||strpos($v[types][jumpurl],$data[p])!==false?'active':''}"><i class="fa-1x $v[types][key]"></i> <span> $val[name] </span></a>
                     <!--{/loop}-->
                     <!--{else}-->
                     <a href="#" class="{echo !empty($data[form][types]) && $v[types][key]==$data[form][types]||strpos($v[types][jumpurl],$data[p])!==false?'active':''}"><i class="fa-1x $v[types][key]"></i> <span> $v[types][name] </span> <span class="menu-arrow"></span></a>
@@ -18,7 +18,7 @@
                         <li class="{echo !empty($val[jumpurl]) && strpos($val[jumpurl],$data[p])!==false || ($data[p]=='/admin/forms/dataList'||$data[p]=='/admin/forms/dataSave') && !empty($data[fid]) && $data[fid]==$val[id]?'active':''}">
                             <span class="label radius-circle bg-danger float-right count$val[id]"
                                   style="display: none;margin-top:12px;margin-right:10px;position: inherit;z-index: 2;"></span>
-                            <a href="{if $val[jumpurl]}$val[jumpurl]{else}/admin/forms/dataList?fid=$val[id]{/if}">$val[name]</a>
+                            <a href="{if !empty($val[jumpurl])}$val[jumpurl]{else}/admin/forms/dataList?fid=$val[id]{/if}">$val[name]</a>
                         </li>
                         <!--{/loop}-->
                     </ul>

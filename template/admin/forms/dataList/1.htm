@@ -83,7 +83,7 @@
                                                         <!--{/if}-->
                                                         <td>
                                                             <a href="/admin/forms/dataSave?$data[query]&fid=$data[fid]&id=$v[id]">编辑</a>
-                                                            <!--{if !$v[jumpurl]}-->
+                                                            <!--{if empty($v[jumpurl])}-->
                                                             <span class="text-info">|</span>
                                                             <a href="/admin/forms/dataList?fid=2&formid=$v[id]">字段</a> <span class="text-info">|</span>
                                                             <a href="/admin/forms/dataList?page=&id=&fid=$v[id]">数据查看</a>
