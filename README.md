@@ -333,4 +333,11 @@ public function setTableName(string $tableName, string $extendName = null): self
 
 数据库中将自动创建表adminlog2022
 
-数据调用方式:$this->t('adminlog')->...（默认调用当前年份数据），如需调用2021数据，:$this->t('adminlog','2021')->...
+## 服务器站点Nginx请求处理规则
+```bash
+location / {
+    index index.php index.html;
+    autoindex  off;
+    try_files $uri $uri/ /index.php?$query_string;
+}
+```
