@@ -40,7 +40,7 @@ class AdminController extends ControlAbstract
      * @return ResponseInterface|null
      * @throws TextException
      */
-    protected function checkAllow(string $auth = null): ?ResponseInterface
+    protected function checkAllow(?string $auth = null): ?ResponseInterface
     {
         $auth = $auth ?? $this->p;
         $res = $this->authService->checkAllow($this->adminInfo(), $auth);
@@ -57,7 +57,7 @@ class AdminController extends ControlAbstract
     /**
      * {@inheritDoc}
      */
-    public function view(OutputInterface $output = null, string $template = ''): ResponseInterface
+    public function view(?OutputInterface $output = null, string $template = ''): ResponseInterface
     {
         $output = $output ?? $this->output;
         $data = [];

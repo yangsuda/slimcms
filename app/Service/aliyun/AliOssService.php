@@ -55,7 +55,7 @@ class AliOssService extends ServiceAbstract implements UploadInterface
      */
     private $bucket = '';
 
-    protected function getSaveDir(string $dirrule = null): string
+    protected function getSaveDir(?string $dirrule = null): string
     {
         $dir = !empty($this->setting['attachment']['dirname']) ? trim($this->setting['attachment']['dirname'], '/') : 'uploads';
         if (!isset($dirrule)) {
@@ -116,7 +116,7 @@ class AliOssService extends ServiceAbstract implements UploadInterface
     /**
      * @inheritDoc
      */
-    public function upload(UploadedFile $post, string $type = 'image', string $dir = null): OutputInterface
+    public function upload(UploadedFile $post, string $type = 'image', ?string $dir = null): OutputInterface
     {
         $not_allow = aval($this->setting, 'security/uploadForbidFile', 'php|pl|cgi|asp|aspx|jsp|php3|shtm|shtml|js');
         $file_name = trim(preg_replace("#[ \r\n\t\*\%\\\/\?><\|\":]{1,}#", '', $post->getClientFilename()));
