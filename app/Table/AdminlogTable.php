@@ -17,7 +17,7 @@ class AdminlogTable extends Table implements TableHookInterface
      */
     public function setTableName(string $tableName, ?string $extendName = null): self
     {
-        $tableName = strtolower(substr(pathinfo(__CLASS__, PATHINFO_FILENAME), 0, -5));
+        $tableName = strtolower(substr(basename(str_replace('\\', '/', __CLASS__)), 0, -5));
         //根据年份进行分表
         if (!isset($extendName)) {
             $extendName = date('Y');
