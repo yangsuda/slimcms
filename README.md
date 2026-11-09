@@ -434,7 +434,7 @@ use SlimCMS\Core\Table;
 
 class AdminlogTable extends Table implements TableHookInterface
 {
-    public function setTableName(string $tableName, string $extendName = null): self
+    public function setTableName(string $tableName, ?string $extendName = null): self
     {
         // 类名自动推导表名（不含 Table 后缀）
         $tableName = strtolower(substr(pathinfo(__CLASS__, PATHINFO_FILENAME), 0, -5));
